@@ -18,6 +18,7 @@ module.exports = function (api) {
       // https://github.com/software-mansion/react-native-reanimated/issues/1823#issuecomment-1384307084
       '@babel/plugin-proposal-export-namespace-from',
       'react-native-reanimated/plugin',
+      'module:react-native-dotenv',
     ],
   };
 };
