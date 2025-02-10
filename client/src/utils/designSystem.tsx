@@ -14,10 +14,11 @@ import {Appearance} from '@app/utils/types/enums';
 // | RN UI Lib |
 // =============
 
-const colors = {
-  primary: '#5383b8', // blue
+export const colors = {
+  primary: '#0A1392', // blue
   secondary: '#469c57', // green
-  accent: '#fed330', // yellow
+  accent: '#00274D', // yellow
+  bgBlue: '#91B9E0',
   _black: Colors.rgba(20, 20, 20, 1),
   _black2: Colors.rgba(50, 50, 50, 1),
   _white: Colors.rgba(250, 250, 250, 1),
@@ -32,7 +33,7 @@ const themes: Record<Appearance, ThemeColors> = {
     bg2Color: colors._white2,
   },
   dark: {
-    textColor: colors._white,
+    textColor: colors.accent,
     bgColor: colors._black,
     bg2Color: colors._black2,
   },
