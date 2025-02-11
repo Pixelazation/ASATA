@@ -106,9 +106,8 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
                   placeholderTextColor={'grey'}
                   value={password}
                   onChangeText={setPassword}
-                  keyboardType="visible-password"
-                  secureTextEntry
-                  toggleSecureTextEntry
+                  keyboardType='default'
+                  secureTextEntry={true}
                 />
               </View>
 
