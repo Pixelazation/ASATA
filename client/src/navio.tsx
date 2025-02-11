@@ -16,6 +16,7 @@ import {
 } from '@app/utils/designSystem';
 import {services} from '@app/services';
 import {AuthLogin} from './screens/auth/login';
+import { AuthSignup } from './screens/auth/signup';
 
 // NAVIO
 export const navio = Navio.build({
@@ -38,6 +39,7 @@ export const navio = Navio.build({
 
     // for auth flow
     AuthLogin,
+    AuthSignup
   },
   stacks: {
     MainStack: ['Main', 'Example'],
@@ -63,7 +65,7 @@ export const navio = Navio.build({
     },
 
     // for auth flow
-    AuthFlow: ['AuthLogin', 'Example'],
+    AuthFlow: ['AuthLogin', 'AuthSignup'],
   },
   tabs: {
     // main 3 tabs

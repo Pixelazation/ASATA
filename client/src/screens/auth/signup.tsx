@@ -13,7 +13,7 @@ export type Props = {
   type?: 'push';
 };
 
-export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
+export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   useAppearance(); // for Dark Mode
   const {t, navio, api} = useServices();
   const {auth} = useStores();
@@ -29,10 +29,12 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
   }, []);
 
   // API Methods
-  async function signInWithEmail() {
+  async function signUpWithEmail() {
     setLoading(true)
-
-    const { error } = await api.auth.signIn(email, password);
+    const {
+      data: { session },
+      error,
+    } = await api.auth.signUp(email, password);
 
     if (error) {
       Alert.alert(error.message)
@@ -45,6 +47,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
       navio.setRoot('tabs', 'AppTabs');
     }
 
+    if (!session) Alert.alert('Please check your inbox for email verification!')
     setLoading(false)
   }
 
@@ -68,7 +71,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
           </View>
 
           <View marginT-s6 centerH>
-            <Text text50 primary>LOGIN</Text>
+            <Text text50 primary>SIGNUP</Text>
 
             <View
               bg-white
@@ -116,8 +119,8 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
                 <Button
                   br30 bg-accent white marginT-s4
                   style={{width: '80%'}}
-                  label={loading ? 'Logging in ...' : 'SIGN IN'}
-                  onPress={signInWithEmail}
+                  label={loading ? 'Logging in ...' : 'SIGN UP'}
+                  onPress={signUpWithEmail}
                 />
               </View>
 
@@ -125,7 +128,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
 
             <Divider />
             <Text accent style={{fontWeight: 500}}>
-              Don't have an account? <Text primary onPress={() => navio.push('AuthSignup')}>Register now</Text>
+              Already have an account? <Text primary onPress={() => navio.push('AuthLogin')}>Login here</Text>
             </Text>
           </View>
         </View>
@@ -134,7 +137,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
   );
 });
 
-AuthLogin.options = props => ({
+AuthSignup.options = props => ({
   title: `Auth flow`,
   headerShown: false
 });
