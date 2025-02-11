@@ -1,15 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, ScrollView} from 'react-native';
-import {TextInput} from 'react-native-gesture-handler';
-import {View, Text, Colors, Image, Assets, TextField, Button} from 'react-native-ui-lib';
+import {View, Text, Image, Assets, TextField, Button} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
-import { supabase } from '../../lib/supabase'
 
 import {useStores} from '@app/stores';
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
-import {BButton} from '@app/components/button';
 import { colors } from '../../utils/designSystem';
 
 export type Props = {
@@ -32,32 +29,10 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
   }, []);
 
   // API Methods
-  const login = async () => {
-    setLoading(true);
-
-    try {
-      const {status} = await api.auth.login(); // fake login
-
-      if (status === 'success') {
-        // marking that we are logged in
-        auth.set('state', 'logged-in');
-
-        // navigating to main app
-        navio.setRoot('tabs', 'AppTabs');
-      }
-    } catch (e) {
-      // handle error
-    } finally {
-      setLoading(false);
-    }
-  };
-
   async function signInWithEmail() {
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    })
+
+    const { error } = await api.auth.signIn(email, password);
 
     if (error) {
       Alert.alert(error.message)
@@ -69,30 +44,14 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
       // navigating to main app
       navio.setRoot('tabs', 'AppTabs');
     }
-    setLoading(false)
-    
-  }
 
-  async function signUpWithEmail() {
-    setLoading(true)
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    })
-
-    if (error) Alert.alert(error.message)
-    if (!session) Alert.alert('Please check your inbox for email verification!')
     setLoading(false)
   }
 
   // Methods
   const configureUI = () => {};
 
-  // const setEmail = (v: string) => auth.set('email', v);
-
+  // Assets
   Assets.loadAssetsGroup('images', {
     logo: require('../../assets/asata_logo.png')
   });
@@ -174,6 +133,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
     </View>
   );
 });
+
 AuthLogin.options = props => ({
   title: `Auth flow`,
   headerShown: false
