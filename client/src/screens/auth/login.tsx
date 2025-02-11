@@ -56,6 +56,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
     logo: require('../../assets/asata_logo.png')
   });
 
+  // TODO: put in separate file
   const Divider = () => <View style={{ width: '100%', height: 1, backgroundColor: 'grey', marginVertical: 10 }} />;
 
   return (
