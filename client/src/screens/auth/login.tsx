@@ -61,9 +61,9 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
   return (
     <View flex bg-white center>
       <ScrollView contentInsetAdjustmentBehavior="always">
-        <View>
+        <View flex centerV marginT-s10>
 
-          <View flex centerH marginT-30>
+          <View flex centerH marginT-s10>
             <Image width={250} height={120} assetName='logo' assetGroup='images'/>  
           </View>
 
