@@ -6,6 +6,7 @@ import {PlaygroundFlashList} from '@app/screens/playground/flash-list';
 import {PlaygroundExpoImage} from '@app/screens/playground/expo-image';
 import {Settings} from '@app/screens/settings';
 import {Example} from '@app/screens/_screen-sample';
+import {MyItineraries} from './screens/myitineraries';
 
 import {useAppearance} from '@app/utils/hooks';
 import {
@@ -25,6 +26,8 @@ export const navio = Navio.build({
     Settings,
     Example,
 
+    MyItineraries,
+
     Playground,
     PlaygroundFlashList,
     PlaygroundExpoImage,
@@ -43,6 +46,7 @@ export const navio = Navio.build({
   },
   stacks: {
     MainStack: ['Main', 'Example'],
+    MyItinerariesStack:['MyItineraries'],
     ExampleStack: {
       screens: ['Example'],
       navigatorProps: {
@@ -78,10 +82,10 @@ export const navio = Navio.build({
             tabBarIcon: getTabBarIcon('MainTab'),
           }),
         },
-        PlaygroundTab: {
-          stack: 'PlaygroundStack',
+        MyItinerariesTab: {
+          stack: ['MyItineraries'],
           options: () => ({
-            title: 'Playground',
+            title: 'My Itineraries',
             tabBarIcon: getTabBarIcon('PlaygroundTab'),
           }),
         },
