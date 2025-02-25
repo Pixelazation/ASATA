@@ -1,22 +1,22 @@
-import { Navio } from 'rn-navio';
-import { Ionicons } from '@expo/vector-icons'; 
+import {Navio} from 'rn-navio';
+import {Ionicons} from '@expo/vector-icons'; 
 
-import { Main as Home } from '@app/screens/main'; // Rename Main to Home
-import { Playground as Itinerary } from '@app/screens/playground'; // Rename Playground to Itinerary
-import { PlaygroundFlashList } from '@app/screens/playground/flash-list';
-import { PlaygroundExpoImage } from '@app/screens/playground/expo-image';
-import { Settings as Account } from '@app/screens/settings'; // Rename Settings to Account
-import { Example } from '@app/screens/_screen-sample';
+import {Main as Home} from '@app/screens/main'; // Rename Main to Home
+import {Playground as Itinerary} from '@app/screens/playground'; // Rename Playground to Itinerary
+import {PlaygroundFlashList} from '@app/screens/playground/flash-list';
+import {PlaygroundExpoImage} from '@app/screens/playground/expo-image';
+import {Settings as Account} from '@app/screens/settings'; // Rename Settings to Account
+import {Example} from '@app/screens/_screen-sample';
 
-import { useAppearance } from '@app/utils/hooks';
+import {useAppearance} from '@app/utils/hooks';
 import {
   screenDefaultOptions,
   tabScreenDefaultOptions,
   drawerScreenDefaultOptions,
 } from '@app/utils/designSystem';
-import { services } from '@app/services';
-import { AuthLogin } from './screens/auth/login';
-import { AuthSignup } from './screens/auth/signup';
+import {services} from '@app/services';
+import {AuthLogin} from './screens/auth/login';
+import {AuthSignup} from './screens/auth/signup';
 
 // Function to get tab bar icons
 const getTabBarIcon = (iconName: 'home-outline' | 'clipboard-outline' | 'person-outline') => ({ color, size }: { color: string; size: number }) => (
