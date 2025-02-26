@@ -1,8 +1,7 @@
 import React from "react";
 import { View, Text, Colors } from "react-native-ui-lib";
-import { Row } from "./row"; 
-import { Icon } from "./icon";
-import { Bounceable } from "rn-bounceable";
+import { Row } from "./row";
+import { IconButton } from "./iconbutton";
 
 type ItineraryItemProps = {
   name: string;
@@ -24,10 +23,10 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({ name, location, st
         shadowRadius: 4,
         shadowOffset: { width: 0, height: 2 },
         minHeight: 120,
-        justifyContent: "space-between", 
+        justifyContent: "space-between",
       }}
     >
-      {/* Title and Loc */}
+      {/* Title and Location */}
       <View style={{ marginBottom: 20 }}>
         <Text text60M>{name}</Text>
         <Text text80L color={Colors.grey40}>{location}</Text>
@@ -35,28 +34,14 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({ name, location, st
 
       {/* Bottom Section (Dates & Icons) */}
       <Row style={{ justifyContent: "space-between" }}>
-        {/* Dates */}
         <Text text80L color={Colors.grey40}>
           {startDate} - {endDate}
         </Text>
 
-        {/* Icons */}
         <Row>
-          <Bounceable>
-            <Text>
-              <Icon name="pencil" size={18} color={Colors.primary} />
-            </Text>
-          </Bounceable>
-          <Bounceable>
-            <Text>
-              <Icon name="copy" size={18} color={Colors.primary} />
-            </Text>
-          </Bounceable>
-          <Bounceable>
-            <Text>
-              <Icon name="trash" size={18} color={Colors.red30} />
-            </Text>
-          </Bounceable>
+          <IconButton name="pencil" />
+          <IconButton name="copy" />
+          <IconButton name="trash" color={Colors.red30} />
         </Row>
       </Row>
     </View>
