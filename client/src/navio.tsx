@@ -1,33 +1,33 @@
 import {Navio} from 'rn-navio';
 
-import {Main} from '@app/screens/main';
-import {Playground} from '@app/screens/playground';
-import {PlaygroundFlashList} from '@app/screens/playground/flash-list';
-import {PlaygroundExpoImage} from '@app/screens/playground/expo-image';
-import {Settings} from '@app/screens/settings';
+import {Home} from '@app/screens/home'; 
+import {Itinerary} from '@app/screens/itinerary'; 
+import {ItineraryFlashList} from '@app/screens/itinerary/flash-list';
+import {ItineraryExpoImage} from '@app/screens/itinerary/expo-image';
+import {Account} from '@app/screens/account'; 
 import {Example} from '@app/screens/_screen-sample';
 
 import {useAppearance} from '@app/utils/hooks';
 import {
   screenDefaultOptions,
   tabScreenDefaultOptions,
-  getTabBarIcon,
   drawerScreenDefaultOptions,
+  getTabBarIcon, 
 } from '@app/utils/designSystem';
 import {services} from '@app/services';
 import {AuthLogin} from './screens/auth/login';
-import { AuthSignup } from './screens/auth/signup';
+import {AuthSignup} from './screens/auth/signup';
 
 // NAVIO
 export const navio = Navio.build({
   screens: {
-    Main,
-    Settings,
+    Home, 
+    Account, 
     Example,
 
-    Playground,
-    PlaygroundFlashList,
-    PlaygroundExpoImage,
+    Itinerary, 
+    ItineraryFlashList,
+    ItineraryExpoImage,
 
     // for .pushStack example
     ProductPage: {
@@ -39,10 +39,10 @@ export const navio = Navio.build({
 
     // for auth flow
     AuthLogin,
-    AuthSignup
+    AuthSignup,
   },
   stacks: {
-    MainStack: ['Main', 'Example'],
+    HomeStack: ['Home', 'Example'],
     ExampleStack: {
       screens: ['Example'],
       navigatorProps: {
@@ -51,8 +51,8 @@ export const navio = Navio.build({
         },
       },
     },
-    PlaygroundStack: {
-      screens: ['Playground', 'PlaygroundFlashList', 'PlaygroundExpoImage'],
+    ItineraryStack: { 
+      screens: ['Itinerary', 'ItineraryFlashList', 'ItineraryExpoImage'],
     },
 
     // for .pushStack example
@@ -71,25 +71,25 @@ export const navio = Navio.build({
     // main 3 tabs
     AppTabs: {
       layout: {
-        MainTab: {
-          stack: 'MainStack',
+        HomeTab: { 
+          stack: 'HomeStack', 
           options: () => ({
-            title: 'Main',
-            tabBarIcon: getTabBarIcon('MainTab'),
+            title: 'Home',
+            tabBarIcon: getTabBarIcon('home-outline'), 
           }),
         },
-        PlaygroundTab: {
-          stack: 'PlaygroundStack',
+        ItineraryTab: { 
+          stack: 'ItineraryStack', 
           options: () => ({
-            title: 'Playground',
-            tabBarIcon: getTabBarIcon('PlaygroundTab'),
+            title: 'Itinerary',
+            tabBarIcon: getTabBarIcon('clipboard-outline'), 
           }),
         },
-        SettingsTab: {
-          stack: ['Settings'],
+        AccountTab: { 
+          stack: ['Account'], 
           options: () => ({
-            title: 'Settings',
-            tabBarIcon: getTabBarIcon('SettingsTab'),
+            title: 'Account',
+            tabBarIcon: getTabBarIcon('person-outline'), 
             tabBarBadge: 23,
           }),
         },
@@ -99,18 +99,18 @@ export const navio = Navio.build({
     // tabs with drawer
     TabsWithDrawer: {
       layout: {
-        MainTab: {
-          stack: 'MainStack',
+        HomeTab: { 
+          stack: 'HomeStack', 
           options: () => ({
-            title: 'Main',
-            tabBarIcon: getTabBarIcon('MainTab'),
+            title: 'Home',
+            tabBarIcon: getTabBarIcon('home-outline'),
           }),
         },
-        PlaygroundTab: {
+        ItineraryTab: { 
           drawer: 'DrawerForTabs',
           options: () => ({
-            title: 'Playground',
-            tabBarIcon: getTabBarIcon('PlaygroundTab'),
+            title: 'Itinerary', 
+            tabBarIcon: getTabBarIcon('clipboard-outline'), 
           }),
         },
       },
@@ -120,8 +120,8 @@ export const navio = Navio.build({
     // main drawer
     AppDrawer: {
       layout: {
-        Main: {
-          stack: 'MainStack',
+        Home: { 
+          stack: 'HomeStack',
           options: {
             drawerType: 'front',
           },
@@ -129,8 +129,8 @@ export const navio = Navio.build({
         Example: {
           stack: ['Example'],
         },
-        Playground: {
-          stack: 'PlaygroundStack',
+        Itinerary: {
+          stack: 'ItineraryStack', 
         },
         Tabs: {
           tabs: 'TabsWithDrawer',
@@ -142,14 +142,14 @@ export const navio = Navio.build({
     DrawerForTabs: {
       layout: {
         FlashList: {
-          stack: ['PlaygroundFlashList'],
+          stack: ['ItineraryFlashList'],
           options: {
             title: 'Flash List',
             drawerPosition: 'right',
           },
         },
         ExpoImage: {
-          stack: ['PlaygroundExpoImage'],
+          stack: ['ItineraryExpoImage'],
           options: {
             title: 'Expo Image',
             drawerPosition: 'right',
@@ -159,7 +159,7 @@ export const navio = Navio.build({
     },
   },
   modals: {
-    ExampleModal: {stack: 'ExampleStack'},
+    ExampleModal: { stack: 'ExampleStack' },
   },
   root: 'stacks.AuthFlow',
   hooks: [useAppearance],

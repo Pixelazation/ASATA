@@ -23,7 +23,7 @@ type RowData = {
 
 export type Props = {};
 
-export const PlaygroundFlashList: NavioScreen<Props> = observer(() => {
+export const ItineraryFlashList: NavioScreen<Props> = observer(() => {
   useAppearance(); // for Dark Mode
   // const {ui} = useStores();
   const {navio} = useServices();
@@ -71,7 +71,7 @@ export const PlaygroundFlashList: NavioScreen<Props> = observer(() => {
     </View>
   );
 });
-PlaygroundFlashList.options = {
+ItineraryFlashList.options = {
   headerBackTitleStyle: false,
   title: `Flash List`,
 };

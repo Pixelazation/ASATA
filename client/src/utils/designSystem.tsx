@@ -8,6 +8,7 @@ import {Colors, Typography} from 'react-native-ui-lib';
 
 import {stores} from '@app/stores';
 import {Icon, IconName} from '@app/components/icon';
+import { Ionicons } from '@expo/vector-icons';
 import {Appearance} from '@app/utils/types/enums';
 
 // =============
@@ -160,10 +161,9 @@ export const tabScreenDefaultOptions = (): BottomTabNavigationOptions => ({
 
 export const drawerScreenDefaultOptions = (): DrawerNavigationOptions => ({});
 
-export const getTabBarIcon =
-  (tabName: string) =>
-  ({focused, color, size}: {focused: boolean; color: string; size: number}) =>
-    <Icon name={getTabIconName(tabName, focused)} size={size} color={color} />;
+export const getTabBarIcon = (iconName: string) => ({ color, size }: { color: string; size: number }) => (
+  <Ionicons name={iconName as any} color={color} size={size} />
+);
 
 const getTabIconName = (tabName: string, focused: boolean): IconName => {
   if (tabName === 'MainTab') {

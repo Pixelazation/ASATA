@@ -18,7 +18,7 @@ type Images = TImage[];
 
 export type Props = {};
 
-export const PlaygroundExpoImage: NavioScreen<Props> = observer(() => {
+export const ItineraryExpoImage: NavioScreen<Props> = observer(() => {
   useAppearance(); // for Dark Mode
   // const {ui} = useStores();
   const {navio} = useServices();
@@ -61,7 +61,7 @@ export const PlaygroundExpoImage: NavioScreen<Props> = observer(() => {
     </View>
   );
 });
-PlaygroundExpoImage.options = {
+ItineraryExpoImage.options = {
   headerBackTitleStyle: false,
   title: `Expo Image`,
 };

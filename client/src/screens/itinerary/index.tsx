@@ -22,21 +22,21 @@ type SectionData = {
   }[];
 };
 
-export const Playground: React.FC = observer(() => {
+export const Itinerary: React.FC = observer(() => {
   useAppearance();
   const {navio} = useServices();
   const {auth} = useStores();
 
   // Methods
-  const showFlashList = () => navio.push('PlaygroundFlashList');
-  const showExpoImage = () => navio.push('PlaygroundExpoImage');
+  const showFlashList = () => navio.push('ItineraryFlashList');
+  const showExpoImage = () => navio.push('ItineraryExpoImage');
   const showDrawerWithTabs = () => {
-    // Alert.alert('Uncomment related code in @app/navio.tsx and @app/screens/playground');
+    // Alert.alert('Uncomment related code in @app/navio.tsx and @app/screens/itinerary');
     // uncomment related code in navio.tsx and below
     navio.setRoot('drawers', 'MainDrawer');
   };
   const showTabsWithDrawer = () => {
-    // Alert.alert('Uncomment related code in @app/navio.tsx and @app/screens/playground');
+    // Alert.alert('Uncomment related code in @app/navio.tsx and @app/screens/itinerary');
     // uncomment related code in navio.tsx and below
     navio.setRoot('tabs', 'TabsWithDrawer');
   };
