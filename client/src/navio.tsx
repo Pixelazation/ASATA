@@ -88,7 +88,7 @@ export const navio = Navio.build({
         SettingsTab: {
           stack: ['Settings'],
           options: () => ({
-            title: services.t.do('settings.title'),
+            title: 'Settings',
             tabBarIcon: getTabBarIcon('SettingsTab'),
             tabBarBadge: 23,
           }),
