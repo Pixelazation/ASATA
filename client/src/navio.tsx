@@ -1,11 +1,10 @@
 import {Navio} from 'rn-navio';
-import {Ionicons} from '@expo/vector-icons'; 
 
-import {Main as Home} from '@app/screens/main'; // Rename Main to Home
-import {Playground as Itinerary} from '@app/screens/playground'; // Rename Playground to Itinerary
-import {PlaygroundFlashList} from '@app/screens/playground/flash-list';
-import {PlaygroundExpoImage} from '@app/screens/playground/expo-image';
-import {Settings as Account} from '@app/screens/settings'; // Rename Settings to Account
+import {Home} from '@app/screens/home'; 
+import {Itinerary} from '@app/screens/itinerary'; 
+import {ItineraryFlashList} from '@app/screens/itinerary/flash-list';
+import {ItineraryExpoImage} from '@app/screens/itinerary/expo-image';
+import {Account} from '@app/screens/account'; 
 import {Example} from '@app/screens/_screen-sample';
 
 import {useAppearance} from '@app/utils/hooks';
@@ -13,15 +12,11 @@ import {
   screenDefaultOptions,
   tabScreenDefaultOptions,
   drawerScreenDefaultOptions,
+  getTabBarIcon, 
 } from '@app/utils/designSystem';
 import {services} from '@app/services';
 import {AuthLogin} from './screens/auth/login';
 import {AuthSignup} from './screens/auth/signup';
-
-// Function to get tab bar icons
-const getTabBarIcon = (iconName: 'home-outline' | 'clipboard-outline' | 'person-outline') => ({ color, size }: { color: string; size: number }) => (
-  <Ionicons name={iconName} color={color} size={size} />
-);
 
 // NAVIO
 export const navio = Navio.build({
@@ -31,8 +26,8 @@ export const navio = Navio.build({
     Example,
 
     Itinerary, 
-    PlaygroundFlashList,
-    PlaygroundExpoImage,
+    ItineraryFlashList,
+    ItineraryExpoImage,
 
     // for .pushStack example
     ProductPage: {
@@ -47,7 +42,7 @@ export const navio = Navio.build({
     AuthSignup,
   },
   stacks: {
-    HomeStack: ['Home', 'Example'], 
+    HomeStack: ['Home', 'Example'],
     ExampleStack: {
       screens: ['Example'],
       navigatorProps: {
@@ -57,7 +52,7 @@ export const navio = Navio.build({
       },
     },
     ItineraryStack: { 
-      screens: ['Itinerary', 'PlaygroundFlashList', 'PlaygroundExpoImage'],
+      screens: ['Itinerary', 'ItineraryFlashList', 'ItineraryExpoImage'],
     },
 
     // for .pushStack example
@@ -76,7 +71,7 @@ export const navio = Navio.build({
     // main 3 tabs
     AppTabs: {
       layout: {
-        HomeTab: {
+        HomeTab: { 
           stack: 'HomeStack', 
           options: () => ({
             title: 'Home',
@@ -107,14 +102,14 @@ export const navio = Navio.build({
         HomeTab: { 
           stack: 'HomeStack', 
           options: () => ({
-            title: 'Home', // new name for main tab
-            tabBarIcon: getTabBarIcon('home-outline'), 
+            title: 'Home',
+            tabBarIcon: getTabBarIcon('home-outline'),
           }),
         },
         ItineraryTab: { 
           drawer: 'DrawerForTabs',
           options: () => ({
-            title: 'Itinerary', // new name for playground tab
+            title: 'Itinerary', 
             tabBarIcon: getTabBarIcon('clipboard-outline'), 
           }),
         },
@@ -126,7 +121,7 @@ export const navio = Navio.build({
     AppDrawer: {
       layout: {
         Home: { 
-          stack: 'HomeStack', 
+          stack: 'HomeStack',
           options: {
             drawerType: 'front',
           },
@@ -134,7 +129,7 @@ export const navio = Navio.build({
         Example: {
           stack: ['Example'],
         },
-        Itinerary: { 
+        Itinerary: {
           stack: 'ItineraryStack', 
         },
         Tabs: {
@@ -147,14 +142,14 @@ export const navio = Navio.build({
     DrawerForTabs: {
       layout: {
         FlashList: {
-          stack: ['PlaygroundFlashList'],
+          stack: ['ItineraryFlashList'],
           options: {
             title: 'Flash List',
             drawerPosition: 'right',
           },
         },
         ExpoImage: {
-          stack: ['PlaygroundExpoImage'],
+          stack: ['ItineraryExpoImage'],
           options: {
             title: 'Expo Image',
             drawerPosition: 'right',
