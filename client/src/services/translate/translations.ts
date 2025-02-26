@@ -42,60 +42,60 @@ export const en = {
   },
 };
 
-export const de = {
-  home: {
-    title: 'Startseite',
-  },
-  settings: {
-    title: 'Einstellungen',
-  },
-  example: {
-    title: 'Beispiel',
-  },
-  section: {
-    navio: {
-      title: 'Navio',
-      button: {
-        common: {
-          push: 'Schieben →',
-          go_back: '← Zurück',
-        },
-        stacks: {
-          push: 'Schieben (stack) →',
-        },
-        modals: {
-          show: 'Zeigen ↑',
-        },
-      },
-    },
-  },
-};
+// export const de = {
+//   home: {
+//     title: 'Startseite',
+//   },
+//   settings: {
+//     title: 'Einstellungen',
+//   },
+//   example: {
+//     title: 'Beispiel',
+//   },
+//   section: {
+//     navio: {
+//       title: 'Navio',
+//       button: {
+//         common: {
+//           push: 'Schieben →',
+//           go_back: '← Zurück',
+//         },
+//         stacks: {
+//           push: 'Schieben (stack) →',
+//         },
+//         modals: {
+//           show: 'Zeigen ↑',
+//         },
+//       },
+//     },
+//   },
+// };
 
-export const ru = {
-  home: {
-    title: 'Хоум',
-  },
-  settings: {
-    title: 'Настройки',
-  },
-  example: {
-    title: 'Пример',
-  },
-  section: {
-    navio: {
-      title: 'Навио',
-      button: {
-        common: {
-          push: 'Запушить →',
-          go_back: '← Назад',
-        },
-        stacks: {
-          push: 'Запушить (стэк) →',
-        },
-        modals: {
-          show: 'Показать ↑',
-        },
-      },
-    },
-  },
-};
+// export const ru = {
+//   home: {
+//     title: 'Хоум',
+//   },
+//   settings: {
+//     title: 'Настройки',
+//   },
+//   example: {
+//     title: 'Пример',
+//   },
+//   section: {
+//     navio: {
+//       title: 'Навио',
+//       button: {
+//         common: {
+//           push: 'Запушить →',
+//           go_back: '← Назад',
+//         },
+//         stacks: {
+//           push: 'Запушить (стэк) →',
+//         },
+//         modals: {
+//           show: 'Показать ↑',
+//         },
+//       },
+//     },
+//   },
+// };
