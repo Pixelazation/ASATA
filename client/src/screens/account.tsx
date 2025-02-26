@@ -20,7 +20,7 @@ import {useStores} from '@app/stores';
 import {HeaderButton} from '@app/components/button';
 import {services, useServices} from '@app/services';
 
-export const Settings: NavioScreen = observer(({}) => {
+export const Account: NavioScreen = observer(({}) => {
   useAppearance();
   const {ui} = useStores();
   const {navio} = useServices();
@@ -106,6 +106,6 @@ export const Settings: NavioScreen = observer(({}) => {
     </View>
   );
 });
-Settings.options = () => ({
-  title: services.t.do('settings.title'),
+Account.options = () => ({
+  title: services.t.do('account.title'),
 });

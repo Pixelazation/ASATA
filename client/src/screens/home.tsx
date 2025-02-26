@@ -16,7 +16,7 @@ import {Row} from '@app/components/row';
 import {useAppearance} from '@app/utils/hooks';
 import {NavioSection} from '@app/components/sections/NavioSection';
 
-export const Main: NavioScreen = observer(({}) => {
+export const Home: NavioScreen = observer(({}) => {
   useAppearance();
   const {counter, ui} = useStores();
   const {t, api, navio} = useServices();
@@ -110,6 +110,6 @@ export const Main: NavioScreen = observer(({}) => {
     </View>
   );
 });
-Main.options = () => ({
+Home.options = () => ({
   title: services.t.do('home.title'),
 });
