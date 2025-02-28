@@ -170,10 +170,10 @@ const getTabIconName = (tabName: string, focused: boolean): IconName => {
     return focused ? 'home' : 'home-outline';
   }
   if (tabName === 'PlaygroundTab') {
-    return focused ? 'construct' : 'construct-outline';
+    return focused ? 'clipboard' : 'clipboard-outline';
   }
   if (tabName === 'SettingsTab') {
-    return focused ? 'settings' : 'settings-outline';
+    return focused ? 'person' : 'person-outline';
   }
 
   return 'list';
