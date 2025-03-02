@@ -78,7 +78,7 @@ export const navio = Navio.build({
         MainTab: {
           stack: 'MainStack',
           options: () => ({
-            title: 'Main',
+            title: 'Home',
             tabBarIcon: getTabBarIcon('MainTab'),
           }),
         },
@@ -92,7 +92,7 @@ export const navio = Navio.build({
         SettingsTab: {
           stack: ['Settings'],
           options: () => ({
-            title: 'Settings',
+            title: 'Account',
             tabBarIcon: getTabBarIcon('SettingsTab'),
             tabBarBadge: 23,
           }),
