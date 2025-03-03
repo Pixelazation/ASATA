@@ -10,6 +10,15 @@ type ItineraryItemProps = {
   endDate: string;
 };
 
+const formatDate = (timestamp: string) => {
+  const date = new Date(timestamp);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
 export const ItineraryItem: React.FC<ItineraryItemProps> = ({ name, location, startDate, endDate }) => {
   return (
     <View
@@ -35,7 +44,7 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({ name, location, st
       {/* Bottom Section (Dates & Icons) */}
       <Row style={{ justifyContent: "space-between" }}>
         <Text text80L color={Colors.grey40}>
-          {startDate} - {endDate}
+          {formatDate(startDate)} - {formatDate(endDate)}
         </Text>
 
         <Row>
