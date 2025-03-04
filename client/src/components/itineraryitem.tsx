@@ -30,27 +30,37 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
   return (
     <View
       bg-white
-      padding-s4
-      br40
+      padding-s3
       marginV-s2
       style={{
+        width: "85%",
+        alignSelf: "center",
+
+        // ios shadows (i have no way to test this kay di ko iphone)
         shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        shadowOffset: { width: 0, height: 2 },
-        minHeight: 120,
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 4 },
+
+        // apparently this is the only shadow controller for android
+        elevation: 7,
+
+        minHeight: 130,
         justifyContent: "space-between",
+        borderWidth: 1,
+        borderColor: "#000",
+        borderRadius: 4,
       }}
     >
       {/* Title and Location */}
       <View style={{ marginBottom: 20 }}>
-        <Text text60M>{name}</Text>
-        <Text text80L color={Colors.grey40}>{location}</Text>
+        <Text text60M style={{ color: "#000" }}>{name}</Text>
+        <Text text80L style={{ color: "#000" }}>{location}</Text>
       </View>
 
       {/* Bottom Section (Dates & Icons) */}
       <Row style={{ justifyContent: "space-between" }}>
-        <Text text80L color={Colors.grey40}>
+        <Text text80L style={{ color: "#000" }}>
           {formatDate(startDate)} - {formatDate(endDate)}
         </Text>
 
