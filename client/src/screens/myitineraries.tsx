@@ -44,7 +44,7 @@ export const MyItineraries: NavioScreen = observer(() => {
       setLoading(false);
     }
   };
-
+  
   // Add Dummy
   const addDummyItinerary = async () => {
     try {
@@ -63,6 +63,16 @@ export const MyItineraries: NavioScreen = observer(() => {
     }
   };
 
+  // Delete Itinerary
+  const deleteItinerary = async (id: string) => {
+    try {
+      await ItineraryApi.deleteItinerary(id);
+      setItineraries((prev) => prev.filter((itinerary) => itinerary.id !== id)); // Optimistic update
+    } catch (error) {
+      console.error("Error deleting itinerary:", error);
+    }
+  };
+
   return (
     <View flex bg-bgColor padding-s3>
       <ScrollView contentInsetAdjustmentBehavior="always">
@@ -76,6 +86,7 @@ export const MyItineraries: NavioScreen = observer(() => {
               location={itinerary.location || "No location specified"}
               startDate={itinerary.start_date}
               endDate={itinerary.end_date}
+              onDelete={() => deleteItinerary(itinerary.id)}
             />
           ))
         ) : (

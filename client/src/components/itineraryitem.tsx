@@ -8,6 +8,7 @@ type ItineraryItemProps = {
   location: string;
   startDate: string;
   endDate: string;
+  onDelete: () => void;
 };
 
 const formatDate = (timestamp: string) => {
@@ -19,7 +20,13 @@ const formatDate = (timestamp: string) => {
   });
 };
 
-export const ItineraryItem: React.FC<ItineraryItemProps> = ({ name, location, startDate, endDate }) => {
+export const ItineraryItem: React.FC<ItineraryItemProps> = ({
+  name,
+  location,
+  startDate,
+  endDate,
+  onDelete,
+}) => {
   return (
     <View
       bg-white
@@ -50,7 +57,7 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({ name, location, st
         <Row>
           <IconButton name="pencil" />
           <IconButton name="copy" />
-          <IconButton name="trash" color={Colors.red30} />
+          <IconButton name="trash" color={Colors.red30} onPress={onDelete} />
         </Row>
       </Row>
     </View>
