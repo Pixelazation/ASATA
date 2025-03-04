@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView } from "react-native";
-import { Text, View, Button } from "react-native-ui-lib";
+import { ScrollView, StyleSheet } from "react-native";
+import { Text, View, Button, Colors } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
 
@@ -8,6 +8,7 @@ import { services, useServices } from "@app/services";
 import { useAppearance } from "@app/utils/hooks";
 import { ItineraryItem } from "../components/itineraryitem";
 import { ItineraryApi } from "@app/services/api/itineraries";
+import { IconButton } from "../components/iconbutton";
 
 export type Params = {
   itineraryId?: string;
@@ -94,7 +95,10 @@ export const MyItineraries: NavioScreen = observer(() => {
         )}
       </ScrollView>
 
-      <Button label="Add Dummy Itinerary" onPress={addDummyItinerary} marginV-s2 />
+      {/* Floating Action Button */}
+      <View style={styles.fabContainer}>
+        <IconButton name="add" color="white" onPress={addDummyItinerary} />
+      </View>
     </View>
   );
 });
@@ -103,3 +107,22 @@ MyItineraries.options = {
   headerBackTitleStyle: false,
   title: "My Itineraries",
 };
+
+const styles = StyleSheet.create({
+  fabContainer: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: Colors.primary,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5, // Android shadow
+  },
+});
