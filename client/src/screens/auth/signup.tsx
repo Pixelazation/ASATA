@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, ScrollView} from 'react-native';
-import {View, Text, Image, Assets, TextField, Button, DateTimePicker} from 'react-native-ui-lib';
+import {View, Text, Image, Assets, Button, DateTimePicker} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 
@@ -28,7 +28,7 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [gender, setGender] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState<Date>();
 
   // Start
   useEffect(() => {
@@ -132,11 +132,12 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
                   label='Date of Birth'
                   labelColor={colors.accent}
                   labelStyle={{fontWeight: 'bold'}}
-                  placeholder='Date of Birth'
+                  placeholder='DD/MM/YYYY'
                   placeholderTextColor={'grey'}
                   value={dateOfBirth}
                   onChange={setDateOfBirth}
                   mode='date'
+                  maximumDate={new Date()}
                 />
                 <FormField
                   label='Gender'
