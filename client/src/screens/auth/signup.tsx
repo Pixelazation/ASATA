@@ -8,6 +8,7 @@ import {useStores} from '@app/stores';
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
 import { colors } from '../../utils/designSystem';
+import { FormField } from '../../components/form-field';
 
 export type Props = {
   type?: 'push';
@@ -22,6 +23,12 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [gender, setGender] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
 
   // Start
   useEffect(() => {
@@ -82,37 +89,66 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
               marginB-s10
               style={{width: 300, borderWidth: 1, borderColor: colors.primary, borderRadius: 12}}
             >
-              <View paddingH-s3 paddingV-s2>
-                <TextField
-                  accent
-                  fieldStyle={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
-                  label='Username'
-                  labelColor={colors.accent}
-                  labelStyle={{fontWeight: 'bold'}}
-                  placeholder={'Email'}
-                  placeholderTextColor={'grey'}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  inputMode="email"
+              
+              <FormField 
+                label='Email'
+                placeholder='Email'
+                value={email}
+                onChangeText={setEmail}
+                keyboardType='email-address'
+                inputMode='email'
+              />
+
+              <FormField 
+                label='Password'
+                placeholder='Password'
+                value={password}
+                onChangeText={setPassword}
+                keyboardType='default'
+                secureTextEntry
+              />
+
+              <View>
+                <FormField 
+                  label='First Name'
+                  placeholder='First Name'
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  keyboardType='default'
+                />
+                <FormField
+                  label='Last Name'
+                  placeholder='Last Name'
+                  value={lastName}
+                  onChangeText={setLastName}
+                  keyboardType='default'
                 />
               </View>
 
-              <View paddingH-s3 paddingV-s2>
-                <TextField
-                  accent
-                  fieldStyle={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
-                  label='Password'
-                  labelColor={colors.accent}
-                  labelStyle={{fontWeight: 'bold'}}
-                  placeholder={'Password'}
-                  placeholderTextColor={'grey'}
-                  value={password}
-                  onChangeText={setPassword}
+              <View>
+                <FormField
+                  label='Date of Birth'
+                  placeholder='DD/MM/YYYY'
+                  value={dateOfBirth}
+                  onChangeText={setDateOfBirth}
                   keyboardType='default'
-                  secureTextEntry={true}
+                />
+                <FormField
+                  label='Gender'
+                  placeholder='Gender'
+                  value={gender}
+                  onChangeText={setGender}
+                  keyboardType='default'
                 />
               </View>
+
+              <FormField
+                label='Phone Number'
+                placeholder='Phone Number'
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType='phone-pad'
+              />
 
               <View centerH>
                 <Button
