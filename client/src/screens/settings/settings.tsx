@@ -7,30 +7,31 @@ import {Section} from '@app/components/section';
 import {Row} from '@app/components/row';
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
-import {useStores} from '@app/stores';
-import {HeaderButton} from '@app/components/button';
-import {
-  appearances,
-  appearancesUI,
-  appearanceUIToInternal
-} from '@app/utils/types/enums';
 import {Bounceable} from 'rn-bounceable';
 import {Icon, IconName} from '@app/components/icon';
-import { colors } from '@app/utils/designSystem';
+import {EditAccount} from '../EditAccount'; // Add this import
+// import {useStores} from '@app/stores';
+// import {HeaderButton} from '@app/components/button';
+// import {
+//   appearances,
+//   appearancesUI,
+//   appearanceUIToInternal
+// } from '@app/utils/types/enums';
+// import { colors } from '@app/utils/designSystem';
 
 export const Settings: NavioScreen = observer(() => {
   useAppearance(); // for Dark Mode
   const {t, navio} = useServices();
   const navigation = navio.useN();
-  const {ui} = useStores();
+  // const {ui} = useStores();
 
   // State
-  const [appearance, setAppearance] = useState(ui.appearance);
+  // const [appearance, setAppearance] = useState(ui.appearance);
 
   // Computed
-  const unsavedChanges = ui.appearance !== appearance;
-  const appearanceInitialIndex = appearances.findIndex(it => it === appearance);
-  const appearanceSegments = appearancesUI.map(it => ({label: it}));
+  // const unsavedChanges = ui.appearance !== appearance;
+  // const appearanceInitialIndex = appearances.findIndex(it => it === appearance);
+  // const appearanceSegments = appearancesUI.map(it => ({label: it}));
 
   // Methods
   const handleEditAccount = () => {
@@ -39,11 +40,12 @@ export const Settings: NavioScreen = observer(() => {
   const handleDeleteAccount = () => {
     console.log('Delete Account Pressed');
   };
-  const handleAppearanceIndexChange = (index: number) =>
-    setAppearance(appearanceUIToInternal[appearancesUI[index]]);
-  const handleSave = () => {
-    ui.setMany({appearance});
-  }
+  const handleLogout = () => {
+    console.log('Logout Pressed');
+  };
+  const handleRunTutorials = () => {
+    console.log('Run Tutorials Pressed');
+  };
 
   const accountActions: {title: string; icon: IconName; onPress: () => void}[] = [
     {
@@ -56,15 +58,20 @@ export const Settings: NavioScreen = observer(() => {
       icon: 'trash-outline', // Use a valid icon name
       onPress: handleDeleteAccount,
     },
+    {
+      title: 'Logout',
+      icon: 'log-out-outline', // Use a valid icon name
+      onPress: handleLogout,
+    },
   ];
   
   // Start
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () =>
-        unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
-    });
-  }, [unsavedChanges, appearance]);
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: () =>
+  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
+  //   });
+  // }, [unsavedChanges, appearance]);
   
   // UI Methods
 
@@ -91,7 +98,24 @@ export const Settings: NavioScreen = observer(() => {
             </View>
           ))}
         </Section>
-        <Section title={'UI'}>
+        <Section title={'Help'}>
+          <View marginV-s1>
+            <Bounceable onPress={handleRunTutorials}>
+              <View padding-s3 br30 style={{backgroundColor:Colors.rgba(240, 240, 240, 1),}}>
+                <Row>
+                  <Icon name="play-circle-outline" size={30}/>
+                  <View flex marginH-s3>
+                    <Text text60R textColor>
+                      Run Tutorials
+                    </Text>
+                  </View>
+                  <Icon name="chevron-forward" />
+                </Row>
+              </View>
+            </Bounceable>
+          </View>
+        </Section>
+        {/* <Section title={'UI'}>
           <View paddingV-s1>
             <Row>
               <View flex>
@@ -110,7 +134,7 @@ export const Settings: NavioScreen = observer(() => {
               />
             </Row>
           </View>
-        </Section>
+        </Section> */}
       </ScrollView>
     </View>
   );
