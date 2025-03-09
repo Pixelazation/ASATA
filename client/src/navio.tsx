@@ -4,7 +4,7 @@ import {Main} from '@app/screens/main';
 import {Playground} from '@app/screens/playground';
 import {PlaygroundFlashList} from '@app/screens/playground/flash-list';
 import {PlaygroundExpoImage} from '@app/screens/playground/expo-image';
-import {Settings} from '@app/screens/settings';
+import {Settings} from '@app/screens/settings/settings';
 import {Example} from '@app/screens/_screen-sample';
 import {MyItineraries} from './screens/myitineraries';
 
