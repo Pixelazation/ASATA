@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, ScrollView} from 'react-native';
-import {View, Text, Image, Assets, TextField, Button} from 'react-native-ui-lib';
+import {View, Text, Image, Assets, TextField, Button, DateTimePicker} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 
@@ -126,12 +126,17 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
               </View>
 
               <View>
-                <FormField
+                <DateTimePicker 
+                  accent
+                  fieldStyle={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
                   label='Date of Birth'
-                  placeholder='DD/MM/YYYY'
+                  labelColor={colors.accent}
+                  labelStyle={{fontWeight: 'bold'}}
+                  placeholder='Date of Birth'
+                  placeholderTextColor={'grey'}
                   value={dateOfBirth}
-                  onChangeText={setDateOfBirth}
-                  keyboardType='default'
+                  onChange={setDateOfBirth}
+                  mode='date'
                 />
                 <FormField
                   label='Gender'
