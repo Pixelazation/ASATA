@@ -37,25 +37,39 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
 
   // API Methods
   async function signUpWithEmail() {
-    setLoading(true)
-    const {
-      data: { session },
-      error,
-    } = await api.auth.signUp(email, password);
-
+    setLoading(true);
+    const { data: { user, session }, error } = await api.auth.signUp(email, password);
+  
     if (error) {
-      Alert.alert(error.message)
+      Alert.alert(error.message);
     } else {
-      auth.set('email', email)
-      // marking that we are logged in
-      auth.set('state', 'logged-in');
-
-      // navigating to main app
-      navio.setRoot('tabs', 'AppTabs');
+      if (user) {
+        // Insert additional user details into the database
+        const { error: insertError } = await api.auth.insertUserDetails({
+          user_id: user.id,
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          mobile_number: phoneNumber,
+          gender,
+          birthdate: dateOfBirth?.toISOString() || '',
+        });
+  
+        if (insertError) {
+          Alert.alert(insertError.message);
+        } else {
+          auth.set('email', email);
+          // marking that we are logged in
+          auth.set('state', 'logged-in');
+  
+          // navigating to main app
+          navio.setRoot('tabs', 'AppTabs');
+        }
+      }
     }
-
-    if (!session) Alert.alert('Please check your inbox for email verification!')
-    setLoading(false)
+  
+    if (!session) Alert.alert('Please check your inbox for email verification!');
+    setLoading(false);
   }
 
   // Methods

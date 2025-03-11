@@ -29,4 +29,20 @@ export class AuthApi {
       password: password,
     })
   };
+
+  insertUserDetails = async function (details: {
+    user_id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    mobile_number: string;
+    gender: string;
+    birthdate: string;
+  }) {
+    const { data, error } = await supabase
+      .from('UserDetails')
+      .insert([details]);
+
+    return { data, error };
+  };
 }
