@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, ScrollView} from 'react-native';
-import {View, Text, Image, Assets, TextField, Button} from 'react-native-ui-lib';
+import {View, Text, Image, Assets, Button, DateTimePicker} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 
@@ -8,6 +8,8 @@ import {useStores} from '@app/stores';
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
 import { colors } from '../../utils/designSystem';
+import { FormField } from '../../components/form-field';
+import { PickerFixed } from '../../components/picker-fixed';
 
 export type Props = {
   type?: 'push';
@@ -23,6 +25,12 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
 
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [gender, setGender] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState<Date>();
+
   // Start
   useEffect(() => {
     configureUI();
@@ -30,25 +38,39 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
 
   // API Methods
   async function signUpWithEmail() {
-    setLoading(true)
-    const {
-      data: { session },
-      error,
-    } = await api.auth.signUp(email, password);
-
+    setLoading(true);
+    const { data: { user, session }, error } = await api.auth.signUp(email, password);
+  
     if (error) {
-      Alert.alert(error.message)
+      Alert.alert(error.message);
     } else {
-      auth.set('email', email)
-      // marking that we are logged in
-      auth.set('state', 'logged-in');
-
-      // navigating to main app
-      navio.setRoot('tabs', 'AppTabs');
+      if (user) {
+        // Insert additional user details into the database
+        const { error: insertError } = await api.auth.insertUserDetails({
+          user_id: user.id,
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          mobile_number: phoneNumber,
+          gender,
+          birthdate: dateOfBirth?.toISOString() || '',
+        });
+  
+        if (insertError) {
+          Alert.alert(insertError.message);
+        } else {
+          auth.set('email', email);
+          // marking that we are logged in
+          auth.set('state', 'logged-in');
+  
+          // navigating to main app
+          navio.setRoot('tabs', 'AppTabs');
+        }
+      }
     }
-
-    if (!session) Alert.alert('Please check your inbox for email verification!')
-    setLoading(false)
+  
+    if (!session) Alert.alert('Please check your inbox for email verification!');
+    setLoading(false);
   }
 
   // Methods
@@ -82,37 +104,72 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
               marginB-s10
               style={{width: 300, borderWidth: 1, borderColor: colors.primary, borderRadius: 12}}
             >
-              <View paddingH-s3 paddingV-s2>
-                <TextField
-                  accent
-                  fieldStyle={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
-                  label='Username'
-                  labelColor={colors.accent}
-                  labelStyle={{fontWeight: 'bold'}}
-                  placeholder={'Email'}
-                  placeholderTextColor={'grey'}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  inputMode="email"
+              
+              <FormField 
+                label='Email'
+                placeholder='Email'
+                value={email}
+                onChangeText={setEmail}
+                keyboardType='email-address'
+                inputMode='email'
+              />
+
+              <FormField 
+                label='Password'
+                placeholder='Password'
+                value={password}
+                onChangeText={setPassword}
+                keyboardType='default'
+                secureTextEntry
+              />
+
+              <View>
+                <FormField 
+                  label='First Name'
+                  placeholder='First Name'
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  keyboardType='default'
+                />
+                <FormField
+                  label='Last Name'
+                  placeholder='Last Name'
+                  value={lastName}
+                  onChangeText={setLastName}
+                  keyboardType='default'
                 />
               </View>
 
-              <View paddingH-s3 paddingV-s2>
-                <TextField
+              <View>
+                <DateTimePicker 
                   accent
                   fieldStyle={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
-                  label='Password'
+                  label='Date of Birth'
                   labelColor={colors.accent}
                   labelStyle={{fontWeight: 'bold'}}
-                  placeholder={'Password'}
+                  placeholder='DD/MM/YYYY'
                   placeholderTextColor={'grey'}
-                  value={password}
-                  onChangeText={setPassword}
-                  keyboardType='default'
-                  secureTextEntry={true}
+                  value={dateOfBirth}
+                  onChange={setDateOfBirth}
+                  mode='date'
+                  maximumDate={new Date()}
+                />
+                <PickerFixed 
+                  label='Gender'
+                  value={gender}
+                  placeholder='Gender'
+                  onValueChange={setGender}
+                  items={['Male', 'Female', 'Other', 'Prefer not to say']}
                 />
               </View>
+
+              <FormField
+                label='Phone Number'
+                placeholder='Phone Number'
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType='phone-pad'
+              />
 
               <View centerH>
                 <Button
