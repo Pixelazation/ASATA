@@ -9,6 +9,7 @@ import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
 import { colors } from '../../utils/designSystem';
 import { FormField } from '../../components/form-field';
+import { PickerFixed } from '../../components/picker-fixed';
 
 export type Props = {
   type?: 'push';
@@ -153,12 +154,12 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
                   mode='date'
                   maximumDate={new Date()}
                 />
-                <FormField
+                <PickerFixed 
                   label='Gender'
-                  placeholder='Gender'
                   value={gender}
-                  onChangeText={setGender}
-                  keyboardType='default'
+                  placeholder='Gender'
+                  onValueChange={setGender}
+                  items={['Male', 'Female', 'Other', 'Prefer not to say']}
                 />
               </View>
 
