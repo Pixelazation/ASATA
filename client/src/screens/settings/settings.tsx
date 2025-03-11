@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {ScrollView} from 'react-native';
-import {Text, View, SegmentedControl, Colors} from 'react-native-ui-lib';
+import React, {useState, useEffect} from 'react';
+import {ScrollView, Modal, TouchableOpacity, StyleSheet} from 'react-native';
+import {Text, View, Colors, SegmentedControl} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 import {Section} from '@app/components/section';
@@ -9,7 +9,6 @@ import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
 import {Bounceable} from 'rn-bounceable';
 import {Icon, IconName} from '@app/components/icon';
-import {EditAccount} from '../EditAccount'; // Add this import
 // import {useStores} from '@app/stores';
 // import {HeaderButton} from '@app/components/button';
 // import {
@@ -23,6 +22,16 @@ export const Settings: NavioScreen = observer(() => {
   useAppearance(); // for Dark Mode
   const {t, navio} = useServices();
   const navigation = navio.useN();
+  const [isModalVisible, setModalVisible] = useState(false);
+// const {ui} = useStores();
+
+  // State
+  // const [appearance, setAppearance] = useState(ui.appearance);
+
+  // Computed
+  // const unsavedChanges = ui.appearance !== appearance;
+  // const appearanceInitialIndex = appearances.findIndex(it => it === appearance);
+  // const appearanceSegments = appearancesUI.map(it => ({label: it}));
   // const {ui} = useStores();
 
   // State
@@ -35,17 +44,22 @@ export const Settings: NavioScreen = observer(() => {
 
   // Methods
   const handleEditAccount = () => {
-    console.log('Edit Account Pressed');
+    navio.push('EditAccount');
   };
   const handleDeleteAccount = () => {
-    console.log('Delete Account Pressed');
+    setModalVisible(true);
+  };
+  const confirmDeleteAccount = () => {
+    console.log('Account deleted');
+    setModalVisible(false);
   };
   const handleLogout = () => {
     console.log('Logout Pressed');
   };
   const handleRunTutorials = () => {
     console.log('Run Tutorials Pressed');
-  };
+  };  
+
 
   const accountActions: {title: string; icon: IconName; onPress: () => void}[] = [
     {
@@ -64,7 +78,7 @@ export const Settings: NavioScreen = observer(() => {
       onPress: handleLogout,
     },
   ];
-  
+
   // Start
   // useEffect(() => {
   //   navigation.setOptions({
@@ -74,6 +88,42 @@ export const Settings: NavioScreen = observer(() => {
   // }, [unsavedChanges, appearance]);
   
   // UI Methods
+// Start
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: () =>
+  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
+  //   });
+  // }, [unsavedChanges, appearance]);
+  
+  // UI Methods
+
+// Start
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: () =>
+  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
+  //   });
+  // }, [unsavedChanges, appearance]);
+  
+  // UI Methods
+
+// Start
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: () =>
+  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
+  //   });
+  // }, [unsavedChanges, appearance]);
+  
+  // UI Methods
+  // Start
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: () =>
+  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
+  //   });
+  // }, [unsavedChanges, appearance]);
 
   return (
     <View flex>
@@ -84,18 +134,18 @@ export const Settings: NavioScreen = observer(() => {
               <Bounceable onPress={action.onPress}>
                 {/*Color might change*/}
                 <View padding-s3 br30 style={{backgroundColor:Colors.rgba(240, 240, 240, 1),}}>
-                    <Row>
+                  <Row>
                     <Icon name={action.icon} size={30}/>
                     <View flex marginH-s3>
                       <Text text60R textColor>
-                        {action.title}
+                         {action.title}
                       </Text>
                     </View>
                     <Icon name="chevron-forward" />
                   </Row>
                 </View>
               </Bounceable>
-            </View>
+            </View>            
           ))}
         </Section>
         <Section title={'Help'}>
@@ -115,6 +165,27 @@ export const Settings: NavioScreen = observer(() => {
             </Bounceable>
           </View>
         </Section>
+        <Modal
+          transparent={true}
+          visible={isModalVisible}
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Are you sure?</Text>
+              <Text style={styles.modalMessage}>Do you really want to delete your account?</Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={confirmDeleteAccount} style={styles.modalButton}>
+                  <Text style={styles.modalButtonText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
         {/* <Section title={'UI'}>
           <View paddingV-s1>
             <Row>
@@ -142,4 +213,45 @@ export const Settings: NavioScreen = observer(() => {
 
 Settings.options = props => ({
   title: 'Settings',
+});
+
+//Modal style... might be moved for modularization
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: Colors.primary,
+  },
 });
