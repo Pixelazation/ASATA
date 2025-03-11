@@ -21,6 +21,7 @@ export const PickerFixed: React.FC<Props> = ({label, value, placeholder, items, 
       onChange={onValueChange}
       fieldType={'dropdown'}
       style={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
+      useWheelPicker
     >
       {items.map((item, index) => (
         <Picker.Item key={index} value={item} label={item} />
