@@ -9,6 +9,7 @@ import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
 import { colors } from '../../utils/designSystem';
 import { FormField } from '../../components/form-field';
+import { BG_IMAGE, LOGO_IMAGE } from '../../assets';
 
 export type Props = {
   type?: 'push';
@@ -23,9 +24,6 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
-
-  const bg_image = require('../../assets/splash-bg-img.png');
-  const logo_image = require('../../assets/asata_logo.png');
 
   // Start
   useEffect(() => {
@@ -55,18 +53,13 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
   // Methods
   const configureUI = () => {};
 
-  // Assets
-  Assets.loadAssetsGroup('images', {
-    logo: require('../../assets/asata_logo.png')
-  });
-
   const Divider = () => <View style={{ width: '100%', height: 0.5, backgroundColor: 'grey', marginVertical: 10 }} />;
 
   return (
     <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center'}}>
-      <ImageBackground source={bg_image} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30}}>
+      <ImageBackground source={BG_IMAGE} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30}}>
         
-          <Image source={logo_image} style={{width: 177, height: 150}} resizeMode='center'/>
+          <Image source={LOGO_IMAGE} style={{width: 177, height: 150}} resizeMode='center'/>
           
       </ImageBackground>
 
