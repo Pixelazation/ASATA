@@ -118,6 +118,7 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
           labelStyle={{paddingHorizontal: 64}}
           style={{marginVertical: 16}}
           onPress={() => setStep(2)}
+          disabled={password !== confirmPassword || password == '' || email == ''} 
         />
     </View>
   );
