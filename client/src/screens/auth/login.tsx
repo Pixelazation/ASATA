@@ -8,6 +8,7 @@ import {useStores} from '@app/stores';
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
 import { colors } from '../../utils/designSystem';
+import { FormField } from '../../components/form-field';
 
 export type Props = {
   type?: 'push';
@@ -63,13 +64,59 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
 
   return (
     <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center'}}>
-      <ImageBackground source={bg_image} style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <ImageBackground source={bg_image} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30}}>
         
           <Image source={logo_image} style={{width: 177, height: 150}} resizeMode='center'/>
           
       </ImageBackground>
-      <View flex bg-white center style={{marginTop: -40, height: '66%', flexGrow: 2, borderTopLeftRadius: 40}}>
-        <Text black>Test</Text>
+
+      <View flex bg-white center style={{marginTop: -30, flexGrow: 3, borderTopLeftRadius: 80, justifyContent: 'space-evenly'}}>
+        <View center style={{gap: 10}}>
+          <Text primary text40 style={{fontWeight: 'bold'}}>Welcome Back</Text>
+          <Text style={{color: 'grey', fontWeight: 500}}>Login to your account</Text>
+        </View>
+
+        <View
+          bg-white
+          br30
+          paddingH-s4
+          marginB-s10
+          style={{width: 300, gap: 16}}
+        >
+          <FormField 
+            label='Email Address'
+            placeholder='Email Address'
+            value={email}
+            onChangeText={setEmail}
+            keyboardType='email-address'
+            inputMode='email'
+          />
+
+          <FormField 
+            label='Password'
+            placeholder='Password'
+            value={password}
+            onChangeText={setPassword}
+            keyboardType='default'
+            secureTextEntry
+          />
+
+        </View>
+
+        <View centerH>
+          <Button
+            br30 bg-accent white
+            size='large'
+            label={loading ? 'Logging in ...' : 'Login'}
+            labelStyle={{paddingHorizontal: 64}}
+            onPress={signInWithEmail}
+          />
+        </View>
+
+        <Text accent style={{fontWeight: 500}}>
+          Don't have an account? <Text primary onPress={() => navio.push('AuthSignup')}>Register now</Text>
+        </Text>
+
       </View>
       
     </ScrollView>
