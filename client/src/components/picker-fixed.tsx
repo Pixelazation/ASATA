@@ -14,13 +14,14 @@ export const PickerFixed: React.FC<Props> = ({label, value, placeholder, items, 
   return (
     <Picker
       label={label}
-      labelColor={colors.accent}
+      labelColor={colors.primary}
       labelStyle={{fontWeight: 'bold'}}
       value={value}
       placeholder={placeholder}
       onChange={onValueChange}
       fieldType={'dropdown'}
-      style={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
+      style={{paddingHorizontal: 16, paddingVertical: 8}}
+      fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100}}
       useWheelPicker
     >
       {items.map((item, index) => (

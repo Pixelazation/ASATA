@@ -11,16 +11,31 @@ type Props = {
   keyboardType?: KeyboardTypeOptions;
   inputMode?: InputModeOptions;
   secureTextEntry?: boolean;
+  leadingAccessory?: React.ReactElement;
+  trailingAccessory?: React.ReactElement;
 };
 
-export const FormField: React.FC<Props> = ({label, placeholder, value, onChangeText, keyboardType, inputMode, secureTextEntry}) => {
+export const FormField: React.FC<Props> = (props) => {
+  const {
+    label,
+    placeholder,
+    value,
+    onChangeText,
+    keyboardType,
+    inputMode,
+    secureTextEntry,
+    leadingAccessory,
+    trailingAccessory
+  } = props;
+
   return (
-    <View paddingH-s3 paddingV-s2>
+    <View>
       <TextField
         accent
-        fieldStyle={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
+        style={{paddingHorizontal: 16, paddingVertical: 8}}
+        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100}}
         label={label}
-        labelColor={colors.accent}
+        labelColor={colors.primary}
         labelStyle={{fontWeight: 'bold'}}
         placeholder={placeholder}
         placeholderTextColor={'grey'}
@@ -29,6 +44,8 @@ export const FormField: React.FC<Props> = ({label, placeholder, value, onChangeT
         keyboardType={keyboardType}
         inputMode={inputMode}
         secureTextEntry={secureTextEntry}
+        leadingAccessory={leadingAccessory}
+        trailingAccessory={trailingAccessory}
       />
     </View>
   );
