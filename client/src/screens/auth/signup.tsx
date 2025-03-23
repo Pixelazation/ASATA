@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, ScrollView} from 'react-native';
-import {View, Text, Image, Assets, Button, DateTimePicker} from 'react-native-ui-lib';
+import {Alert, Image, ImageBackground, ScrollView} from 'react-native';
+import {View, Text, Assets, Button, DateTimePicker, ProgressBar} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 
@@ -10,6 +10,7 @@ import {useAppearance} from '@app/utils/hooks';
 import { colors } from '../../utils/designSystem';
 import { FormField } from '../../components/form-field';
 import { PickerFixed } from '../../components/picker-fixed';
+import { BG_IMAGE, LOGO_IMAGE } from '../../assets';
 
 export type Props = {
   type?: 'push';
@@ -24,12 +25,15 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [gender, setGender] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<Date>();
+
+  const [step, setStep] = useState(1);
 
   // Start
   useEffect(() => {
@@ -76,120 +80,136 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   // Methods
   const configureUI = () => {};
 
-  // Assets
-  Assets.loadAssetsGroup('images', {
-    logo: require('../../assets/asata_logo.png')
-  });
-
   const Divider = () => <View style={{ width: '100%', height: 1, backgroundColor: 'grey', marginVertical: 10 }} />;
 
-  return (
-    <View flex bg-white center>
-      <ScrollView contentInsetAdjustmentBehavior="always">
-        <View flex centerV marginT-s10>
+  const StepOne = (
+    <View style={{gap: 16, paddingVertical: 16}}>
+      <FormField 
+          label='Email'
+          placeholder='Email'
+          value={email}
+          onChangeText={setEmail}
+          keyboardType='email-address'
+          inputMode='email'
+        />
 
-          <View flex centerH marginT-s10>
-            <Image width={250} height={120} assetName='logo' assetGroup='images'/>  
-          </View>
+        <FormField 
+          label='Password'
+          placeholder='Password'
+          value={password}
+          onChangeText={setPassword}
+          keyboardType='default'
+          secureTextEntry
+        />
 
-          <View marginT-s6 centerH>
-            <Text text50 primary>SIGNUP</Text>
+        <FormField 
+          label='Confirm Password'
+          placeholder='Confirm Password'
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          keyboardType='default'
+          secureTextEntry
+        />
 
-            <View
-              bg-white
-              br30
-              paddingH-s4
-              paddingV-s2
-              marginT-s6
-              marginB-s10
-              style={{width: 300, borderWidth: 1, borderColor: colors.primary, borderRadius: 12}}
-            >
-              
-              <FormField 
-                label='Email'
-                placeholder='Email'
-                value={email}
-                onChangeText={setEmail}
-                keyboardType='email-address'
-                inputMode='email'
-              />
-
-              <FormField 
-                label='Password'
-                placeholder='Password'
-                value={password}
-                onChangeText={setPassword}
-                keyboardType='default'
-                secureTextEntry
-              />
-
-              <View>
-                <FormField 
-                  label='First Name'
-                  placeholder='First Name'
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  keyboardType='default'
-                />
-                <FormField
-                  label='Last Name'
-                  placeholder='Last Name'
-                  value={lastName}
-                  onChangeText={setLastName}
-                  keyboardType='default'
-                />
-              </View>
-
-              <View>
-                <DateTimePicker 
-                  accent
-                  fieldStyle={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
-                  label='Date of Birth'
-                  labelColor={colors.accent}
-                  labelStyle={{fontWeight: 'bold'}}
-                  placeholder='DD/MM/YYYY'
-                  placeholderTextColor={'grey'}
-                  value={dateOfBirth}
-                  onChange={setDateOfBirth}
-                  mode='date'
-                  maximumDate={new Date()}
-                />
-                <PickerFixed 
-                  label='Gender'
-                  value={gender}
-                  placeholder='Gender'
-                  onValueChange={setGender}
-                  items={['Male', 'Female', 'Other', 'Prefer not to say']}
-                />
-              </View>
-
-              <FormField
-                label='Phone Number'
-                placeholder='Phone Number'
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType='phone-pad'
-              />
-
-              <View centerH>
-                <Button
-                  br30 bg-accent white marginT-s4
-                  style={{width: '80%'}}
-                  label={loading ? 'Logging in ...' : 'SIGN UP'}
-                  onPress={signUpWithEmail}
-                />
-              </View>
-
-            </View>
-
-            <Divider />
-            <Text accent style={{fontWeight: 500}}>
-              Already have an account? <Text primary onPress={() => navio.push('AuthLogin')}>Login here</Text>
-            </Text>
-          </View>
-        </View>
-      </ScrollView>
+        <Button
+          br30 bg-accent white
+          size='large'
+          label={'Next'}
+          labelStyle={{paddingHorizontal: 64}}
+          style={{marginVertical: 16}}
+          onPress={() => setStep(2)}
+        />
     </View>
+  );
+
+  const StepTwo = (
+    <View center>
+      <FormField 
+        label='First Name'
+        placeholder='First Name'
+        value={firstName}
+        onChangeText={setFirstName}
+        keyboardType='default'
+      />
+      <FormField
+        label='Last Name'
+        placeholder='Last Name'
+        value={lastName}
+        onChangeText={setLastName}
+        keyboardType='default'
+      />
+
+      <DateTimePicker 
+        accent
+        style={{paddingHorizontal: 16, paddingVertical: 8}}
+        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100}}
+        label='Date of Birth'
+        labelColor={colors.primary}
+        labelStyle={{fontWeight: 'bold'}}
+        placeholder='DD/MM/YYYY'
+        placeholderTextColor={'grey'}
+        value={dateOfBirth}
+        onChange={setDateOfBirth}
+        mode='date'
+        maximumDate={new Date()}
+      />
+      <PickerFixed 
+        label='Gender'
+        value={gender}
+        placeholder='Gender'
+        onValueChange={setGender}
+        items={['Male', 'Female', 'Other', 'Prefer not to say']}
+      />
+
+      <FormField
+        label='Phone Number'
+        placeholder='Phone Number'
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
+        keyboardType='phone-pad'
+      />
+
+      <Button
+        br30 bg-accent white marginT-s4
+        style={{width: '80%'}}
+        label={loading ? 'Logging in ...' : 'SIGN UP'}
+        onPress={signUpWithEmail}
+      />
+    </View>
+  );
+
+  return (
+    <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center'}}>
+      <ImageBackground source={BG_IMAGE} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30}}>
+        
+          <Image source={LOGO_IMAGE} style={{width: 177, height: 150}} resizeMode='center'/>
+          
+      </ImageBackground>
+
+      <View flex bg-white center style={{marginTop: -30, flexGrow: 3, borderTopLeftRadius: 80, justifyContent: 'space-evenly'}}>
+        <View center style={{gap: 10}}>
+          <Text primary text40 style={{fontWeight: 'bold'}}>Register</Text>
+          <Text style={{color: 'grey', fontWeight: 500}}>Create new account</Text>
+        </View>
+
+        <View center style={{gap: 10}}>
+          <Text primary style={{fontWeight: 'bold'}}>Please fill out the following information to register</Text>
+          
+        </View>
+
+        {step === 1 && StepOne}
+        {step === 2 && StepTwo}
+
+        <View centerH>
+          
+        </View>
+
+        <Text accent style={{fontWeight: 500}}>
+          Already have an account? <Text primary onPress={() => navio.push('AuthLogin')}>Login here</Text>
+        </Text>
+
+      </View>
+    </ScrollView>
   );
 });
 
