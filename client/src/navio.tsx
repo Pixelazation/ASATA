@@ -7,6 +7,7 @@ import {PlaygroundExpoImage} from '@app/screens/playground/expo-image';
 import {Settings} from '@app/screens/settings';
 import {Example} from '@app/screens/_screen-sample';
 import {MyItineraries} from './screens/myitineraries';
+import { GetSuggestions } from './screens/getsuggestions';
 
 import {useAppearance} from '@app/utils/hooks';
 import {
@@ -27,6 +28,7 @@ export const navio = Navio.build({
     Example,
 
     MyItineraries,
+    GetSuggestions,
 
     Playground,
     PlaygroundFlashList,
@@ -45,7 +47,7 @@ export const navio = Navio.build({
     AuthSignup
   },
   stacks: {
-    MainStack: ['Main', 'Example'],
+    MainStack: ['Main', 'Example', 'GetSuggestions'],
     MyItinerariesStack:['MyItineraries'],
     ExampleStack: {
       screens: ['Example'],
