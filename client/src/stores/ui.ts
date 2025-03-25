@@ -6,22 +6,22 @@ export class UIStore implements IStore {
   appLaunches = 0;
 
   // Appearance
-  appearance: Appearance = 'system';
+  appearance: Appearance = 'light';
   get appearanceStr() {
     return appearanceToUI[this.appearance];
   }
-  get isAppearanceSystem() {
-    return this.appearance === 'system';
-  }
+  // get isAppearanceSystem() {
+  //   return this.appearance === 'light';
+  // }
 
   // Language
-  language: Language = 'system';
+  language: Language = 'EN';
   get languageStr() {
     return languageToUI[this.language];
   }
-  get isLanguageSystem() {
-    return this.language === 'system';
-  }
+  // get isLanguageSystem() {
+  //   return this.language === 'EN';
+  // }
 
   constructor() {
     makeAutoObservable(this);

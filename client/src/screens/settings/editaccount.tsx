@@ -1,52 +1,103 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, TextInput, Button, StyleSheet} from 'react-native';
-import {NavioScreen} from 'rn-navio';
-import {supabase} from '@app/lib/supabase';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { NavioScreen } from 'rn-navio';
+import { supabase } from '@app/lib/supabase';
+import { Icon } from '@app/components/icon';
+import { EditModal } from '@app/components/editModal';
+import { fetchUserData, updateUserData } from '@app/services/api/userdetails';
+import { styles } from '@app/screens/settings/editAccountStyles';
 
 export const EditAccount: NavioScreen = () => {
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [gender, setGender] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [currentField, setCurrentField] = useState('');
+  const [currentValue, setCurrentValue] = useState('');
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('username, email')
-          .eq('id', user.id)
-          .single();
-
-        if (data) {
-          setUsername(data.username);
-          setEmail(data.email);
-        }
-
-        if (error) {
-          console.error('Error fetching user data:', error);
-        }
+    const fetchData = async () => {
+      try {
+        const data = await fetchUserData();
+        setEmail(data.email);
+        setFirstName(data.first_name);
+        setLastName(data.last_name);
+        setDateOfBirth(data.birthdate);
+        setGender(data.gender);
+        setPhoneNumber(data.mobile_number);
+      } catch (error) {
+        console.error(error.message);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    fetchUserData();
+    fetchData();
   }, []);
 
-  const handleSave = async () => {
+  const openModal = (field, value) => {
+    setCurrentField(field);
+    setCurrentValue(value);
+    setModalVisible(true);
+  };
+
+  const handleModalSave = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ username, email })
-        .eq('id', user.id);
+      let updateData = {};
+      switch (currentField) {
+        case 'Email':
+          setEmail(currentValue);
+          updateData = { email: currentValue };
+          const { error: authError } = await supabase.auth.updateUser({ email: currentValue });
+          if (authError) {
+            console.error('Error updating email in authentication table:', authError);
+            return;
+          }
+          break;
+        case 'Password':
+          setPassword(currentValue);
+          break;
+        case 'First Name':
+          setFirstName(currentValue);
+          updateData = { first_name: currentValue };
+          break;
+        case 'Last Name':
+          setLastName(currentValue);
+          updateData = { last_name: currentValue };
+          break;
+        case 'Birth Date':
+          setDateOfBirth(currentValue);
+          updateData = { birthdate: currentValue };
+          break;
+        case 'Gender':
+          setGender(currentValue);
+          updateData = { gender: currentValue };
+          break;
+        case 'Phone Number':
+          setPhoneNumber(currentValue);
+          updateData = { mobile_number: currentValue };
+          break;
+        default:
+          break;
+      }
 
-      if (error) {
-        console.error('Error updating user data:', error);
-      } else {
-        console.log('Account details saved:', { username, email });
+      if (Object.keys(updateData).length > 0) {
+        try {
+          await updateUserData(user.id, updateData);
+          console.log('Field updated successfully:', updateData);
+        } catch (error) {
+          console.error(error.message);
+        }
       }
     }
+    setModalVisible(false);
   };
 
   if (loading) {
@@ -58,46 +109,55 @@ export const EditAccount: NavioScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Username</Text>
-      <TextInput
-        style={styles.input}
-        value={username}
-        onChangeText={setUsername}
-        placeholder="Enter your username"
+    <ScrollView contentContainerStyle={styles.container}>
+      <TouchableOpacity onPress={() => openModal('Email', email)} style={styles.row}>
+        <Text style={styles.label}>Email: {email}</Text>
+        <Icon name="chevron-forward" />
+      </TouchableOpacity>
+      <View style={styles.divider} />
+      <TouchableOpacity onPress={() => openModal('Password', password)} style={styles.row}>
+        <Text style={styles.label}>Password {password}</Text>
+        <Icon name="chevron-forward" />
+      </TouchableOpacity>
+      <View style={styles.divider} />
+      <TouchableOpacity onPress={() => openModal('First Name', firstName)} style={styles.row}>
+        <Text style={styles.label}>First Name: {firstName}</Text>
+        <Icon name="chevron-forward" />
+      </TouchableOpacity>
+      <View style={styles.divider} />
+      <TouchableOpacity onPress={() => openModal('Last Name', lastName)} style={styles.row}>
+        <Text style={styles.label}>Last Name: {lastName}</Text>
+        <Icon name="chevron-forward" />
+      </TouchableOpacity>
+      <View style={styles.divider} />
+      <TouchableOpacity onPress={() => openModal('Birth Date', dateOfBirth)} style={styles.row}>
+        <Text style={styles.label}>Date of Birth: {dateOfBirth}</Text>
+        <Icon name="chevron-forward" />
+      </TouchableOpacity>
+      <View style={styles.divider} />
+      <TouchableOpacity onPress={() => openModal('Gender', gender)} style={styles.row}>
+        <Text style={styles.label}>Gender: {gender}</Text>
+        <Icon name="chevron-forward" />
+      </TouchableOpacity>
+      <View style={styles.divider} />
+      <TouchableOpacity onPress={() => openModal('Phone Number', phoneNumber)} style={styles.row}>
+        <Text style={styles.label}>Phone Number: {phoneNumber}</Text>
+        <Icon name="chevron-forward" />
+      </TouchableOpacity>
+      <View style={styles.divider} />
+
+      <EditModal
+        modalVisible={modalVisible}
+        currentField={currentField}
+        currentValue={currentValue}
+        setCurrentValue={setCurrentValue}
+        handleModalSave={handleModalSave}
+        setModalVisible={setModalVisible}
       />
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Enter your email"
-        keyboardType="email-address"
-      />
-      <Button title="Save" onPress={handleSave} />
-    </View>
+    </ScrollView>
   );
 };
 
 EditAccount.options = {
   title: 'Edit Account',
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: 'white',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 16,
-    paddingHorizontal: 8,
-  },
-});

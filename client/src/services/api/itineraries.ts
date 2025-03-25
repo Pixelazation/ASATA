@@ -11,7 +11,6 @@ export class ItineraryApi {
       .select("*")
       .eq("user_id", user.id) // Use logged-in user's ID
       .order("created_at", { ascending: false });
-
     if (error) throw error;
     return data;
   }
