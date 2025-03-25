@@ -9,42 +9,34 @@ import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
 import {Bounceable} from 'rn-bounceable';
 import {Icon, IconName} from '@app/components/icon';
-// import {useStores} from '@app/stores';
-// import {HeaderButton} from '@app/components/button';
-// import {
-//   appearances,
-//   appearancesUI,
-//   appearanceUIToInternal
-// } from '@app/utils/types/enums';
-// import { colors } from '@app/utils/designSystem';
+import {useStores} from '@app/stores';
+import {HeaderButton} from '@app/components/button';
+import {
+  appearances,
+  appearancesUI,
+  appearanceUIToInternal
+} from '@app/utils/types/enums';
+import {colors} from '@app/utils/designSystem';
+import {supabase} from '@app/lib/supabase';
 
 export const Settings: NavioScreen = observer(() => {
   useAppearance(); // for Dark Mode
   const {t, navio} = useServices();
   const navigation = navio.useN();
+  const {ui} = useStores();
   const [isModalVisible, setModalVisible] = useState(false);
-// const {ui} = useStores();
 
   // State
-  // const [appearance, setAppearance] = useState(ui.appearance);
+  const [appearance, setAppearance] = useState(ui.appearance);
 
   // Computed
-  // const unsavedChanges = ui.appearance !== appearance;
-  // const appearanceInitialIndex = appearances.findIndex(it => it === appearance);
-  // const appearanceSegments = appearancesUI.map(it => ({label: it}));
-  // const {ui} = useStores();
-
-  // State
-  // const [appearance, setAppearance] = useState(ui.appearance);
-
-  // Computed
-  // const unsavedChanges = ui.appearance !== appearance;
-  // const appearanceInitialIndex = appearances.findIndex(it => it === appearance);
-  // const appearanceSegments = appearancesUI.map(it => ({label: it}));
+  const unsavedChanges = ui.appearance !== appearance;
+  const appearanceInitialIndex = appearances.findIndex(it => it === appearance);
+  const appearanceSegments = appearancesUI.map(it => ({label: it}));
 
   // Methods
   const handleEditAccount = () => {
-    navio.push('EditAccount');
+    navigation.push('EditAccount');
   };
   const handleDeleteAccount = () => {
     setModalVisible(true);
@@ -53,14 +45,24 @@ export const Settings: NavioScreen = observer(() => {
     console.log('Account deleted');
     setModalVisible(false);
   };
-  const handleLogout = () => {
-    console.log('Logout Pressed');
+  const handleLogout = async () => {
+    if (ui.state === 'logged-in') {
+      ui.logout();
+    } else {
+      navio.setRoot('stacks', 'AuthFlow');
+    }
   };
   const handleRunTutorials = () => {
     console.log('Run Tutorials Pressed');
-  };  
-
-
+  };
+  const handleAppearanceIndexChange = (index: number) => {
+    setAppearance(appearanceUIToInternal[appearancesUI[index]]);
+  };
+  const handleSave = () => {
+    ui.setMany({
+      appearance,
+    });
+  };
   const accountActions: {title: string; icon: IconName; onPress: () => void}[] = [
     {
       title: 'Edit Account',
@@ -79,51 +81,12 @@ export const Settings: NavioScreen = observer(() => {
     },
   ];
 
-  // Start
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerRight: () =>
-  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
-  //   });
-  // }, [unsavedChanges, appearance]);
-  
-  // UI Methods
-// Start
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerRight: () =>
-  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
-  //   });
-  // }, [unsavedChanges, appearance]);
-  
-  // UI Methods
-
-// Start
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerRight: () =>
-  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
-  //   });
-  // }, [unsavedChanges, appearance]);
-  
-  // UI Methods
-
-// Start
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerRight: () =>
-  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
-  //   });
-  // }, [unsavedChanges, appearance]);
-  
-  // UI Methods
-  // Start
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerRight: () =>
-  //       unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
-  //   });
-  // }, [unsavedChanges, appearance]);
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () =>
+        unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
+    });
+  }, [unsavedChanges, appearance]);
 
   return (
     <View flex>
@@ -190,7 +153,7 @@ export const Settings: NavioScreen = observer(() => {
           <View paddingV-s1>
             <Row>
               <View flex>
-                <Text textColor text60R>
+                <Text textColor>
                   Appearance
                 </Text>
               </View>
@@ -201,7 +164,6 @@ export const Settings: NavioScreen = observer(() => {
                 activeColor={Colors.primary}
                 inactiveColor={Colors.textColor}
                 onChangeIndex={handleAppearanceIndexChange}
-                style={{width: 175, flexShrink: 0, alignSelf: 'flex-end'}}
               />
             </Row>
           </View>
