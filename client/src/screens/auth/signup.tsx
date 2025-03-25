@@ -171,9 +171,11 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
       />
 
       <Button
-        br30 bg-accent white marginT-s4
-        style={{width: '80%'}}
-        label={loading ? 'Logging in ...' : 'SIGN UP'}
+        br30 bg-accent white
+        size='large'
+        label={'Sign Up'}
+        labelStyle={{paddingHorizontal: 64}}
+        style={{marginVertical: 16}}
         onPress={signUpWithEmail}
       />
     </View>
