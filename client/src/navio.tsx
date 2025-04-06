@@ -7,6 +7,7 @@ import {Settings} from '@app/screens/settings/settings';
 import {EditAccount} from '@app/screens/settings/editaccount';
 import {Example} from '@app/screens/_screen-sample';
 import {MyItineraries} from './screens/myitineraries';
+import {Itinerary} from './screens/itinerary';
 import { GetSuggestions } from './screens/getsuggestions';
 
 import {useAppearance} from '@app/utils/hooks';
@@ -31,6 +32,7 @@ export const navio = Navio.build({
     Example,
 
     MyItineraries,
+    Itinerary,
     GetSuggestions,
 
     Playground,
@@ -51,7 +53,7 @@ export const navio = Navio.build({
   },
   stacks: {
     MainStack: ['Main', 'Example', 'GetSuggestions'],
-    MyItinerariesStack:['MyItineraries'],
+    MyItinerariesStack:['MyItineraries', 'Itinerary'],
     ExampleStack: {
       screens: ['Example'],
       navigatorProps: {
@@ -88,7 +90,7 @@ export const navio = Navio.build({
           }),
         },
         MyItinerariesTab: {
-          stack: ['MyItineraries'],
+          stack: 'MyItinerariesStack',
           options: () => ({
             title: 'My Itineraries',
             tabBarIcon: getTabBarIcon('PlaygroundTab'),

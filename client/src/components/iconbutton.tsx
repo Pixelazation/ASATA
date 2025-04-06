@@ -12,7 +12,7 @@ type IconButtonProps = {
 export const IconButton: React.FC<IconButtonProps> = ({ name, color = Colors.primary, onPress }) => {
   return (
     <Bounceable onPress={onPress}>
-      <Icon name={name} size={18} color={color} />
+      <Icon name={name} size={24} color={color} />
     </Bounceable>
   );
 };
