@@ -65,7 +65,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
 
       <View flex bg-white center style={{marginTop: -30, flexGrow: 3, borderTopLeftRadius: 80, justifyContent: 'space-evenly'}}>
         <View center style={{gap: 10}}>
-          <Text primary text40 style={{fontWeight: 'bold'}}>Welcome Back</Text>
+          <Text style={{fontSize: 28,fontWeight: 'bold', color: colors.primary}}>Welcome Back</Text>
           <Text style={{color: 'grey', fontWeight: 500}}>Login to your account</Text>
         </View>
 

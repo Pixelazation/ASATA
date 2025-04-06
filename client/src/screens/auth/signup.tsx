@@ -191,7 +191,7 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
 
       <View flex bg-white center style={{marginTop: -30, flexGrow: 3, borderTopLeftRadius: 80, justifyContent: 'space-evenly'}}>
         <View center style={{gap: 10}}>
-          <Text primary text40 style={{fontWeight: 'bold'}}>Register</Text>
+          <Text style={{fontSize: 28,fontWeight: 'bold', color: colors.primary}}>Register</Text>
           <Text style={{color: 'grey', fontWeight: 500}}>Create new account</Text>
         </View>
 
