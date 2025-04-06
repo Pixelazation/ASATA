@@ -84,6 +84,7 @@ export const MyItineraries: NavioScreen = observer(() => {
           itineraries.map((itinerary) => (
             <ItineraryItem
               key={itinerary.id}
+              id={itinerary.id}
               name={itinerary.title}
               location={itinerary.location || "No location specified"}
               startDate={itinerary.start_date}

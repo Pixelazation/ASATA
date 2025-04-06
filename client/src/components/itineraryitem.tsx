@@ -6,8 +6,10 @@ import { IconButton } from "./iconbutton";
 import { formatDate } from "../utils/dateutils";
 import { BG_IMAGE } from '../assets';
 import { Icon } from './icon';
+import { useServices } from '../services';
 
 type ItineraryItemProps = {
+  id: string;
   name: string;
   location: string;
   startDate: string;
@@ -16,12 +18,15 @@ type ItineraryItemProps = {
 };
 
 export const ItineraryItem: React.FC<ItineraryItemProps> = ({
+  id,
   name,
   location,
   startDate,
   endDate,
   onDelete,
 }) => {
+  const {t, navio} = useServices();
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -40,7 +45,7 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
             </Text>
           </View>
           <Row style={styles.row}>
-            <IconButton name="pencil" />
+            <IconButton name="pencil" onPress={() => navio.push('Itinerary', {itineraryId: id})}/>
             <IconButton name="copy" />
             <IconButton name="trash" color={Colors.red30} onPress={onDelete} />
           </Row>
