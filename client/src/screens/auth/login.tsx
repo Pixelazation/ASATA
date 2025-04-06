@@ -101,6 +101,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
             label={loading ? 'Logging in ...' : 'Login'}
             labelStyle={{paddingHorizontal: 64}}
             onPress={signInWithEmail}
+            disabled={email === '' || password === ''}
           />
         </View>
 

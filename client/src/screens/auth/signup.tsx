@@ -80,6 +80,26 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   // Methods
   const configureUI = () => {};
 
+  const handleStep1 = () => {
+    if (password !== confirmPassword) {
+      Alert.alert('Passwords do not match');
+      return;
+    }
+    else if (password.length < 6) {
+      Alert.alert('Password must be at least 6 characters long');
+      return;
+    }
+    else if (!email.includes('@')) {
+      Alert.alert('Please enter a valid email address');
+      return;
+    }
+    else if (email === '' || password === '' || confirmPassword === '') {
+      Alert.alert('Please fill in all fields');
+      return;
+    }
+    setStep(2);
+  }
+
   const StepOne = (
     <View style={{gap: 16, paddingVertical: 16}}>
       <FormField 
@@ -115,8 +135,8 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
           label={'Next'}
           labelStyle={{paddingHorizontal: 64}}
           style={{marginVertical: 16}}
-          onPress={() => setStep(2)}
-          disabled={password !== confirmPassword || password == '' || email == ''} 
+          onPress={handleStep1}
+          disabled={password == '' || email == '' || confirmPassword == ''} 
         />
     </View>
   );
@@ -175,6 +195,12 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
         labelStyle={{paddingHorizontal: 64}}
         style={{marginVertical: 16}}
         onPress={signUpWithEmail}
+        disabled={
+          firstName == ''
+          || lastName == ''
+          || phoneNumber == ''
+          || dateOfBirth == undefined
+        }
       />
     </View>
   );
@@ -200,10 +226,6 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
 
         {step === 1 && StepOne}
         {step === 2 && StepTwo}
-
-        <View centerH>
-          
-        </View>
 
         <Text accent style={{fontWeight: 500}}>
           Already have an account? <Text primary onPress={() => navio.push('AuthLogin')}>Login here</Text>
