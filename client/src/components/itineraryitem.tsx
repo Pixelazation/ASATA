@@ -81,7 +81,6 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     backgroundColor: "white",
-    verticalAlign: "middle",
     borderBottomWidth: 1,
     borderBottomColor: "#000",
     padding: 8,
