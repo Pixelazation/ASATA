@@ -80,7 +80,25 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   // Methods
   const configureUI = () => {};
 
-  const Divider = () => <View style={{ width: '100%', height: 1, backgroundColor: 'grey', marginVertical: 10 }} />;
+  const handleStep1 = () => {
+    if (password !== confirmPassword) {
+      Alert.alert('Passwords do not match');
+      return;
+    }
+    else if (password.length < 6) {
+      Alert.alert('Password must be at least 6 characters long');
+      return;
+    }
+    else if (!email.includes('@')) {
+      Alert.alert('Please enter a valid email address');
+      return;
+    }
+    else if (email === '' || password === '' || confirmPassword === '') {
+      Alert.alert('Please fill in all fields');
+      return;
+    }
+    setStep(2);
+  }
 
   const StepOne = (
     <View style={{gap: 16, paddingVertical: 16}}>
@@ -117,14 +135,14 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
           label={'Next'}
           labelStyle={{paddingHorizontal: 64}}
           style={{marginVertical: 16}}
-          onPress={() => setStep(2)}
-          disabled={password !== confirmPassword || password == '' || email == ''} 
+          onPress={handleStep1}
+          disabled={password == '' || email == '' || confirmPassword == ''} 
         />
     </View>
   );
 
   const StepTwo = (
-    <View center>
+    <View style={{gap: 4}}>
       <FormField 
         label='First Name'
         placeholder='First Name'
@@ -143,7 +161,7 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
       <DateTimePicker 
         accent
         style={{paddingHorizontal: 16, paddingVertical: 8}}
-        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100}}
+        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100, paddingVertical: 4, marginTop: 4}}
         label='Date of Birth'
         labelColor={colors.primary}
         labelStyle={{fontWeight: 'bold'}}
@@ -177,12 +195,18 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
         labelStyle={{paddingHorizontal: 64}}
         style={{marginVertical: 16}}
         onPress={signUpWithEmail}
+        disabled={
+          firstName == ''
+          || lastName == ''
+          || phoneNumber == ''
+          || dateOfBirth == undefined
+        }
       />
     </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center'}}>
+    <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center', minHeight: 750}}>
       <ImageBackground source={BG_IMAGE} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30}}>
         
           <Image source={LOGO_IMAGE} style={{width: 177, height: 150}} resizeMode='center'/>
@@ -191,21 +215,17 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
 
       <View flex bg-white center style={{marginTop: -30, flexGrow: 3, borderTopLeftRadius: 80, justifyContent: 'space-evenly'}}>
         <View center style={{gap: 10}}>
-          <Text primary text40 style={{fontWeight: 'bold'}}>Register</Text>
+          <Text style={{fontSize: 28,fontWeight: 'bold', color: colors.primary}}>Register</Text>
           <Text style={{color: 'grey', fontWeight: 500}}>Create new account</Text>
         </View>
 
         <View center style={{gap: 10}}>
-          <Text primary style={{fontWeight: 'bold'}}>Please fill out the following information to register</Text>
+          <Text primary style={{fontSize: 12, fontWeight: 'bold'}}>Please fill out the following information to register</Text>
           
         </View>
 
         {step === 1 && StepOne}
         {step === 2 && StepTwo}
-
-        <View centerH>
-          
-        </View>
 
         <Text accent style={{fontWeight: 500}}>
           Already have an account? <Text primary onPress={() => navio.push('AuthLogin')}>Login here</Text>

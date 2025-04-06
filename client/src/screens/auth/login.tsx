@@ -53,10 +53,8 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
   // Methods
   const configureUI = () => {};
 
-  const Divider = () => <View style={{ width: '100%', height: 0.5, backgroundColor: 'grey', marginVertical: 10 }} />;
-
   return (
-    <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center'}}>
+    <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center', minHeight: 750}}>
       <ImageBackground source={BG_IMAGE} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30}}>
         
           <Image source={LOGO_IMAGE} style={{width: 177, height: 150}} resizeMode='center'/>
@@ -65,7 +63,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
 
       <View flex bg-white center style={{marginTop: -30, flexGrow: 3, borderTopLeftRadius: 80, justifyContent: 'space-evenly'}}>
         <View center style={{gap: 10}}>
-          <Text primary text40 style={{fontWeight: 'bold'}}>Welcome Back</Text>
+          <Text style={{fontSize: 28,fontWeight: 'bold', color: colors.primary}}>Welcome Back</Text>
           <Text style={{color: 'grey', fontWeight: 500}}>Login to your account</Text>
         </View>
 
@@ -103,6 +101,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
             label={loading ? 'Logging in ...' : 'Login'}
             labelStyle={{paddingHorizontal: 64}}
             onPress={signInWithEmail}
+            disabled={email === '' || password === ''}
           />
         </View>
 
