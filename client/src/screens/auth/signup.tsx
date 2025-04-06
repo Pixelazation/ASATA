@@ -182,7 +182,7 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   );
 
   return (
-    <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center'}}>
+    <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center', minHeight: 750}}>
       <ImageBackground source={BG_IMAGE} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30}}>
         
           <Image source={LOGO_IMAGE} style={{width: 177, height: 150}} resizeMode='center'/>
