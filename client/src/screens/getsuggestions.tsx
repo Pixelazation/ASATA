@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TextInput, Alert, Modal } from "react-native";
+import { ScrollView, StyleSheet, TextInput, Alert, Modal, Linking, TouchableOpacity } from "react-native";
 import { Text, View, Colors, Button, Checkbox } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
 import { services, useServices } from "@app/services";
 import { useAppearance } from "@app/utils/hooks";
 import { LocationSearchApi } from "@app/services/api/locationsearch";
-import { LocationDetailsApi } from "@app/services/api/locationdetails"; // ✅ ADDED
+import { LocationDetailsApi } from "@app/services/api/locationdetails";
 
 export const GetSuggestions: NavioScreen = observer(() => {
   useAppearance();
@@ -43,7 +43,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
       const data = await LocationSearchApi.search(searchQuery, "attractions");
       const results = data?.data || [];
 
-      // ✅ ENRICH WITH LOCATION DETAILS
       const detailedResults = await Promise.all(
         results.map(async (item: any) => {
           try {
@@ -80,24 +79,28 @@ export const GetSuggestions: NavioScreen = observer(() => {
           <Text text70M>Loading suggestions...</Text>
         ) : (
           suggestions.map((item, index) => (
-            <View
+            <TouchableOpacity
               key={index}
+              onPress={() => {
+                if (item.web_url) {
+                  Linking.openURL(item.web_url);
+                }
+              }}
               style={{
-                padding: 12,
+                padding: 16,
                 borderWidth: 1,
-                borderColor: "#ddd",
-                borderRadius: 10,
+                borderColor: "#ccc",
+                borderRadius: 12,
                 marginBottom: 15,
+                backgroundColor: "#fff",
               }}
             >
-              <Text text70M>{item.name}</Text>
-              <Text text80>{item.address_obj?.address_string}</Text>
-              <Text text80>Rating: {item.rating ?? "N/A"}</Text>
-              <Text text80>Ranking: {item.ranking_data?.ranking_string ?? "N/A"}</Text>
-              <Text text80 numberOfLines={1} ellipsizeMode="tail">
-                {item.web_url}
+              <Text text60BO marginB-s1>{item.name}</Text>
+              <Text text70 marginB-s1>{item.address_obj?.address_string}</Text>
+              <Text>
+                {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
               </Text>
-            </View>
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>
