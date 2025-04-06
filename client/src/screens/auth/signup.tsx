@@ -124,7 +124,7 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   );
 
   const StepTwo = (
-    <View center>
+    <View style={{gap: 4}}>
       <FormField 
         label='First Name'
         placeholder='First Name'
@@ -143,7 +143,7 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
       <DateTimePicker 
         accent
         style={{paddingHorizontal: 16, paddingVertical: 8}}
-        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100}}
+        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100, paddingVertical: 4, marginTop: 4}}
         label='Date of Birth'
         labelColor={colors.primary}
         labelStyle={{fontWeight: 'bold'}}
@@ -196,7 +196,7 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
         </View>
 
         <View center style={{gap: 10}}>
-          <Text primary style={{fontWeight: 'bold'}}>Please fill out the following information to register</Text>
+          <Text primary style={{fontSize: 12, fontWeight: 'bold'}}>Please fill out the following information to register</Text>
           
         </View>
 

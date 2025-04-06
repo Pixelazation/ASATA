@@ -20,8 +20,8 @@ export const PickerFixed: React.FC<Props> = ({label, value, placeholder, items, 
       placeholder={placeholder}
       onChange={onValueChange}
       fieldType={'dropdown'}
-      style={{paddingHorizontal: 16, paddingVertical: 8}}
-      fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100}}
+      style={{paddingHorizontal: 16}}
+      fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100, paddingVertical: 4, marginTop: 4, marginBottom: -16}}
       useWheelPicker
     >
       {items.map((item, index) => (

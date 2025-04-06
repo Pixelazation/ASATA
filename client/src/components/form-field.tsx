@@ -32,8 +32,8 @@ export const FormField: React.FC<Props> = (props) => {
     <View>
       <TextField
         accent
-        style={{paddingHorizontal: 16, paddingVertical: 8}}
-        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100, paddingVertical: 8, marginTop: 8}}
+        style={{paddingHorizontal: 16, paddingVertical: 4}}
+        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100, paddingVertical: 4, marginTop: 4}}
         label={label}
         labelColor={colors.primary}
         labelStyle={{fontWeight: 'bold'}}
