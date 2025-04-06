@@ -80,8 +80,6 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
   // Methods
   const configureUI = () => {};
 
-  const Divider = () => <View style={{ width: '100%', height: 1, backgroundColor: 'grey', marginVertical: 10 }} />;
-
   const StepOne = (
     <View style={{gap: 16, paddingVertical: 16}}>
       <FormField 

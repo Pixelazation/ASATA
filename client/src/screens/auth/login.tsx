@@ -53,8 +53,6 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
   // Methods
   const configureUI = () => {};
 
-  const Divider = () => <View style={{ width: '100%', height: 0.5, backgroundColor: 'grey', marginVertical: 10 }} />;
-
   return (
     <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center', minHeight: 750}}>
       <ImageBackground source={BG_IMAGE} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30}}>
