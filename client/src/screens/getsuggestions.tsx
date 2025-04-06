@@ -6,6 +6,7 @@ import { NavioScreen } from "rn-navio";
 import { services, useServices } from "@app/services";
 import { useAppearance } from "@app/utils/hooks";
 import { LocationSearchApi } from "@app/services/api/locationsearch";
+import { LocationDetailsApi } from "@app/services/api/locationdetails"; // ✅ ADDED
 
 export const GetSuggestions: NavioScreen = observer(() => {
   useAppearance();
@@ -40,7 +41,21 @@ export const GetSuggestions: NavioScreen = observer(() => {
     try {
       const searchQuery = [location, ...selectedRecreation, ...selectedDiner].join(", ");
       const data = await LocationSearchApi.search(searchQuery, "attractions");
-      setSuggestions(data?.data || []);
+      const results = data?.data || [];
+
+      // ✅ ENRICH WITH LOCATION DETAILS
+      const detailedResults = await Promise.all(
+        results.map(async (item: any) => {
+          try {
+            const details = await LocationDetailsApi.getDetails(Number(item.location_id));
+            return details ?? item;
+          } catch {
+            return item;
+          }
+        })
+      );
+
+      setSuggestions(detailedResults);
     } catch (error) {
       console.error("Error fetching suggestions:", error);
     } finally {
@@ -65,7 +80,24 @@ export const GetSuggestions: NavioScreen = observer(() => {
           <Text text70M>Loading suggestions...</Text>
         ) : (
           suggestions.map((item, index) => (
-            <Text key={index} text70M>{item.name}</Text>
+            <View
+              key={index}
+              style={{
+                padding: 12,
+                borderWidth: 1,
+                borderColor: "#ddd",
+                borderRadius: 10,
+                marginBottom: 15,
+              }}
+            >
+              <Text text70M>{item.name}</Text>
+              <Text text80>{item.address_obj?.address_string}</Text>
+              <Text text80>Rating: {item.rating ?? "N/A"}</Text>
+              <Text text80>Ranking: {item.ranking_data?.ranking_string ?? "N/A"}</Text>
+              <Text text80 numberOfLines={1} ellipsizeMode="tail">
+                {item.web_url}
+              </Text>
+            </View>
           ))
         )}
       </ScrollView>
@@ -82,7 +114,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
               onValueChange={() => toggleSelection(option, 'recreation')} 
             />
           ))}
-          <Button label="Submit" marginT-s4 onPress={() => setShowRecreationModal(false)} />
+          <Button label="Close" marginT-s4 onPress={() => setShowRecreationModal(false)} />
         </View>
       </Modal>
 
@@ -98,7 +130,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
               onValueChange={() => toggleSelection(option, 'diner')} 
             />
           ))}
-          <Button label="Submit" marginT-s4 onPress={() => setShowDinerModal(false)} />
+          <Button label="Close" marginT-s4 onPress={() => setShowDinerModal(false)} />
         </View>
       </Modal>
     </View>
