@@ -75,10 +75,10 @@ export const MyItineraries: NavioScreen = observer(() => {
   };
 
   return (
-    <View flex bg-bgColor padding-s3>
-      <ScrollView contentInsetAdjustmentBehavior="always">
+    <View flex bg-bgColor>
+      <ScrollView contentInsetAdjustmentBehavior="always" style={styles.scrollView}>
         {loading ? (
-          <Text text70M>Loading itineraries...</Text>
+          <Text text70M>   Loading itineraries...</Text>
         ) : itineraries.length > 0 ? (
           itineraries.map((itinerary) => (
             <ItineraryItem
@@ -109,6 +109,9 @@ MyItineraries.options = {
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    height: 100,
+  },
   fabContainer: {
     position: "absolute",
     bottom: 20,
