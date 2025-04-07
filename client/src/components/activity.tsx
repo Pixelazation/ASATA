@@ -4,13 +4,17 @@ import { LineProgressNode } from './atoms/line-progress-node';
 import { Icon } from './icon';
 import { Image, StyleSheet } from 'react-native';
 import { BG_IMAGE } from '../assets';
+import { IconButton } from './iconbutton';
+import { ItineraryApi } from '../services/api/itineraries';
 
 type Props = {
   activity: ActivityType;
+  editMode?: boolean;
+  handleDelete: (id: string) => void;
 };
 
-export const Activity: React.FC<Props> = ({activity}) => {
-  const {start_time, end_time, cost, category, description, name} = activity;
+export const Activity: React.FC<Props> = ({activity, editMode = false, handleDelete}) => {
+  const {id, start_time, end_time, cost, category, description, name} = activity;
   const startTime = new Date(start_time).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
   return (
@@ -37,6 +41,12 @@ export const Activity: React.FC<Props> = ({activity}) => {
             <Text style={styles.descText}>
               $$$
             </Text>
+            {editMode && (
+              <View style={styles.footerButtons}>
+                <IconButton name='pencil' onPress={() => {}}/>
+                <IconButton name='trash' color='red' onPress={() => handleDelete(id!)}/>
+              </View>
+            )}
           </View>
         </View>
       </View>
@@ -107,5 +117,11 @@ const styles = StyleSheet.create({
     borderTopColor: 'black',
     paddingHorizontal: 16,
     paddingVertical: 8,
+    alignItems: 'center',
+    minHeight: 44,
   },
+  footerButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  }
 });

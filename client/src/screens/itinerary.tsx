@@ -71,6 +71,19 @@ export const Itinerary: NavioScreen = observer(() => {
     }
   };
 
+  const deleteActivity = async (id: string) => {
+    if (id) {
+      ItineraryApi.deleteActivity(id)
+        .then(() => {
+          console.log("Deleted activity:", id); // Debugging log
+          fetchActivities(); // Fetch updated activities after deleting
+        })
+        .catch((error) => {
+          console.error("Error deleting activity:", error);
+        });
+    }
+  }
+
   // Start
   useEffect(() => {
     configureUI();
@@ -83,7 +96,7 @@ export const Itinerary: NavioScreen = observer(() => {
   };
 
   const activityList = activities.map((activity, index) => (
-    <Activity key={index} activity={activity} />
+    <Activity key={index} activity={activity} editMode={editMode} handleDelete={deleteActivity} />
   ))
 
   return (
@@ -122,7 +135,9 @@ export const Itinerary: NavioScreen = observer(() => {
                         <Text section>In {location}</Text>
                       </View>
                     </View>
-                    {activityList}
+                    <View style={{paddingBottom: 64}}>
+                      {activityList}
+                    </View>
                   </View>
                 ) : (
                   <Text text70M>No activities found.</Text>

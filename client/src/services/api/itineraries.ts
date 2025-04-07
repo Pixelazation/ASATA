@@ -81,5 +81,20 @@ export class ItineraryApi {
         throw error;
     }
   }
+
+  static async deleteActivity(
+    activityId: string
+  ) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("Activities")
+      .delete()
+      .eq("id", activityId);
+
+    if (error) throw error;
+    return data;
+  }
   
 }
