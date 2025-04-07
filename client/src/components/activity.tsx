@@ -6,26 +6,29 @@ import { Image, StyleSheet } from 'react-native';
 import { BG_IMAGE } from '../assets';
 
 type Props = {
-  title?: string;
+  activity: ActivityType;
 };
 
-export const Activity: React.FC<Props> = ({title}) => {
+export const Activity: React.FC<Props> = ({activity}) => {
+  const {start_time, end_time, cost, category, description, name} = activity;
+  const startTime = new Date(start_time).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
   return (
     <View style={styles.container}>
       <LineProgressNode />
       <View style={{flex: 1, gap: 8}}>
         <Text style={styles.time}>
-          MMM DD HH:MM AM
+          {startTime}
         </Text>
         <View style={styles.details}>
           <View style={styles.body}>
             <View style={styles.title}>
               <Icon name='cafe' size={24} color='black' />
-              <Text style={styles.titleText}>Activity Name</Text>
+              <Text style={styles.titleText}>{name}</Text>
             </View>
             <View style={styles.description}>
               <Text style={styles.descText}>
-                Very long description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.
+                {description}
               </Text>
               <Image source={BG_IMAGE} resizeMode='cover' style={styles.descImg} />
             </View>

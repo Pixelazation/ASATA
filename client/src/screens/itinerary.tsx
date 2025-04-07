@@ -13,10 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Activity } from '../components/activity';
 import { LineProgressHead } from '../components/atoms/line-progress-head';
 import { IconButton } from '../components/iconbutton';
+import { FloatingActionButton } from '../components/atoms/floating-action-button';
+import { ItineraryApi } from '../services/api/itineraries';
 
 export type Params = {
   type?: 'push' | 'show';
-  itineraryId?: string;
+  itineraryId: string;
 };
 
 export const Itinerary: NavioScreen = observer(() => {
@@ -27,24 +29,60 @@ export const Itinerary: NavioScreen = observer(() => {
 
   const { itineraryId } = params;
 
+  // State
   const [panelRef, setPanelRef] = useState<SlidingUpPanel | null>();
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // const {ui} = useStores();
-
-  // State
+  const [activities, setActivities] = useState<ActivityType[]>([]);
 
   // Methods
+  const fetchActivities = async () => {
+    setLoading(true);
+    try {
+      const data = await ItineraryApi.getActivities(itineraryId);
+      console.log("Fetched activities:", data); // Debugging log
+      setActivities(data);
+    } catch (error) {
+      console.error("Error fetching itineraries:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addDummyActivity = async () => {
+    try {
+      const newActivity = {
+        name: "Test Activity",
+        start_time: new Date(),
+        end_time: new Date(Date.now() + 60 * 60 * 1000), // 1 hour later
+        cost: 500,
+        category: "recreation",
+        location: "Cebu",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      };
+
+      await ItineraryApi.addActivity(itineraryId, newActivity);
+      fetchActivities(); // Fetch updated itineraries after adding
+    } catch (error) {
+      console.error("Error adding itinerary:", error);
+    }
+  };
 
   // Start
   useEffect(() => {
     configureUI();
+    fetchActivities(); // Fetch data on mount
   }, []);
 
   // UI Methods
   const configureUI = () => {
     navigation.setOptions({});
   };
+
+  const activityList = activities.map((activity, index) => (
+    <Activity key={index} activity={activity} />
+  ))
 
   return (
     <SafeAreaView style={{flex: 1}} edges={['top', 'left', 'right']}>
@@ -70,24 +108,39 @@ export const Itinerary: NavioScreen = observer(() => {
                 <Text section>Itinerary Name</Text>
               </View>
               <ScrollView contentContainerStyle={{paddingBottom: 100}} showsVerticalScrollIndicator={false}>
-                <View style={{flexDirection: 'row', gap: 8}}>
-                  <LineProgressHead />
-                  <View style={{marginBottom: 16}}>
-                    <Text section>In **Location**</Text>
-                  </View>
-                </View>
+                
 
-                <Activity />
-                <Activity />
-                <Activity />
-                <Activity />
-                <Activity />
+                {loading ? (
+                  <Text text70M>Loading activities...</Text>
+                ) : activities.length > 0 ? (
+                  <View>
+                    <View style={{flexDirection: 'row', gap: 8}}>
+                      <LineProgressHead />
+                      <View style={{marginBottom: 16}}>
+                        <Text section>In **Location**</Text>
+                      </View>
+                    </View>
+                    {activityList}
+                  </View>
+                ) : (
+                  <Text text70M>No activities found.</Text>
+                )}
               </ScrollView>
             </View>
           </SlidingUpPanel>
         </View>
       </ImageBackground>
-      
+
+      <FloatingActionButton
+        icon={editMode ? 'add' : 'location'}
+        onPress={() => {
+          if (editMode) {
+            addDummyActivity();
+          } else {
+            panelRef?.hide();
+          }
+        }}
+      />
     </SafeAreaView>
   );
 });
