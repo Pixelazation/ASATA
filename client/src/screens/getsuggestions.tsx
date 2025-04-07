@@ -17,18 +17,14 @@ type Location = {
 };
 
 export const GetSuggestions: NavioScreen = observer(() => {
-  useAppearance();
   const { t, navio } = useServices();
 
   const [location, setLocation] = useState("");
   const [selectedOption, setSelectedOption] = useState<string>(""); // Recreation or Diner
   const [selectedRecreation, setSelectedRecreation] = useState<string[]>([]);
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
-  const [showRecreationModal, setShowRecreationModal] = useState(false);
-  const [showDinerModal, setShowDinerModal] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
 
   const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
@@ -53,7 +49,10 @@ export const GetSuggestions: NavioScreen = observer(() => {
       const filters = selectedOption === "recreation" ? selectedRecreation : selectedDiner;
       const query = `${location} ${filters.join(", ")}`;
 
-      const data = await LocationSearchApi.search(query, "attractions");
+      // Dynamically choose category based on selected option (Recreation or Diner)
+      const category = selectedOption === "recreation" ? "recreation" : "diner";
+
+      const data = await LocationSearchApi.search(query, category); // Pass category dynamically
       const results = data?.data || [];
 
       const detailedResults = await Promise.all(
