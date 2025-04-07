@@ -1,0 +1,108 @@
+import React from 'react';
+import {View, Text} from 'react-native-ui-lib';
+import { LineProgressNode } from './atoms/line-progress-node';
+import { Icon } from './icon';
+import { Image, StyleSheet } from 'react-native';
+import { BG_IMAGE } from '../assets';
+
+type Props = {
+  title?: string;
+};
+
+export const Activity: React.FC<Props> = ({title}) => {
+  return (
+    <View style={styles.container}>
+      <LineProgressNode />
+      <View style={{flex: 1, gap: 8}}>
+        <Text style={styles.time}>
+          MMM DD HH:MM AM
+        </Text>
+        <View style={styles.details}>
+          <View style={styles.body}>
+            <View style={styles.title}>
+              <Icon name='cafe' size={24} color='black' />
+              <Text style={styles.titleText}>Activity Name</Text>
+            </View>
+            <View style={styles.description}>
+              <Text style={styles.descText}>
+                Very long description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.
+              </Text>
+              <Image source={BG_IMAGE} resizeMode='cover' style={styles.descImg} />
+            </View>
+          </View>
+          <View style={styles.footer}>
+            <Text style={styles.descText}>
+              $$$
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    gap: 8,
+    marginRight: 8
+  },
+  time: {
+    fontSize: 12,
+    fontWeight: '300',
+    color: 'gray',
+  },
+  details: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'black',
+    borderRadius: 8,
+    gap: 8,
+    marginBottom: 16,
+
+    // iOS Shadows
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 4 },
+
+    // Android Shadow
+    elevation: 4,
+  },
+  body: {
+    padding: 16,
+    gap: 8,
+  },
+  title: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  titleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  description: {
+    flexDirection: 'row',
+    gap: 8,
+    width: '100%',
+  },
+  descText: {
+    flex: 1,
+    flexGrow: 1,
+    fontSize: 12,
+    fontWeight: '100',
+    color: 'gray',
+  },
+  descImg: {
+    width: 80,
+    height: 80,
+    borderRadius: 16
+  },
+  footer: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: 'black',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+});

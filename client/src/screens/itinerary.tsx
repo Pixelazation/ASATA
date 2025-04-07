@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Button, ImageBackground, ScrollView, StyleSheet} from 'react-native';
-import {Text, View} from 'react-native-ui-lib';
+import {Gradient, Text, View} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 import SlidingUpPanel from 'rn-sliding-up-panel';
@@ -10,6 +10,8 @@ import {useAppearance} from '@app/utils/hooks';
 import {NavioSection} from '@app/components/sections/NavioSection';
 import { BG_IMAGE } from '../assets';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Activity } from '../components/activity';
+import { LineProgressHead } from '../components/atoms/line-progress-head';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -42,26 +44,33 @@ export const Itinerary: NavioScreen = observer(() => {
     navigation.setOptions({});
   };
 
-  // UI Methods
-
   return (
     <SafeAreaView style={{flex: 1}} edges={['top', 'left', 'right']}>
       <ImageBackground source={BG_IMAGE} resizeMode='cover'>
         <View style={{minHeight: '60%'}}>
           <Text>Test Header</Text>
-          <Button title='Show' onPress={() => panelRef?.show()} />
         </View>
         <View style={{flex: 1}}>
           <SlidingUpPanel containerStyle={styles.container} ref={c => setPanelRef(c)} draggableRange={{top: 350, bottom: 50}} snappingPoints={[50, 350]} friction={0.5}>
-            <ScrollView style={{flex: 1}} contentContainerStyle={{flexGrow: 1}}>
-              <Text section>Itinerary Name</Text>
-              <Text>{itineraryId}</Text>
-              <Button title='Hide' onPress={() => panelRef?.hide()} />
-              
-              <View>
-                <Text section>In \(Location\)</Text>
+            <View style={{flex: 1, padding: 16}}>
+              <View style={{paddingBottom: 16}}>
+                <Text section>Itinerary Name</Text>
               </View>
-            </ScrollView>
+              <ScrollView contentContainerStyle={{paddingBottom: 100}} showsVerticalScrollIndicator={false}>
+                <View style={{flexDirection: 'row', gap: 8}}>
+                  <LineProgressHead />
+                  <View style={{marginBottom: 16}}>
+                    <Text section>In **Location**</Text>
+                  </View>
+                </View>
+
+                <Activity />
+                <Activity />
+                <Activity />
+                <Activity />
+                <Activity />
+              </ScrollView>
+            </View>
           </SlidingUpPanel>
         </View>
       </ImageBackground>
@@ -75,7 +84,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f8ff',
     borderRadius: 16,
-    padding: 16,
   },
 });
 
