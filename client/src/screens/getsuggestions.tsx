@@ -45,10 +45,10 @@ export const GetSuggestions: NavioScreen = observer(() => {
       return;
     }
 
-  if (!selectedLocation) {
-    Alert.alert("Error", "Please select a location on the map.");
-    return;
-  }
+    if (!selectedLocation) {
+      Alert.alert("Error", "Please select a location on the map.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -58,12 +58,18 @@ export const GetSuggestions: NavioScreen = observer(() => {
         return;
       }
 
-      const { fullAddress } = geocodeResult;
+      const { fullAddress, route, city, country } = geocodeResult;
 
-      // Dynamically choose category based on selected option (Recreation or Diner)
-      const category = selectedOption === "recreation" ? "recreation" : "diner";
-      const filters = selectedOption === "recreation" ? selectedRecreation : selectedDiner;
-      const query = `${fullAddress} ${filters.join(", ")}`;
+      // Dynamically set the category based on selected option
+      let category = "";
+      if (selectedOption === "recreation") {
+        category = "attractions"; // Recreation -> Attractions
+      } else if (selectedOption === "diner") {
+        category = "restaurants"; // Diner -> Restaurants
+      }
+
+      // Combine route, city, and country for the query
+      const query = `${route}, ${city}, ${country} ${selectedOption === "recreation" ? selectedRecreation.join(", ") : selectedDiner.join(", ")}`;
 
       const data = await LocationSearchApi.search(query, category); // Pass category dynamically
       const results = data?.data || [];
