@@ -7,9 +7,9 @@ import { services, useServices } from "@app/services";
 import { useAppearance } from "@app/utils/hooks";
 import { LocationSearchApi } from "@app/services/api/locationsearch";
 import { LocationDetailsApi } from "@app/services/api/locationdetails";
-import { GeocodingApi } from "@app/services/api/geocoding"; // ✅ ADDED: Geocoding API import
+import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
-import { Picker } from '@react-native-picker/picker'; // ✅ Import Picker
+import { Picker } from '@react-native-picker/picker';
 
 type Location = {
   latitude: number;
@@ -17,6 +17,7 @@ type Location = {
 };
 
 export const GetSuggestions: NavioScreen = observer(() => {
+  useAppearance();
   const { t, navio } = useServices();
 
   const [location, setLocation] = useState("");
@@ -44,13 +45,25 @@ export const GetSuggestions: NavioScreen = observer(() => {
       return;
     }
 
+  if (!selectedLocation) {
+    Alert.alert("Error", "Please select a location on the map.");
+    return;
+  }
+
     setLoading(true);
     try {
-      const filters = selectedOption === "recreation" ? selectedRecreation : selectedDiner;
-      const query = `${location} ${filters.join(", ")}`;
+      // Get the full address (route, city, country)
+      const geocodeResult = await GeocodingApi.reverseGeocode(selectedLocation.latitude, selectedLocation.longitude);
+      if (!geocodeResult) {
+        return;
+      }
+
+      const { fullAddress } = geocodeResult;
 
       // Dynamically choose category based on selected option (Recreation or Diner)
       const category = selectedOption === "recreation" ? "recreation" : "diner";
+      const filters = selectedOption === "recreation" ? selectedRecreation : selectedDiner;
+      const query = `${fullAddress} ${filters.join(", ")}`;
 
       const data = await LocationSearchApi.search(query, category); // Pass category dynamically
       const results = data?.data || [];

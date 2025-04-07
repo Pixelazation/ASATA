@@ -36,11 +36,15 @@ export const GeocodingApi = {
         return comp?.long_name || null;
       };
 
+      const route = getComponent("route");
+      const city = getComponent("locality") || getComponent("sublocality") || getComponent("administrative_area_level_2");
+      const country = getComponent("country");
+
       return {
-        route: getComponent("route"), // street
-        city: getComponent("locality") || getComponent("sublocality") || getComponent("administrative_area_level_2"),
-        country: getComponent("country"),
-        fullAddress: data.results[0].formatted_address,
+        fullAddress: `${route}, ${city}, ${country}`, // Combined address
+        route,
+        city,
+        country,
       };
     } catch (error) {
       console.error("Error with geocoding:", error);
