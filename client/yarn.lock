@@ -4086,6 +4086,11 @@ ci-info@^3.2.0, ci-info@^3.3.0:
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-3.4.0.tgz#b28484fd436cbc267900364f096c9dc185efb251"
   integrity sha512-t5QdPT5jq3o262DOQ8zA6E1tlH2upmUc4Hlvrbx1pGYJuiiHl7O7rvVNI+l8HTVhd/q3Qc9vqimkNk5yiXsAug==
 
+clamp@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/clamp/-/clamp-1.0.1.tgz#66a0e64011816e37196828fdc8c8c147312c8634"
+  integrity sha512-kgMuFyE78OC6Dyu3Dy7vcx4uy97EIbVxJB/B0eJ3bUNAkwdNcxYzgKltnyADiYwsR7SEqkkUPsEUT//OVS6XMA==
+
 clean-css@^5.2.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/clean-css/-/clean-css-5.3.2.tgz#70ecc7d4d4114921f5d298349ff86a31a9975224"
@@ -10296,6 +10301,15 @@ rn-navio@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/rn-navio/-/rn-navio-0.1.0.tgz#bf09019263b13582e4c22a1f75944cbd3cb208b8"
   integrity sha512-pmYOHM0cxUqIZa9an8WKSkKKEHuFdkd4v6bgd1YRIh4/fM86ACu9dJYZLK7RJEDrroGd0s4ATCaNpsARf/yBnQ==
+
+rn-sliding-up-panel@^2.4.6:
+  version "2.4.6"
+  resolved "https://registry.yarnpkg.com/rn-sliding-up-panel/-/rn-sliding-up-panel-2.4.6.tgz#601664429063fcf2286ce82825c7ef7071c1d763"
+  integrity sha512-RC9vcJp5pdc5ZMxOyfsUY5Sdv6VGD7JhFmOKDYJ827IPmZDQLmqVkiAkRukvT9NC05tQ5c5Gz1nMwVBk9Cp5lA==
+  dependencies:
+    clamp "^1.0.1"
+    deprecated-react-native-prop-types "^2.3.0"
+    prop-types "^15.7.2"
 
 rtl-detect@^1.0.2:
   version "1.0.2"
