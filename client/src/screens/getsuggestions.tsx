@@ -3,9 +3,17 @@ import { ScrollView, StyleSheet, TextInput, Alert, Modal, Linking, TouchableOpac
 import { Text, View, Colors, Button, Checkbox } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
-import { useServices } from "@app/services";
+import { services, useServices } from "@app/services";
+import { useAppearance } from "@app/utils/hooks";
 import { LocationSearchApi } from "@app/services/api/locationsearch";
 import { LocationDetailsApi } from "@app/services/api/locationdetails";
+import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+
+// Define a type for selected location
+type Location = {
+  latitude: number;
+  longitude: number;
+};
 
 export const GetSuggestions: NavioScreen = observer(() => {
   useAppearance();
@@ -19,6 +27,9 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Map-related states
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null); // Store selected pin
+
   const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
   const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
 
@@ -31,14 +42,18 @@ export const GetSuggestions: NavioScreen = observer(() => {
   };
 
   const fetchSuggestions = async () => {
-    if (!location.trim()) {
-      Alert.alert("Error", "Please enter a location.");
+    if (!location.trim() && !selectedLocation) {
+      Alert.alert("Error", "Please enter a location or select a location on the map.");
       return;
     }
 
     setLoading(true);
     try {
-      const searchQuery = [location, ...selectedRecreation, ...selectedDiner].join(", ");
+      // Use the selectedLocation coordinates if available, otherwise use the location input
+      const searchQuery = selectedLocation
+        ? `${selectedLocation.latitude}, ${selectedLocation.longitude}`
+        : location;
+
       const data = await LocationSearchApi.search(searchQuery, "attractions");
       const results = data?.data || [];
 
@@ -61,16 +76,45 @@ export const GetSuggestions: NavioScreen = observer(() => {
     }
   };
 
+  const handleMapPress = (event: any) => {
+    const { coordinate } = event.nativeEvent;
+    setSelectedLocation(coordinate); // Set selected pin's coordinates
+    setLocation(""); // Clear the input when pin is selected
+  };
+
   return (
     <View flex bg-bgColor padding-s3>
       <ScrollView contentInsetAdjustmentBehavior="always">
         <Text text50 marginB-s2>Get Suggestions</Text>
-        <TextInput 
-          placeholder="Enter location"
-          value={location}
-          onChangeText={setLocation}
+
+        {/* Map Component */}
+        <MapView
+          provider={PROVIDER_DEFAULT}  // Default map provider
+          style={{ height: 300, marginBottom: 10 }}
+          initialRegion={{
+            latitude: 37.78825,  // Default to some initial coordinates
+            longitude: -122.4324,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+          onPress={handleMapPress}
+        >
+          {selectedLocation && (
+            <Marker
+              coordinate={selectedLocation}
+              title="Selected Location"
+            />
+          )}
+        </MapView>
+
+        {/* Display location as text after selecting on the map */}
+        <TextInput
+          placeholder="Location"
+          value={selectedLocation ? `${selectedLocation.latitude}, ${selectedLocation.longitude}` : location}
+          editable={false}
           style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginBottom: 10 }}
         />
+
         <Button label="Recreation" marginB-s2 onPress={() => setShowRecreationModal(true)} />
         <Button label="Diner" marginB-s2 onPress={() => setShowDinerModal(true)} />
         <Button label="Get Suggestions" onPress={fetchSuggestions} marginB-s2 disabled={loading} />
@@ -109,11 +153,11 @@ export const GetSuggestions: NavioScreen = observer(() => {
         <View flex center bg-white padding-s4>
           <Text text60 marginB-s2>Choose Recreation Types</Text>
           {recreationOptions.map(option => (
-            <Checkbox 
-              key={option} 
-              label={option} 
-              value={selectedRecreation.includes(option)} 
-              onValueChange={() => toggleSelection(option, 'recreation')} 
+            <Checkbox
+              key={option}
+              label={option}
+              value={selectedRecreation.includes(option)}
+              onValueChange={() => toggleSelection(option, "recreation")}
             />
           ))}
           <Button label="Close" marginT-s4 onPress={() => setShowRecreationModal(false)} />
@@ -125,11 +169,11 @@ export const GetSuggestions: NavioScreen = observer(() => {
         <View flex center bg-white padding-s4>
           <Text text60 marginB-s2>Choose Diner Types</Text>
           {dinerOptions.map(option => (
-            <Checkbox 
-              key={option} 
-              label={option} 
-              value={selectedDiner.includes(option)} 
-              onValueChange={() => toggleSelection(option, 'diner')} 
+            <Checkbox
+              key={option}
+              label={option}
+              value={selectedDiner.includes(option)}
+              onValueChange={() => toggleSelection(option, "diner")}
             />
           ))}
           <Button label="Close" marginT-s4 onPress={() => setShowDinerModal(false)} />
