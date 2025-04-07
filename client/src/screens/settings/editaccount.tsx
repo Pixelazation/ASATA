@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { NavioScreen } from 'rn-navio';
 import { supabase } from '@app/lib/supabase';
 import { Icon } from '@app/components/icon';
 import { EditModal } from '@app/components/editModal';
 import { fetchUserData, updateUserData } from '@app/services/api/userdetails';
-import { styles } from '@app/screens/settings/editAccountStyles';
 
 export const EditAccount: NavioScreen = () => {
   const [email, setEmail] = useState('');
@@ -32,7 +31,11 @@ export const EditAccount: NavioScreen = () => {
         setGender(data.gender);
         setPhoneNumber(data.mobile_number);
       } catch (error) {
-        console.error(error.message);
+        if (error instanceof Error) {
+          console.error(error.message);
+        } else {
+          console.error('An unknown error occurred:', error);
+        }
       } finally {
         setLoading(false);
       }
@@ -41,7 +44,7 @@ export const EditAccount: NavioScreen = () => {
     fetchData();
   }, []);
 
-  const openModal = (field, value) => {
+  const openModal = (field: React.SetStateAction<string>, value: React.SetStateAction<string>) => {
     setCurrentField(field);
     setCurrentValue(value);
     setModalVisible(true);
@@ -93,7 +96,11 @@ export const EditAccount: NavioScreen = () => {
           await updateUserData(user.id, updateData);
           console.log('Field updated successfully:', updateData);
         } catch (error) {
-          console.error(error.message);
+          if (error instanceof Error) {
+            console.error(error.message);
+          } else {
+            console.error('An unknown error occurred:', error);
+          }
         }
       }
     }
@@ -161,3 +168,25 @@ export const EditAccount: NavioScreen = () => {
 EditAccount.options = {
   title: 'Edit Account',
 };
+
+export const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    padding: 16,
+    backgroundColor: 'white',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'gray',
+    marginVertical: 8,
+  },
+});

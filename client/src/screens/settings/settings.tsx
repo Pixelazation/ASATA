@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {ScrollView, Modal, TouchableOpacity, StyleSheet} from 'react-native';
-import {Text, View, Colors, SegmentedControl} from 'react-native-ui-lib';
+import {Text, View, Colors} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 import {Section} from '@app/components/section';
@@ -8,14 +8,11 @@ import {Row} from '@app/components/row';
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
 import {Bounceable} from 'rn-bounceable';
-import {Icon} from '@app/components/icon';
+import {Icon, IconName} from '@app/components/icon';
 import {useStores} from '@app/stores';
 import {HeaderButton} from '@app/components/button';
 import {appearances, appearancesUI, appearanceUIToInternal} from '@app/utils/types/enums';
-import {colors} from '@app/utils/designSystem';
-import {supabase} from '@app/lib/supabase';
-import {modalStyles} from './modalStyles';
-import {useAccountActions} from './accountActions';
+import {useAccountActions} from '../../utils/accountActions';
 
 export const Settings: NavioScreen = observer(() => {
   useAppearance(); // for Dark Mode
@@ -71,7 +68,7 @@ export const Settings: NavioScreen = observer(() => {
                 {/*Color might change*/}
                 <View padding-s3 br30 style={{backgroundColor:Colors.rgba(240, 240, 240, 1),}}>
                   <Row>
-                    <Icon name={action.icon} size={30}/>
+                    <Icon name={action.icon as IconName} size={30}/>
                     <View flex marginH-s3>
                       <Text text60R textColor>
                          {action.title}
@@ -129,4 +126,44 @@ export const Settings: NavioScreen = observer(() => {
 
 Settings.options = props => ({
   title: 'Settings',
+});
+
+export const modalStyles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: Colors.primary,
+  },
 });

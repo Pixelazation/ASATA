@@ -3,7 +3,16 @@ import { View, Text, TextInput, Button, Modal, StyleSheet } from 'react-native';
 import { DateTimePicker } from 'react-native-ui-lib';
 import { PickerFixed } from '@app/components/picker-fixed';
 
-export const EditModal = ({ modalVisible, currentField, currentValue, setCurrentValue, handleModalSave, setModalVisible }) => {
+interface EditModalProps {
+  modalVisible: boolean;
+  currentField: string;
+  currentValue: string;
+  setCurrentValue: (value: string) => void;
+  handleModalSave: () => void;
+  setModalVisible: (visible: boolean) => void;
+}
+
+export const EditModal: React.FC<EditModalProps> = ({ modalVisible, currentField, currentValue, setCurrentValue, handleModalSave, setModalVisible }) => {
   return (
     <Modal
       transparent={true}
@@ -23,17 +32,16 @@ export const EditModal = ({ modalVisible, currentField, currentValue, setCurrent
               placeholder='DD/MM/YYYY'
               placeholderTextColor={'grey'}
               value={new Date(currentValue)}
-              onChange={(date) => setCurrentValue(date.toISOString().split('T')[0])}
+              onChange={(date: { toISOString: () => string; }) => setCurrentValue(date.toISOString().split('T')[0])}
               mode="date"
               maximumDate={new Date()}
             />
           ) : currentField === 'Gender' ? (
             <PickerFixed
-              value={currentValue}
-              placeholder='Gender'
-              onValueChange={setCurrentValue}
-              items={['Male', 'Female', 'Other', 'Prefer not to say']}
-            />
+                value={currentValue}
+                placeholder='Gender'
+                onValueChange={setCurrentValue}
+                items={['Male', 'Female', 'Other', 'Prefer not to say']} label={''}            />
           ) : (
             <TextInput
               style={styles.input}

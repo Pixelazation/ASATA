@@ -1,4 +1,3 @@
-import {IconName} from 'react-native-ui-lib';
 import {useServices} from '@app/services';
 import {useStores} from '@app/stores';
 
@@ -25,17 +24,17 @@ export const useAccountActions = () => {
   return [
     {
       title: 'Edit Account',
-      icon: 'create-outline' as IconName,
+      icon: 'create-outline',
       onPress: handleEditAccount,
     },
     {
       title: 'Delete Account',
-      icon: 'trash-outline' as IconName,
+      icon: 'trash-outline',
       onPress: handleDeleteAccount,
     },
     {
       title: 'Logout',
-      icon: 'log-out-outline' as IconName,
+      icon: 'log-out-outline',
       onPress: handleLogout,
     },
   ];
