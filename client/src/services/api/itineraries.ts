@@ -22,7 +22,7 @@ export class ItineraryApi {
     const { data, error } = await supabase
       .from("Activities")
       .select("*")
-      .eq("itinerary_id", itineraryId) // Use logged-in user's ID
+      .eq("itinerary_id", itineraryId)
       .order("start_time", { ascending: true });
     if (error) throw error;
     return data;

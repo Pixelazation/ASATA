@@ -20,7 +20,7 @@ export type Params = {
   type?: 'push' | 'show';
   itineraryId: string;
   name: string
-  location?: string;
+  location: string;
 };
 
 export const Itinerary: NavioScreen = observer(() => {
