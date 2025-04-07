@@ -17,7 +17,6 @@ import {
   getTabBarIcon,
   drawerScreenDefaultOptions,
 } from '@app/utils/designSystem';
-import {services} from '@app/services';
 import {AuthLogin} from './screens/auth/login';
 import { AuthSignup } from './screens/auth/signup';
 
@@ -54,6 +53,7 @@ export const navio = Navio.build({
   stacks: {
     MainStack: ['Main', 'Example', 'GetSuggestions'],
     MyItinerariesStack:['MyItineraries', 'Itinerary'],
+    SettingsStack:['Settings', 'EditAccount'],
     ExampleStack: {
       screens: ['Example'],
       navigatorProps: {
@@ -97,7 +97,7 @@ export const navio = Navio.build({
           }),
         },
         SettingsTab: {
-          stack: ['Settings','EditAccount'],
+          stack: 'SettingsStack',
           options: () => ({
             title: 'Account',
             tabBarIcon: getTabBarIcon('SettingsTab'),

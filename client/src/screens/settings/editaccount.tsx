@@ -3,7 +3,7 @@ import {View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity,
 import {DateTimePicker} from 'react-native-ui-lib';
 import {NavioScreen} from 'rn-navio';
 import {supabase} from '@app/lib/supabase';
-import {Icon, IconName} from '@app/components/icon';
+import {Icon} from '@app/components/icon';
 import {PickerFixed} from '@app/components/picker-fixed';
 
 export const EditAccount: NavioScreen = () => {
@@ -49,7 +49,7 @@ export const EditAccount: NavioScreen = () => {
     fetchUserData();
   }, []);
 
-  const openModal = (field, value) => {
+  const openModal = (field: React.SetStateAction<string>, value: React.SetStateAction<string>) => {
     console.log('Opening modal for field:', field, 'with value:', value);
     setCurrentField(field);
     setCurrentValue(value);
@@ -182,16 +182,16 @@ export const EditAccount: NavioScreen = () => {
                 placeholder='DD/MM/YYYY'
                 placeholderTextColor={'grey'}
                 value={new Date(currentValue)}
-                onChange={(date) => setCurrentValue(date.toISOString().split('T')[0])}
+                onChange={(date: { toISOString: () => string; }) => setCurrentValue(date.toISOString().split('T')[0])}
                 mode="date"
                 maximumDate={new Date()}
               />
             ) : currentField === 'Gender' ? (
               <PickerFixed
-                value={currentValue}
-                placeholder='Gender'
-                onValueChange={setCurrentValue}
-                items={['Male', 'Female', 'Other', 'Prefer not to say']}
+                  value={currentValue}
+                  placeholder='Gender'
+                  onValueChange={setCurrentValue}
+                  items={['Male', 'Female', 'Other', 'Prefer not to say']} label={''}
               />
             ) : (
               <TextInput
