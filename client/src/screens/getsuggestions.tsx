@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, TextInput, Alert, Modal, Linking, TouchableOpacity } from "react-native";
+import { ScrollView, TextInput, Alert, Linking, TouchableOpacity } from "react-native";
 import { Text, View, Button, Checkbox } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
@@ -20,13 +20,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
   useAppearance();
   const { t, navio } = useServices();
 
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState(""); // Location as editable text input
   const [selectedOption, setSelectedOption] = useState<string>(""); // Recreation or Diner
   const [selectedRecreation, setSelectedRecreation] = useState<string[]>([]);
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null); // Store the selected pin location
 
   const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
   const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
@@ -45,22 +45,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
       return;
     }
 
-    if (!selectedLocation) {
-      Alert.alert("Error", "Please select a location on the map.");
-      return;
-    }
-
     setLoading(true);
     try {
-      // Get the full address (route, city, country)
-      const geocodeResult = await GeocodingApi.reverseGeocode(selectedLocation.latitude, selectedLocation.longitude);
-      if (!geocodeResult) {
-        return;
-      }
-
-      const { fullAddress, route, city, country } = geocodeResult;
-
-      // Dynamically set the category based on selected option
       let category = "";
       if (selectedOption === "recreation") {
         category = "attractions"; // Recreation -> Attractions
@@ -68,9 +54,21 @@ export const GetSuggestions: NavioScreen = observer(() => {
         category = "restaurants"; // Diner -> Restaurants
       }
 
-      // Combine route, city, and country for the query
-      const query = `${route}, ${city}, ${country} ${selectedOption === "recreation" ? selectedRecreation.join(", ") : selectedDiner.join(", ")}`;
+      let query = location; // If location is typed by the user
 
+      if (!selectedLocation && location.trim()) {
+        // If the user typed a location, pass the typed location + filters to the query
+        query = `${location} ${selectedOption === "recreation" ? selectedRecreation.join(", ") : selectedDiner.join(", ")}`;
+      } else if (selectedLocation) {
+        // If location is selected on the map, update the location to route, city, country format
+        const geocodeResult = await GeocodingApi.reverseGeocode(selectedLocation.latitude, selectedLocation.longitude);
+        if (geocodeResult) {
+          const { route, city, country } = geocodeResult;
+          query = `${route}, ${city}, ${country} ${selectedOption === "recreation" ? selectedRecreation.join(", ") : selectedDiner.join(", ")}`;
+        }
+      }
+
+      // Call the API with the dynamically created query
       const data = await LocationSearchApi.search(query, category); // Pass category dynamically
       const results = data?.data || [];
 
@@ -98,11 +96,15 @@ export const GetSuggestions: NavioScreen = observer(() => {
     setSelectedLocation(coordinate);
 
     const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
-    if (result?.city) {
-      setLocation(result.city);
-    } else {
-      setLocation("Unknown");
+    if (result) {
+      const { route, city, country } = result;
+      setLocation(`${route}, ${city}, ${country}`);
     }
+  };
+
+  const handleLocationChange = (text: string) => {
+    setLocation(text); // Update location on text change
+    setSelectedLocation(null); // Remove the pin if user is typing
   };
 
   return (
@@ -134,7 +136,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
         <TextInput
           placeholder="Location"
           value={location}
-          editable={false}
+          onChangeText={handleLocationChange} // Update location when typing
           style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginBottom: 10 }}
         />
 
