@@ -12,6 +12,7 @@ import { BG_IMAGE } from '../assets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Activity } from '../components/activity';
 import { LineProgressHead } from '../components/atoms/line-progress-head';
+import { IconButton } from '../components/iconbutton';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -27,6 +28,7 @@ export const Itinerary: NavioScreen = observer(() => {
   const { itineraryId } = params;
 
   const [panelRef, setPanelRef] = useState<SlidingUpPanel | null>();
+  const [editMode, setEditMode] = useState(false);
 
   // const {ui} = useStores();
 
@@ -47,8 +49,19 @@ export const Itinerary: NavioScreen = observer(() => {
   return (
     <SafeAreaView style={{flex: 1}} edges={['top', 'left', 'right']}>
       <ImageBackground source={BG_IMAGE} resizeMode='cover'>
-        <View style={{minHeight: '60%'}}>
-          <Text>Test Header</Text>
+        <View style={styles.header}>
+          <View style={styles.headerButton}>
+            <IconButton
+              name='arrow-back'
+              onPress={() => navigation.goBack()}
+            />
+          </View>
+          <View style={styles.headerButton}>
+            <IconButton
+              name={editMode ? 'eye' : 'pencil'}
+              onPress={() => setEditMode(!editMode)}
+            />
+          </View>
         </View>
         <View style={{flex: 1}}>
           <SlidingUpPanel containerStyle={styles.container} ref={c => setPanelRef(c)} draggableRange={{top: 350, bottom: 50}} snappingPoints={[50, 350]} friction={0.5}>
@@ -80,6 +93,21 @@ export const Itinerary: NavioScreen = observer(() => {
 });
 
 const styles = StyleSheet.create({
+  header: {
+    minHeight: '60%',
+    flexDirection: 'row',
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  headerButton: {
+    backgroundColor: 'white',
+    opacity: 0.8,
+    borderRadius: 8,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8f8ff',
