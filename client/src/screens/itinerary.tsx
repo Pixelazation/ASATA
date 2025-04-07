@@ -19,6 +19,8 @@ import { ItineraryApi } from '../services/api/itineraries';
 export type Params = {
   type?: 'push' | 'show';
   itineraryId: string;
+  name: string
+  location?: string;
 };
 
 export const Itinerary: NavioScreen = observer(() => {
@@ -27,7 +29,7 @@ export const Itinerary: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const params = navio.useParams<Params>();
 
-  const { itineraryId } = params;
+  const { itineraryId, name, location } = params;
 
   // State
   const [panelRef, setPanelRef] = useState<SlidingUpPanel | null>();
@@ -105,7 +107,7 @@ export const Itinerary: NavioScreen = observer(() => {
           <SlidingUpPanel containerStyle={styles.container} ref={c => setPanelRef(c)} draggableRange={{top: 350, bottom: 50}} snappingPoints={[50, 350]} friction={0.5}>
             <View style={{flex: 1, padding: 16}}>
               <View style={{paddingBottom: 16}}>
-                <Text section>Itinerary Name</Text>
+                <Text section>{name}</Text>
               </View>
               <ScrollView contentContainerStyle={{paddingBottom: 100}} showsVerticalScrollIndicator={false}>
                 
@@ -117,7 +119,7 @@ export const Itinerary: NavioScreen = observer(() => {
                     <View style={{flexDirection: 'row', gap: 8}}>
                       <LineProgressHead />
                       <View style={{marginBottom: 16}}>
-                        <Text section>In **Location**</Text>
+                        <Text section>In {location}</Text>
                       </View>
                     </View>
                     {activityList}
