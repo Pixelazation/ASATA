@@ -3,8 +3,7 @@ import { ScrollView, StyleSheet, TextInput, Alert, Modal, Linking, TouchableOpac
 import { Text, View, Colors, Button, Checkbox } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
-import { services, useServices } from "@app/services";
-import { useAppearance } from "@app/utils/hooks";
+import { useServices } from "@app/services";
 import { LocationSearchApi } from "@app/services/api/locationsearch";
 import { LocationDetailsApi } from "@app/services/api/locationdetails";
 
