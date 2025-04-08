@@ -5,20 +5,15 @@ import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
 import { useServices } from "@app/services";
 import { ItineraryTracker } from "../components/itinerary-tracker";
+import { Carousel } from "../components/carousel"; 
 import { BG_IMAGE } from "@app/assets";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {Icon, IconName} from '@app/components/icon';
-
-export type Params = {
-  type?: "push" | "show";
-  productId?: string;
-};
+import { Icon } from "@app/components/icon";
 
 export const Main: NavioScreen = observer(() => {
   const { navio } = useServices();
   const navigation = navio.useN();
 
-  // Start
   useEffect(() => {
     configureUI();
   }, []);
@@ -26,6 +21,18 @@ export const Main: NavioScreen = observer(() => {
   const configureUI = () => {
     navigation.setOptions({});
   };
+
+  const recommendationItems = [
+    { title: "Recommendation 1", image: BG_IMAGE },
+    { title: "Recommendation 2", image: BG_IMAGE },
+    { title: "Recommendation 3", image: BG_IMAGE },
+  ];
+
+  const promotionItems = [
+    { title: "Promotion 1", image: BG_IMAGE },
+    { title: "Promotion 2", image: BG_IMAGE },
+    { title: "Promotion 3", image: BG_IMAGE },
+  ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -52,43 +59,8 @@ export const Main: NavioScreen = observer(() => {
 
             <ItineraryTracker />
 
-            <Text style={styles.carouselTitle}>Explore new places...</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.carousel}>
-              <View style={styles.carouselItem}>
-                <ImageBackground source={BG_IMAGE} style={styles.carouselItemBackground}>
-                  <Text style={styles.carouselItemText}>Recommendation 1</Text>
-                </ImageBackground>
-              </View>
-              <View style={styles.carouselItem}>
-                <ImageBackground source={BG_IMAGE} style={styles.carouselItemBackground}>
-                  <Text style={styles.carouselItemText}>Recommendation 2</Text>
-                </ImageBackground>
-              </View>
-              <View style={styles.carouselItem}>
-                <ImageBackground source={BG_IMAGE} style={styles.carouselItemBackground}>
-                  <Text style={styles.carouselItemText}>Recommendation 3</Text>
-                </ImageBackground>
-              </View>
-            </ScrollView>
-            
-            <Text style={styles.carouselTitle}>Promotions</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.carousel}>
-              <View style={styles.carouselItem}>
-                <ImageBackground source={BG_IMAGE} style={styles.carouselItemBackground}>
-                  <Text style={styles.carouselItemText}>Promotion 1</Text>
-                </ImageBackground>
-              </View>
-              <View style={styles.carouselItem}>
-                <ImageBackground source={BG_IMAGE} style={styles.carouselItemBackground}>
-                  <Text style={styles.carouselItemText}>Promotion 2</Text>
-                </ImageBackground>
-              </View>
-              <View style={styles.carouselItem}>
-                <ImageBackground source={BG_IMAGE} style={styles.carouselItemBackground}>
-                  <Text style={styles.carouselItemText}>Promotion 3</Text>
-                </ImageBackground>
-              </View>
-            </ScrollView>
+            <Carousel title="Explore new places..." items={recommendationItems} />
+            <Carousel title="Promotions" items={promotionItems} />
           </View>
         </ScrollView>
       </ImageBackground>
@@ -113,8 +85,8 @@ const styles = StyleSheet.create({
   opaqueContainer: {
     flex: 1,
     backgroundColor: "rgba(255, 255, 255, 1)",
-    borderTopLeftRadius: 40, 
-    borderTopRightRadius: 40, 
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
     padding: 20,
     marginTop: 200,
   },
@@ -124,46 +96,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   iconButton: {
-    width: 56, 
-    height: 56, 
+    width: 56,
+    height: 56,
     marginHorizontal: 8,
     borderWidth: 1,
     borderColor: "black",
-    borderRadius: 8, 
-    backgroundColor: "white"
+    borderRadius: 8,
+    backgroundColor: "white",
   },
   icon: {
-    color: "black", 
-    fontSize: 32
-  },
-  carouselTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 10,
-  },
-  carousel: {
-    marginBottom: 20,
-  },
-  carouselItem: {
-    width: 150,
-    height: 150,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f0f0f0",
-    borderRadius: 10,
-    marginHorizontal: 32,
-  },
-  carouselItemBackground: {
-    width: 200,
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    overflow: "hidden",
-  },
-  carouselItemText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: "black",
+    fontSize: 32,
   },
 });
