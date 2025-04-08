@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {ScrollView, Modal, TouchableOpacity, StyleSheet} from 'react-native';
-import {Text, View, Colors, SegmentedControl} from 'react-native-ui-lib';
+import {Text, View, Colors} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 import {Section} from '@app/components/section';
@@ -10,33 +10,22 @@ import {useAppearance} from '@app/utils/hooks';
 import {Bounceable} from 'rn-bounceable';
 import {Icon, IconName} from '@app/components/icon';
 import {useStores} from '@app/stores';
-import {HeaderButton} from '@app/components/button';
-import {
-  appearances,
-  appearancesUI,
-  appearanceUIToInternal
-} from '@app/utils/types/enums';
-import {colors} from '@app/utils/designSystem';
-import {supabase} from '@app/lib/supabase';
 
 export const Settings: NavioScreen = observer(() => {
   useAppearance(); // for Dark Mode
-  const {t, navio} = useServices();
-  const navigation = navio.useN();
+  const {navio} = useServices();
   const {ui} = useStores();
   const [isModalVisible, setModalVisible] = useState(false);
 
   // State
-  const [appearance, setAppearance] = useState(ui.appearance);
+  const [appearance] = useState(ui.appearance);
 
   // Computed
   const unsavedChanges = ui.appearance !== appearance;
-  const appearanceInitialIndex = appearances.findIndex(it => it === appearance);
-  const appearanceSegments = appearancesUI.map(it => ({label: it}));
 
   // Methods
   const handleEditAccount = () => {
-    navigation.push('EditAccount');
+    navio.push('EditAccount');
   };
   const handleDeleteAccount = () => {
     setModalVisible(true);
@@ -55,14 +44,7 @@ export const Settings: NavioScreen = observer(() => {
   const handleRunTutorials = () => {
     console.log('Run Tutorials Pressed');
   };
-  const handleAppearanceIndexChange = (index: number) => {
-    setAppearance(appearanceUIToInternal[appearancesUI[index]]);
-  };
-  const handleSave = () => {
-    ui.setMany({
-      appearance,
-    });
-  };
+
   const accountActions: {title: string; icon: IconName; onPress: () => void}[] = [
     {
       title: 'Edit Account',
@@ -80,13 +62,6 @@ export const Settings: NavioScreen = observer(() => {
       onPress: handleLogout,
     },
   ];
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () =>
-        unsavedChanges ? <HeaderButton onPress={handleSave} label="Save" /> : null,
-    });
-  }, [unsavedChanges, appearance]);
 
   return (
     <View flex>
