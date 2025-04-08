@@ -10,7 +10,7 @@ export class UIStore implements IStore {
 
   // Appearance
   appearance: Appearance = 'light';
-  state: string | undefined;
+  state: string;
   get appearanceStr() {
     return appearanceToUI[this.appearance];
   }
@@ -19,7 +19,7 @@ export class UIStore implements IStore {
   // }
 
   // Language
-  language: Language = 'en';
+  language: Language = 'EN';
   get languageStr() {
     return languageToUI[this.language];
   }

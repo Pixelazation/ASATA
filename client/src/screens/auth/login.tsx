@@ -17,7 +17,7 @@ export type Props = {
 
 export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
   useAppearance(); // for Dark Mode
-  const {navio, api} = useServices();
+  const {t, navio, api} = useServices();
   const {auth} = useStores();
 
   // State
