@@ -9,6 +9,8 @@ import { useAppearance } from "@app/utils/hooks";
 import { ItineraryItem } from "../components/itineraryitem";
 import { ItineraryApi } from "@app/services/api/itineraries";
 import { IconButton } from "../components/iconbutton";
+import { colors } from '../utils/designSystem';
+import { FloatingActionButton } from '../components/atoms/floating-action-button';
 
 export type Params = {
   itineraryId?: string;
@@ -98,9 +100,10 @@ export const MyItineraries: NavioScreen = observer(() => {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <View style={styles.fabContainer}>
-        <IconButton name="add" color="white" onPress={addDummyItinerary} />
-      </View>
+      <FloatingActionButton
+        icon="add"
+        onPress={addDummyItinerary}
+      />
     </View>
   );
 });
@@ -117,21 +120,5 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     letterSpacing: 1.25
-  },
-  fabContainer: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: Colors.primary,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5, // Android shadow
   },
 });

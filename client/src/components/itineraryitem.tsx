@@ -45,7 +45,7 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
             </Text>
           </View>
           <Row style={styles.row}>
-            <IconButton name="pencil" onPress={() => navio.push('Itinerary', {itineraryId: id})}/>
+            <IconButton name="pencil" onPress={() => navio.push('Itinerary', {itineraryId: id, name: name, location: location})}/>
             <IconButton name="copy" />
             <IconButton name="trash" color={Colors.red30} onPress={onDelete} />
           </Row>
