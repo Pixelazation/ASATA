@@ -3,14 +3,10 @@ import {hydrateStore, makePersistable} from 'mobx-persist-store';
 import {Appearance, appearanceToUI, Language, languageToUI} from '@app/utils/types/enums';
 
 export class UIStore implements IStore {
-  logout() {
-    throw new Error('Method not implemented.');
-  }
   appLaunches = 0;
 
   // Appearance
   appearance: Appearance = 'light';
-  state: string;
   get appearanceStr() {
     return appearanceToUI[this.appearance];
   }
