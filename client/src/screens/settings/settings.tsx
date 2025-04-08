@@ -22,11 +22,16 @@ export const Settings: NavioScreen = observer(() => {
   const handleEditAccount = () => {
     navio.push('EditAccount');
   };
-
+  const handleLogout = async () => {
+    if (ui.state === 'logged-in') {
+      ui.logout();
+    } else {
+      navio.setRoot('stacks', 'AuthFlow');
+    }
+  };
   const handleRunTutorials = () => {
     console.log('Run Tutorials Pressed');
   };
-  
   const handleDeactivateAccount = async () => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
@@ -83,7 +88,7 @@ export const Settings: NavioScreen = observer(() => {
               <Bounceable onPress={action.onPress}>
                 <View padding-s3 br30 style={{backgroundColor:Colors.rgba(240, 240, 240, 1),}}>
                   <Row>
-                    <Icon name={action.icon as IconName} size={30}/>
+                    <Icon name={action.icon} size={30}/>
                     <View flex marginH-s3>
                       <Text text60R textColor>
                          {action.title}

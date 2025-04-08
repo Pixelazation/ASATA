@@ -15,19 +15,6 @@ export class ItineraryApi {
     return data;
   }
 
-  static async getActivities(itineraryId: string) {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) throw new Error("User not authenticated");
-
-    const { data, error } = await supabase
-      .from("Activities")
-      .select("*")
-      .eq("itinerary_id", itineraryId)
-      .order("start_time", { ascending: true });
-    if (error) throw error;
-    return data;
-  }
-
   /** ➕ Add a new itinerary for the logged-in user */
   static async addItinerary(itinerary: {
     title: string;
@@ -41,22 +28,6 @@ export class ItineraryApi {
     const { data, error } = await supabase
       .from("Itineraries")
       .insert([{ ...itinerary, user_id: user.id }]); // Attach user_id automatically
-
-    if (error) throw error;
-    return data;
-  }
-
-  /** ➕ Add a new itinerary for the logged-in user */
-  static async addActivity(
-    itineraryId: string, 
-    activity: ActivityType
-  ) {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) throw new Error("User not authenticated");
-
-    const { data, error } = await supabase
-      .from("Activities")
-      .insert([{ ...activity, itinerary_id: itineraryId }]);
 
     if (error) throw error;
     return data;
@@ -80,21 +51,6 @@ export class ItineraryApi {
         console.error("Error deleting itinerary from Supabase:", error);
         throw error;
     }
-  }
-
-  static async deleteActivity(
-    activityId: string
-  ) {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) throw new Error("User not authenticated");
-
-    const { data, error } = await supabase
-      .from("Activities")
-      .delete()
-      .eq("id", activityId);
-
-    if (error) throw error;
-    return data;
   }
   
 }
