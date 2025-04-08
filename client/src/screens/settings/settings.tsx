@@ -127,7 +127,7 @@ export const Settings: NavioScreen = observer(() => {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Are you sure?</Text>
-              <Text style={styles.modalMessage}>Do you really want to deactivate your account?</Text>
+              <Text style={styles.modalMessage}>Do you really want to delete your account?</Text>
               <View style={styles.modalButtons}>
                 <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
                   <Text style={styles.modalButtonText}>Cancel</Text>
