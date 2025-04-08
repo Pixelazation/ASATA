@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {ScrollView, Modal, TouchableOpacity, StyleSheet} from 'react-native';
-import {Text, View, Colors, SegmentedControl} from 'react-native-ui-lib';
+import {Text, View, Colors} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 import {Section} from '@app/components/section';
@@ -11,13 +11,8 @@ import {Bounceable} from 'rn-bounceable';
 import {Icon, IconName} from '@app/components/icon';
 import {useStores} from '@app/stores';
 import {HeaderButton} from '@app/components/button';
-import {
-  appearances,
-  appearancesUI,
-  appearanceUIToInternal
-} from '@app/utils/types/enums';
-import {colors} from '@app/utils/designSystem';
-import {supabase} from '@app/lib/supabase';
+import {appearances, appearancesUI, appearanceUIToInternal} from '@app/utils/types/enums';
+import {useAccountActions} from '../../utils/accountActions';
 
 export const Settings: NavioScreen = observer(() => {
   useAppearance(); // for Dark Mode
@@ -35,51 +30,26 @@ export const Settings: NavioScreen = observer(() => {
   const appearanceSegments = appearancesUI.map(it => ({label: it}));
 
   // Methods
-  const handleEditAccount = () => {
-    navigation.push('EditAccount');
-  };
-  const handleDeleteAccount = () => {
-    setModalVisible(true);
-  };
   const confirmDeleteAccount = () => {
     console.log('Account deleted');
     setModalVisible(false);
   };
-  const handleLogout = async () => {
-    if (ui.state === 'logged-in') {
-      ui.logout();
-    } else {
-      navio.setRoot('stacks', 'AuthFlow');
-    }
-  };
+
   const handleRunTutorials = () => {
     console.log('Run Tutorials Pressed');
   };
+
   const handleAppearanceIndexChange = (index: number) => {
     setAppearance(appearanceUIToInternal[appearancesUI[index]]);
   };
+
   const handleSave = () => {
     ui.setMany({
       appearance,
     });
   };
-  const accountActions: {title: string; icon: IconName; onPress: () => void}[] = [
-    {
-      title: 'Edit Account',
-      icon: 'create-outline', // Use a valid icon name
-      onPress: handleEditAccount,
-    },
-    {
-      title: 'Delete Account',
-      icon: 'trash-outline', // Use a valid icon name
-      onPress: handleDeleteAccount,
-    },
-    {
-      title: 'Logout',
-      icon: 'log-out-outline', // Use a valid icon name
-      onPress: handleLogout,
-    },
-  ];
+
+  const accountActions = useAccountActions();
 
   useEffect(() => {
     navigation.setOptions({
@@ -94,11 +64,11 @@ export const Settings: NavioScreen = observer(() => {
         <Section title={'My Account'}>
           {accountActions.map(action => (
             <View key={action.title} marginV-s1>
-              <Bounceable onPress={action.onPress}>
+              <Bounceable onPress={() => action.onPress(setModalVisible)}>
                 {/*Color might change*/}
                 <View padding-s3 br30 style={{backgroundColor:Colors.rgba(240, 240, 240, 1),}}>
                   <Row>
-                    <Icon name={action.icon} size={30}/>
+                    <Icon name={action.icon as IconName} size={30}/>
                     <View flex marginH-s3>
                       <Text text60R textColor>
                          {action.title}
@@ -134,40 +104,21 @@ export const Settings: NavioScreen = observer(() => {
           animationType="slide"
           onRequestClose={() => setModalVisible(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Are you sure?</Text>
-              <Text style={styles.modalMessage}>Do you really want to delete your account?</Text>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
-                  <Text style={styles.modalButtonText}>Cancel</Text>
+          <View style={modalStyles.modalContainer}>
+            <View style={modalStyles.modalContent}>
+              <Text style={modalStyles.modalTitle}>Are you sure?</Text>
+              <Text style={modalStyles.modalMessage}>Do you really want to delete your account?</Text>
+              <View style={modalStyles.modalButtons}>
+                <TouchableOpacity onPress={() => setModalVisible(false)} style={modalStyles.modalButton}>
+                  <Text style={modalStyles.modalButtonText}>Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={confirmDeleteAccount} style={styles.modalButton}>
-                  <Text style={styles.modalButtonText}>Delete</Text>
+                <TouchableOpacity onPress={confirmDeleteAccount} style={modalStyles.modalButton}>
+                  <Text style={modalStyles.modalButtonText}>Delete</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
         </Modal>
-        {/* <Section title={'UI'}>
-          <View paddingV-s1>
-            <Row>
-              <View flex>
-                <Text textColor>
-                  Appearance
-                </Text>
-              </View>
-              <SegmentedControl
-                initialIndex={appearanceInitialIndex}
-                segments={appearanceSegments}
-                backgroundColor={Colors.bgColor}
-                activeColor={Colors.primary}
-                inactiveColor={Colors.textColor}
-                onChangeIndex={handleAppearanceIndexChange}
-              />
-            </Row>
-          </View>
-        </Section> */}
       </ScrollView>
     </View>
   );
@@ -177,8 +128,7 @@ Settings.options = props => ({
   title: 'Settings',
 });
 
-//Modal style... might be moved for modularization
-const styles = StyleSheet.create({
+export const modalStyles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
