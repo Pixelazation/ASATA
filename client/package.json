@@ -70,7 +70,6 @@
     "react-native-web": "~0.19.6",
     "rn-bounceable": "^1.2.0",
     "rn-navio": "^0.1.0",
-    "rn-sliding-up-panel": "^2.4.6",
     "yup": "^1.0.2"
   },
   "devDependencies": {

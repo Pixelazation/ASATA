@@ -8,7 +8,8 @@ import {PickerFixed} from '@app/components/picker-fixed';
 
 export const EditAccount: NavioScreen = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [password] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
@@ -17,8 +18,12 @@ export const EditAccount: NavioScreen = () => {
   const [loading, setLoading] = useState(true);
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [currentField, setCurrentField] = useState('');
   const [currentValue, setCurrentValue] = useState('');
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -58,63 +63,31 @@ export const EditAccount: NavioScreen = () => {
 
   const handleModalSave = async () => {
     console.log('Saving modal data for field:', currentField, 'with value:', currentValue);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      let updateData = {};
-      switch (currentField) {
-        case 'Email':
-          setEmail(currentValue);
-          updateData = { email: currentValue };
-          // Update email in authentication table
-          const { error: authError } = await supabase.auth.updateUser({
-            email: currentValue,
-          });
-          if (authError) {
-            console.error('Error updating email in authentication table:', authError);
-            return;
-          }
-          break;
-        case 'Password':
-          setPassword(currentValue);
-          // Assuming password is stored in a different table or handled differently
-          break;
-        case 'First Name':
-          setFirstName(currentValue);
-          updateData = { first_name: currentValue };
-          break;
-        case 'Last Name':
-          setLastName(currentValue);
-          updateData = { last_name: currentValue };
-          break;
-        case 'Birth Date':
-          setDateOfBirth(currentValue);
-          updateData = { birthdate: currentValue };
-          break;
-        case 'Gender':
-          setGender(currentValue);
-          updateData = { gender: currentValue };
-          break;
-        case 'Phone Number':
-          setPhoneNumber(currentValue);
-          updateData = { mobile_number: currentValue };
-          break;
-        default:
-          break;
-      }
-
-      if (Object.keys(updateData).length > 0) {
-        const { error } = await supabase
-          .from('UserDetails')
-          .update(updateData)
-          .eq('user_id', user.id);
-
-        if (error) {
-          console.error('Error updating user data:', error);
-        } else {
-          console.log('Field updated successfully:', updateData);
-        }
-      }
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Error fetching user:', authError);
+      return;
     }
+
+    if (currentField === 'Password') {
+      if (currentValue !== confirmPassword) {
+        setErrorMessage('Passwords do not match.');
+        setErrorModalVisible(true);
+        return;
+      }
+
+      const { error: passwordError } = await supabase.auth.updateUser({
+        password: currentValue,
+      });
+      if (passwordError) {
+        console.error('Error updating password in authentication table:', passwordError);
+        return;
+      }
+      console.log('Password updated successfully in authentication table');
+      setSuccessMessage('Your password has been updated successfully.');
+      setSuccessModalVisible(true);
+    }
+
     setModalVisible(false);
   };
 
@@ -173,7 +146,24 @@ export const EditAccount: NavioScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Edit {currentField}</Text>
-            {currentField === 'Birth Date' ? (
+            {currentField === 'Password' ? (
+              <>
+                <TextInput
+                  style={styles.input}
+                  value={currentValue}
+                  onChangeText={setCurrentValue}
+                  placeholder="Enter new password"
+                  secureTextEntry={true}
+                />
+                <TextInput
+                  style={styles.input}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Confirm new password"
+                  secureTextEntry={true}
+                />
+              </>
+            ) : currentField === 'Birth Date' ? (
               <DateTimePicker
                 accent
                 fieldStyle={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
@@ -191,8 +181,7 @@ export const EditAccount: NavioScreen = () => {
                   value={currentValue}
                   placeholder='Gender'
                   onValueChange={setCurrentValue}
-                  items={['Male', 'Female', 'Other', 'Prefer not to say']} label={''}
-              />
+                  items={['Male', 'Female', 'Other', 'Prefer not to say']} label={''}/>
             ) : (
               <TextInput
                 style={styles.input}
@@ -206,6 +195,34 @@ export const EditAccount: NavioScreen = () => {
               <Button title="Cancel" onPress={() => setModalVisible(false)} />
               <Button title="Save" onPress={handleModalSave} />
             </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        transparent={true}
+        visible={errorModalVisible}
+        animationType="fade"
+        onRequestClose={() => setErrorModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Error</Text>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+            <Button title="Close" onPress={() => setErrorModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        transparent={true}
+        visible={successModalVisible}
+        animationType="fade"
+        onRequestClose={() => setSuccessModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Success</Text>
+            <Text style={styles.successMessage}>{successMessage}</Text>
+            <Button title="Close" onPress={() => setSuccessModalVisible(false)} />
           </View>
         </View>
       </Modal>
@@ -239,7 +256,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width: 180,
+    width: 200,
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 16,
@@ -268,5 +285,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     marginTop: 10,
+  },
+  errorMessage: {
+    color: 'red',
+    marginBottom: 10,
+  },
+  successMessage: {
+    color: 'green',
+    marginBottom: 10,
   },
 });

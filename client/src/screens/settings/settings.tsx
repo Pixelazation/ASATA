@@ -10,29 +10,17 @@ import {useAppearance} from '@app/utils/hooks';
 import {Bounceable} from 'rn-bounceable';
 import {Icon, IconName} from '@app/components/icon';
 import {useStores} from '@app/stores';
+import { supabase } from '@app/lib/supabase';
 
 export const Settings: NavioScreen = observer(() => {
-  useAppearance(); // for Dark Mode
+  useAppearance(); 
   const {navio} = useServices();
   const {ui} = useStores();
   const [isModalVisible, setModalVisible] = useState(false);
 
-  // State
-  const [appearance] = useState(ui.appearance);
-
-  // Computed
-  const unsavedChanges = ui.appearance !== appearance;
-
   // Methods
   const handleEditAccount = () => {
     navio.push('EditAccount');
-  };
-  const handleDeleteAccount = () => {
-    setModalVisible(true);
-  };
-  const confirmDeleteAccount = () => {
-    console.log('Account deleted');
-    setModalVisible(false);
   };
   const handleLogout = async () => {
     if (ui.state === 'logged-in') {
@@ -44,21 +32,49 @@ export const Settings: NavioScreen = observer(() => {
   const handleRunTutorials = () => {
     console.log('Run Tutorials Pressed');
   };
-
-  const accountActions: {title: string; icon: IconName; onPress: () => void}[] = [
+  const handleDeactivateAccount = async () => {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Error fetching user:', authError);
+      return;
+    }
+  
+    try {
+      const { error } = await supabase
+        .from('UserDetails')
+        .update({ activity_status: false })
+        .eq('user_id', user.id);
+  
+      if (error) {
+        console.error('Error deactivating account:', error);
+        return;
+      }
+  
+      console.log('Account deactivated successfully');
+      setModalVisible(false);
+      if (ui.state === 'logged-in') {
+        ui.logout();
+      } else {
+        navio.setRoot('stacks', 'AuthFlow');
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+    }
+  };
+  const accountActions: { title: string; icon: IconName; onPress: () => void }[] = [
     {
       title: 'Edit Account',
-      icon: 'create-outline', // Use a valid icon name
+      icon: 'create-outline',
       onPress: handleEditAccount,
     },
     {
-      title: 'Delete Account',
-      icon: 'trash-outline', // Use a valid icon name
-      onPress: handleDeleteAccount,
+      title: 'Deactivate Account',
+      icon: 'power-outline', // Updated icon
+      onPress: () => setModalVisible(true), // Show confirmation modal
     },
     {
       title: 'Logout',
-      icon: 'log-out-outline', // Use a valid icon name
+      icon: 'log-out-outline',
       onPress: handleLogout,
     },
   ];
@@ -70,7 +86,6 @@ export const Settings: NavioScreen = observer(() => {
           {accountActions.map(action => (
             <View key={action.title} marginV-s1>
               <Bounceable onPress={action.onPress}>
-                {/*Color might change*/}
                 <View padding-s3 br30 style={{backgroundColor:Colors.rgba(240, 240, 240, 1),}}>
                   <Row>
                     <Icon name={action.icon} size={30}/>
@@ -117,32 +132,13 @@ export const Settings: NavioScreen = observer(() => {
                 <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
                   <Text style={styles.modalButtonText}>Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={confirmDeleteAccount} style={styles.modalButton}>
-                  <Text style={styles.modalButtonText}>Delete</Text>
+                <TouchableOpacity onPress={handleDeactivateAccount} style={styles.modalButton}>
+                  <Text style={styles.modalButtonText}>Deactivate</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
         </Modal>
-        {/* <Section title={'UI'}>
-          <View paddingV-s1>
-            <Row>
-              <View flex>
-                <Text textColor>
-                  Appearance
-                </Text>
-              </View>
-              <SegmentedControl
-                initialIndex={appearanceInitialIndex}
-                segments={appearanceSegments}
-                backgroundColor={Colors.bgColor}
-                activeColor={Colors.primary}
-                inactiveColor={Colors.textColor}
-                onChangeIndex={handleAppearanceIndexChange}
-              />
-            </Row>
-          </View>
-        </Section> */}
       </ScrollView>
     </View>
   );
@@ -152,7 +148,6 @@ Settings.options = props => ({
   title: 'Settings',
 });
 
-//Modal style... might be moved for modularization
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
