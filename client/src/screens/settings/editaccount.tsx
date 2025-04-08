@@ -26,32 +26,27 @@ export const EditAccount: NavioScreen = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) throw new Error("User not authenticated");
-      const { data, error } = await supabase
-        .from('UserDetails')
-        .select('email, first_name, last_name, birthdate, gender, mobile_number')
-        .eq('user_id', user.id)  
-        .limit(1)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user data:', error);
-      } else if (!data) {
-        console.error('No user data found');
-      } else {
+    const fetchData = async () => {
+      try {
+        const data = await fetchUserData();
         setEmail(data.email);
         setFirstName(data.first_name);
         setLastName(data.last_name);
         setDateOfBirth(data.birthdate);
         setGender(data.gender);
         setPhoneNumber(data.mobile_number);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(error.message);
+        } else {
+          console.error('An unknown error occurred:', error);
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    fetchUserData();
+    fetchData();
   }, []);
 
   const openModal = (field: React.SetStateAction<string>, value: React.SetStateAction<string>) => {
@@ -234,7 +229,7 @@ EditAccount.options = {
   title: 'Edit Account',
 };
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
