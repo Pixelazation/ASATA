@@ -15,6 +15,7 @@ import { LineProgressHead } from '../components/atoms/line-progress-head';
 import { IconButton } from '../components/iconbutton';
 import { FloatingActionButton } from '../components/atoms/floating-action-button';
 import { ItineraryApi } from '../services/api/itineraries';
+import { FloatingActionMenu } from '../components/molecules/floating-action-menu';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -148,16 +149,18 @@ export const Itinerary: NavioScreen = observer(() => {
         </View>
       </ImageBackground>
 
-      <FloatingActionButton
-        icon={editMode ? 'add' : 'location'}
-        onPress={() => {
-          if (editMode) {
-            addDummyActivity();
-          } else {
-            panelRef?.hide();
-          }
-        }}
-      />
+      {editMode ? (
+        <FloatingActionMenu 
+          icon='add'
+          onPress1={addDummyActivity}
+          onPress2={addDummyActivity}
+        />
+      ) : (
+        <FloatingActionButton
+          icon={'location'}
+          onPress={panelRef?.hide}
+        />
+      )}
     </SafeAreaView>
   );
 });
