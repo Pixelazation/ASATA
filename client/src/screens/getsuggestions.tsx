@@ -336,26 +336,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   optionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
-  },
-  optionBox: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#d4edda', // light green by default
-  },
-  optionBoxSelected: {
-    backgroundColor: '#155724', // dark green when selected
-  },
-  optionText: {
-    fontSize: 14,
-    color: '#155724', // dark green text by default
-  },
-  optionTextSelected: {
-    color: 'white', // white text when selected
-  },  
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  gap: 10,
+  marginBottom: 20,
+},
+optionBox: {
+  paddingHorizontal: 12,
+  paddingVertical: 8,
+  borderRadius: 20,
+  backgroundColor: '#d4edda', // light green by default
+},
+optionBoxSelected: {
+  backgroundColor: '#155724', // dark green when selected
+},
+optionText: {
+  fontSize: 14,
+  color: '#155724', // dark green text by default
+},
+optionTextSelected: {
+  color: 'white', // white text when selected
+},
+
 });
 
