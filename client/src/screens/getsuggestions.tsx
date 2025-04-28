@@ -140,15 +140,43 @@ export const GetSuggestions: NavioScreen = observer(() => {
         <ScrollView contentInsetAdjustmentBehavior="always">
           <Text text50 marginB-s2>Get Suggestions</Text>
 
-          <Picker
-            selectedValue={selectedOption}
-            onValueChange={(itemValue) => setSelectedOption(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Select Category" value="" />
-            <Picker.Item label="Recreation" value="recreation" />
-            <Picker.Item label="Diner" value="diner" />
-          </Picker>
+          <View style={styles.categoryContainer}>
+            <TouchableOpacity
+              style={[
+                styles.categoryBox,
+                selectedOption === "accommodation" && styles.categoryBoxSelected
+              ]}
+              onPress={() => {}} // Accommodation not functional yet
+              activeOpacity={0.8}
+            >
+              <Text style={styles.categoryIcon}>🏨</Text>
+              <Text style={styles.categoryLabel}>Accommodation</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.categoryBox,
+                selectedOption === "recreation" && styles.categoryBoxSelected
+              ]}
+              onPress={() => setSelectedOption("recreation")}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.categoryIcon}>🏖️</Text>
+              <Text style={styles.categoryLabel}>Recreation</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.categoryBox,
+                selectedOption === "diner" && styles.categoryBoxSelected
+              ]}
+              onPress={() => setSelectedOption("diner")}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.categoryIcon}>🍽️</Text>
+              <Text style={styles.categoryLabel}>Diner</Text>
+            </TouchableOpacity>
+          </View>
 
           {selectedOption === "recreation" && (
             <View>
@@ -253,6 +281,35 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 15,
     backgroundColor: "#fff",
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  categoryBox: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  categoryBoxSelected: {
+    backgroundColor: '#d1e7ff', // light blue when selected
+  },
+  categoryIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  categoryLabel: {
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 
