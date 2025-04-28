@@ -181,28 +181,52 @@ export const GetSuggestions: NavioScreen = observer(() => {
           {selectedOption === "recreation" && (
             <View>
               <Text text60 marginB-s2>Choose Recreation Types</Text>
-              {recreationOptions.map(option => (
-                <Checkbox
-                  key={option}
-                  label={option}
-                  value={selectedRecreation.includes(option)}
-                  onValueChange={() => toggleSelection(option, "recreation")}
-                />
-              ))}
+              <View style={styles.optionsContainer}>
+                {recreationOptions.map(option => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionBox,
+                      selectedRecreation.includes(option) && styles.optionBoxSelected
+                    ]}
+                    onPress={() => toggleSelection(option, "recreation")}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[
+                      styles.optionText,
+                      selectedRecreation.includes(option) && styles.optionTextSelected
+                    ]}>
+                      {option}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           )}
 
           {selectedOption === "diner" && (
             <View>
               <Text text60 marginB-s2>Choose Diner Types</Text>
-              {dinerOptions.map(option => (
-                <Checkbox
-                  key={option}
-                  label={option}
-                  value={selectedDiner.includes(option)}
-                  onValueChange={() => toggleSelection(option, "diner")}
-                />
-              ))}
+              <View style={styles.optionsContainer}>
+                {dinerOptions.map(option => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionBox,
+                      selectedDiner.includes(option) && styles.optionBoxSelected
+                    ]}
+                    onPress={() => toggleSelection(option, "diner")}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[
+                      styles.optionText,
+                      selectedDiner.includes(option) && styles.optionTextSelected
+                    ]}>
+                      {option}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           )}
 
@@ -311,5 +335,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  optionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 20,
+  },
+  optionBox: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#d4edda', // light green by default
+  },
+  optionBoxSelected: {
+    backgroundColor: '#155724', // dark green when selected
+  },
+  optionText: {
+    fontSize: 14,
+    color: '#155724', // dark green text by default
+  },
+  optionTextSelected: {
+    color: 'white', // white text when selected
+  },  
 });
 
