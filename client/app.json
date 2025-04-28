@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "Expo Starter",
+    "owner": "team-kyot",
     "slug": "expo-starter",
     "version": "1.0.0",
     "orientation": "portrait",

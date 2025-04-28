@@ -9,6 +9,7 @@ type Props = {
   placeholder?: string;
   value?: string;
   onChangeText?: (text: string) => void;
+  onBlur?: (e: any) => void;
   keyboardType?: KeyboardTypeOptions;
   inputMode?: InputModeOptions;
   secureTextEntry?: boolean;
