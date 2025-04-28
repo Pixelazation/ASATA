@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   searchBarContainer: {
     position: 'absolute',
-    top: 50,
+    top: 10,
     left: 20,
     right: 20,
     zIndex: 10,
