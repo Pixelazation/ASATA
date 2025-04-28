@@ -125,16 +125,20 @@ export const GetSuggestions: NavioScreen = observer(() => {
         )}
       </MapView>
 
+      {/* Floating Search Bar */}
+      <View style={styles.searchBarContainer}>
+        <TextInput
+          placeholder="Search Location"
+          value={location}
+          onChangeText={handleLocationChange}
+          style={styles.searchBar}
+        />
+      </View>
+
+      {/* Sliding Panel */}
       <View style={styles.slidingPanel}>
         <ScrollView contentInsetAdjustmentBehavior="always">
           <Text text50 marginB-s2>Get Suggestions</Text>
-
-          <TextInput
-            placeholder="Location"
-            value={location}
-            onChangeText={handleLocationChange}
-            style={styles.textInput}
-          />
 
           <Picker
             selectedValue={selectedOption}
@@ -211,6 +215,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  searchBarContainer: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    right: 20,
+    zIndex: 10,
+  },
+  searchBar: {
+    backgroundColor: 'white',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    fontSize: 16,
+  },
   slidingPanel: {
     flex: 1,
     backgroundColor: "rgba(255, 255, 255, 1)",
@@ -218,14 +241,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 40,
     padding: 20,
     marginTop: 200,
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-    backgroundColor: 'white',
   },
   picker: {
     marginBottom: 10,
@@ -240,3 +255,4 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 });
+
