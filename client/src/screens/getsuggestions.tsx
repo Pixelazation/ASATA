@@ -117,10 +117,10 @@ export const GetSuggestions: NavioScreen = observer(() => {
         provider={PROVIDER_DEFAULT}
         style={StyleSheet.absoluteFillObject}
         initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitude: 10.321684,
+          longitude: 123.898671,
+          latitudeDelta: 0.1922,
+          longitudeDelta: 0.1421,
         }}
         onPress={handleMapPress}
       >
