@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Button, ImageBackground, ScrollView, StyleSheet} from 'react-native';
 import {Gradient, Text, View} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
@@ -15,6 +15,8 @@ import { LineProgressHead } from '../components/atoms/line-progress-head';
 import { IconButton } from '../components/iconbutton';
 import { FloatingActionButton } from '../components/atoms/floating-action-button';
 import { ItineraryApi } from '../services/api/itineraries';
+import { FloatingActionMenu } from '../components/molecules/floating-action-menu';
+import { useFocusEffect } from '@react-navigation/native';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -86,9 +88,15 @@ export const Itinerary: NavioScreen = observer(() => {
 
   // Start
   useEffect(() => {
-    configureUI();
-    fetchActivities(); // Fetch data on mount
+     // Fetch data on mount
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      configureUI();
+      fetchActivities()
+    }, [])
+  );
 
   // UI Methods
   const configureUI = () => {
@@ -148,16 +156,18 @@ export const Itinerary: NavioScreen = observer(() => {
         </View>
       </ImageBackground>
 
-      <FloatingActionButton
-        icon={editMode ? 'add' : 'location'}
-        onPress={() => {
-          if (editMode) {
-            addDummyActivity();
-          } else {
-            panelRef?.hide();
-          }
-        }}
-      />
+      {editMode ? (
+        <FloatingActionMenu 
+          icon='add'
+          onPress1={addDummyActivity}
+          onPress2={() => navio.push('ActivityForm', {itineraryId: itineraryId})}
+        />
+      ) : (
+        <FloatingActionButton
+          icon={'location'}
+          onPress={panelRef?.hide}
+        />
+      )}
     </SafeAreaView>
   );
 });

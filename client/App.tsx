@@ -22,6 +22,7 @@ import {useAppearance} from '@app/utils/hooks';
 LogBox.ignoreLogs([
   'Require',
   'Found screens with the same name nested inside one another.', // for navio in some cases
+  "The new TextField implementation does not support the 'expandable' prop",
 ]);
 
 export default (): JSX.Element => {
