@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
+import { Alert, ScrollView } from 'react-native';
 import { DateTimePicker, Text, View } from 'react-native-ui-lib';
 import { observer } from 'mobx-react';
 import { NavioScreen } from 'rn-navio';
@@ -52,7 +52,29 @@ export const ActivityForm: NavioScreen = observer(() => {
       console.log(newActivity);
       navio.goBack();
     } catch (error) {
-      console.error("Error adding activity:", error);
+      const err = error as { message?: string };
+    
+      console.error("Error adding activity:", err);
+    
+      if (err.message?.includes("overlaps")) {
+        Alert.alert(
+          "Activity Overlap",
+          "This activity overlaps with an existing one. Please choose a different time/date.",
+          [{ text: "OK" }]
+        );
+      } else if (err.message?.includes("dates")) {
+        Alert.alert(
+          "Activity Overlap",
+          "Activity must be within the itinerary dates. Please choose a different time/date.",
+          [{ text: "OK" }]
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          "An unexpected error occurred while adding the activity.",
+          [{ text: "OK" }]
+        );
+      }
     }
   };
 

@@ -46,21 +46,54 @@ export class ItineraryApi {
     return data;
   }
 
-  /** ➕ Add a new itinerary for the logged-in user */
-  static async addActivity(
-    itineraryId: string, 
-    activity: ActivityType
-  ) {
+  /** ➕ Add a new activity for the logged-in user */
+  static async addActivity(itineraryId: string, activity: ActivityType) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
+  
+    // 1. Reuse existing getActivities
+    const existingActivities = await ItineraryApi.getActivities(itineraryId);
+  
+     // 2. Fetch itinerary to get start_date and end_date
+    const { data: itineraryData, error: itineraryError } = await supabase
+      .from("Itineraries")
+      .select("start_date, end_date")
+      .eq("id", itineraryId)
+      .single(); // only 1 itinerary expected
 
+    if (itineraryError || !itineraryData) throw new Error("Failed to fetch itinerary dates.");
+
+    const itineraryStart = new Date(itineraryData.start_date).getTime();
+    const itineraryEnd = new Date(itineraryData.end_date).getTime();
+
+    const newStart = new Date(activity.start_time).getTime();
+    const newEnd = new Date(activity.end_time).getTime();
+
+    // 3. Check if activity is within itinerary dates
+    if (newStart < itineraryStart || newStart > itineraryEnd || newEnd < itineraryStart || newEnd > itineraryEnd) {
+      throw new Error("Activity must be within the itinerary dates.");
+    }
+  
+    const hasOverlap = existingActivities.some(existing => {
+      const existingStart = new Date(existing.start_time).getTime();
+      const existingEnd = new Date(existing.end_time).getTime();
+      
+      return (newStart <= existingEnd && newStart >= existingStart) || (newEnd <= existingEnd && newEnd >= existingStart);
+    });
+  
+    if (hasOverlap) {
+      throw new Error("New activity overlaps with an existing activity.");
+    }
+  
+    // 3. No overlap, insert
     const { data, error } = await supabase
       .from("Activities")
       .insert([{ ...activity, itinerary_id: itineraryId }]);
-
+  
     if (error) throw error;
     return data;
   }
+  
 
   /** ✏️ Update an existing itinerary */
   static async updateItinerary(id: string, updates: Partial<any>) {
