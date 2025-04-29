@@ -1,15 +1,30 @@
-import React, { useState } from "react";
-import { ScrollView, TextInput, Alert, Linking, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ScrollView,
+  TextInput,
+  Alert,
+  Linking,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Animated,
+  Dimensions,
+  PanResponder,
+} from "react-native";
 import { Text, View, Button } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
-import { services, useServices } from "@app/services";
+import { useServices } from "@app/services";
 import { useAppearance } from "@app/utils/hooks";
 import { LocationSearchApi } from "@app/services/api/locationsearch";
 import { LocationDetailsApi } from "@app/services/api/locationdetails";
-import { LocationPhotosApi } from "@app/services/api/location-photos"; // <-- Import LocationPhotosApi
+import { LocationPhotosApi } from "@app/services/api/location-photos";
 import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const PANEL_MIN_HEIGHT = 200;
+const PANEL_MAX_HEIGHT = SCREEN_HEIGHT - 100;
 
 type Location = {
   latitude: number;
@@ -18,7 +33,7 @@ type Location = {
 
 export const GetSuggestions: NavioScreen = observer(() => {
   useAppearance();
-  const { t, navio } = useServices();
+  const { navio } = useServices();
 
   const [location, setLocation] = useState("");
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -48,11 +63,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
     setLoading(true);
     try {
       let category = "";
-      if (selectedOption === "recreation") {
-        category = "attractions";
-      } else if (selectedOption === "diner") {
-        category = "restaurants";
-      }
+      if (selectedOption === "recreation") category = "attractions";
+      else if (selectedOption === "diner") category = "restaurants";
 
       let query = location;
 
@@ -73,7 +85,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
         results.map(async (item: any) => {
           try {
             const details = await LocationDetailsApi.getDetails(Number(item.location_id));
-            const photosData = await LocationPhotosApi.getPhotos(Number(item.location_id), 1); // get 1 photo
+            const photosData = await LocationPhotosApi.getPhotos(Number(item.location_id), 1);
             const firstPhoto = photosData?.data?.[0]?.images?.medium?.url ?? null;
 
             return {
@@ -111,6 +123,28 @@ export const GetSuggestions: NavioScreen = observer(() => {
     setSelectedLocation(null);
   };
 
+  const animatedY = useRef(new Animated.Value(PANEL_MIN_HEIGHT)).current;
+  const currentY = useRef(PANEL_MIN_HEIGHT); // manually track current value
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (e, gesture) => {
+        const newValue = Math.max(
+          PANEL_MIN_HEIGHT,
+          Math.min(PANEL_MAX_HEIGHT, currentY.current - gesture.dy)
+        );
+        animatedY.setValue(newValue);
+      },
+      onPanResponderRelease: (e, gesture) => {
+        currentY.current = Math.max(
+          PANEL_MIN_HEIGHT,
+          Math.min(PANEL_MAX_HEIGHT, currentY.current - gesture.dy)
+        );
+      },
+    })
+  ).current;
+
   return (
     <View style={styles.container}>
       <MapView
@@ -125,10 +159,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
         onPress={handleMapPress}
       >
         {selectedLocation && (
-          <Marker
-            coordinate={selectedLocation}
-            title="Selected Location"
-          />
+          <Marker coordinate={selectedLocation} title="Selected Location" />
         )}
       </MapView>
 
@@ -142,15 +173,18 @@ export const GetSuggestions: NavioScreen = observer(() => {
         />
       </View>
 
-      {/* Sliding Panel */}
-      <View style={styles.slidingPanel}>
-        <ScrollView contentInsetAdjustmentBehavior="always">
+      {/* Draggable Sliding Panel */}
+      <Animated.View
+        style={[styles.slidingPanel, { height: animatedY }]}
+        {...panResponder.panHandlers}
+      >
+        <View>
           <Text text50 marginB-s2>Get Suggestions</Text>
 
           <View style={styles.categoryContainer}>
             <TouchableOpacity
               style={[styles.categoryBox, selectedOption === "accommodation" && styles.categoryBoxSelected]}
-              onPress={() => {}} // Accommodation not functional yet
+              onPress={() => {}}
               activeOpacity={0.8}
             >
               <Text style={styles.categoryIcon}>🏨</Text>
@@ -176,7 +210,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
             </TouchableOpacity>
           </View>
 
-          {/* Recreation Options */}
           {selectedOption === "recreation" && (
             <View>
               <Text text60 marginB-s2>Choose Recreation Types</Text>
@@ -186,15 +219,16 @@ export const GetSuggestions: NavioScreen = observer(() => {
                     key={option}
                     style={[
                       styles.optionBox,
-                      selectedRecreation.includes(option) && styles.optionBoxSelected
+                      selectedRecreation.includes(option) && styles.optionBoxSelected,
                     ]}
                     onPress={() => toggleSelection(option, "recreation")}
-                    activeOpacity={0.8}
                   >
-                    <Text style={[
-                      styles.optionText,
-                      selectedRecreation.includes(option) && styles.optionTextSelected
-                    ]}>
+                    <Text
+                      style={[
+                        styles.optionText,
+                        selectedRecreation.includes(option) && styles.optionTextSelected,
+                      ]}
+                    >
                       {option}
                     </Text>
                   </TouchableOpacity>
@@ -203,7 +237,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
             </View>
           )}
 
-          {/* Diner Options */}
           {selectedOption === "diner" && (
             <View>
               <Text text60 marginB-s2>Choose Diner Types</Text>
@@ -213,15 +246,16 @@ export const GetSuggestions: NavioScreen = observer(() => {
                     key={option}
                     style={[
                       styles.optionBox,
-                      selectedDiner.includes(option) && styles.optionBoxSelected
+                      selectedDiner.includes(option) && styles.optionBoxSelected,
                     ]}
                     onPress={() => toggleSelection(option, "diner")}
-                    activeOpacity={0.8}
                   >
-                    <Text style={[
-                      styles.optionText,
-                      selectedDiner.includes(option) && styles.optionTextSelected
-                    ]}>
+                    <Text
+                      style={[
+                        styles.optionText,
+                        selectedDiner.includes(option) && styles.optionTextSelected,
+                      ]}
+                    >
                       {option}
                     </Text>
                   </TouchableOpacity>
@@ -232,26 +266,17 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
           <Button label="Get Suggestions" onPress={fetchSuggestions} marginB-s2 disabled={loading} />
 
-          {/* Suggestions List */}
           {loading ? (
             <Text text70M>Loading suggestions...</Text>
           ) : (
             suggestions.map((item, index) => (
               <TouchableOpacity
                 key={index}
-                onPress={() => {
-                  if (item.web_url) {
-                    Linking.openURL(item.web_url);
-                  }
-                }}
+                onPress={() => item.web_url && Linking.openURL(item.web_url)}
                 style={styles.suggestionCard}
               >
                 {item.photoUrl && (
-                  <Image
-                    source={{ uri: item.photoUrl }}
-                    style={styles.suggestionImage}
-                    resizeMode="cover"
-                  />
+                  <Image source={{ uri: item.photoUrl }} style={styles.suggestionImage} />
                 )}
                 <Text text60BO marginT-s2 marginB-s1>{item.name}</Text>
                 <Text text70 marginB-s1>{item.address_obj?.address_string || "No address available"}</Text>
@@ -261,8 +286,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
               </TouchableOpacity>
             ))
           )}
-        </ScrollView>
-      </View>
+        </View>
+      </Animated.View>
     </View>
   );
 });
@@ -272,35 +297,78 @@ GetSuggestions.options = {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   searchBarContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     left: 20,
     right: 20,
     zIndex: 10,
   },
   searchBar: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
     elevation: 5,
     fontSize: 16,
   },
   slidingPanel: {
-    flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 1)",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#fff",
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     padding: 20,
-    marginTop: 200,
+  },
+  categoryContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 20,
+  },
+  categoryBox: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+  },
+  categoryBoxSelected: {
+    backgroundColor: "#d1e7ff",
+  },
+  categoryIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  categoryLabel: {
+    fontSize: 14,
+    textAlign: "center",
+  },
+  optionsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 20,
+  },
+  optionBox: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#d4edda",
+  },
+  optionBoxSelected: {
+    backgroundColor: "#155724",
+  },
+  optionText: {
+    fontSize: 14,
+    color: "#155724",
+  },
+  optionTextSelected: {
+    color: "white",
   },
   suggestionCard: {
     padding: 16,
@@ -311,60 +379,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   suggestionImage: {
-    width: '100%',
+    width: "100%",
     height: 150,
     borderRadius: 8,
     marginBottom: 10,
-  },
-  categoryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  categoryBox: {
-    width: 100,
-    height: 100,
-    borderRadius: 12,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  categoryBoxSelected: {
-    backgroundColor: '#d1e7ff',
-  },
-  categoryIcon: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
-  categoryLabel: {
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  optionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
-  },
-  optionBox: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#d4edda',
-  },
-  optionBoxSelected: {
-    backgroundColor: '#155724',
-  },
-  optionText: {
-    fontSize: 14,
-    color: '#155724',
-  },
-  optionTextSelected: {
-    color: 'white',
   },
 });
