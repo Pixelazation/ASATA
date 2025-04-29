@@ -17,9 +17,11 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
   const {id, start_time, end_time, cost, category, description, name} = activity;
   const startTime = new Date(start_time).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+  const finished = new Date(start_time) < new Date();
+
   return (
     <View style={styles.container}>
-      <LineProgressNode />
+      <LineProgressNode finished={finished} />
       <View style={{flex: 1, gap: 8}}>
         <Text style={styles.time}>
           {startTime}
