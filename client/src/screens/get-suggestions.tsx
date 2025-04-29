@@ -7,7 +7,7 @@ import { services, useServices } from "@app/services";
 import { useAppearance } from "@app/utils/hooks";
 import { LocationSearchApi } from "@app/services/api/locationsearch";
 import { LocationDetailsApi } from "@app/services/api/locationdetails";
-import { LocationPhotosApi } from "@app/services/api/locationphotos"; // <-- Import LocationPhotosApi
+import { LocationPhotosApi } from "@app/services/api/location-photos"; // <-- Import LocationPhotosApi
 import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 

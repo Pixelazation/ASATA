@@ -8,7 +8,7 @@ import {EditAccount} from '@app/screens/settings/editaccount';
 import {Example} from '@app/screens/_screen-sample';
 import {MyItineraries} from './screens/myitineraries';
 import {Itinerary} from './screens/itinerary';
-import { GetSuggestions } from './screens/getsuggestions';
+import { GetSuggestions } from './screens/get-suggestions';
 
 import {useAppearance} from '@app/utils/hooks';
 import {
