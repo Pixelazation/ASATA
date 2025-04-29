@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   ScrollView,
   TextInput,
@@ -21,6 +21,7 @@ import { LocationDetailsApi } from "@app/services/api/locationdetails";
 import { LocationPhotosApi } from "@app/services/api/location-photos";
 import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import { Ionicons } from "@expo/vector-icons";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -45,6 +46,12 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
   const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
+
+  // Animation refs
+  const animatedY = useRef(new Animated.Value(PANEL_MIN_HEIGHT)).current;
+  const searchBarOpacity = useRef(new Animated.Value(1)).current;
+  const isExpandedRef = useRef(false);
+  const currentY = useRef(PANEL_MIN_HEIGHT);
 
   const toggleSelection = (item: string, type: "recreation" | "diner") => {
     if (type === "recreation") {
@@ -123,24 +130,80 @@ export const GetSuggestions: NavioScreen = observer(() => {
     setSelectedLocation(null);
   };
 
-  const animatedY = useRef(new Animated.Value(PANEL_MIN_HEIGHT)).current;
-  const currentY = useRef(PANEL_MIN_HEIGHT); // manually track current value
+  // Update search bar opacity based on panel position
+  const updateSearchBarOpacity = (panelHeight: number) => {
+    const opacity = 1 - (panelHeight - PANEL_MIN_HEIGHT) / (PANEL_MAX_HEIGHT - PANEL_MIN_HEIGHT);
+    searchBarOpacity.setValue(opacity);
+  };
 
+  // Toggle panel with animation
+  const togglePanel = () => {
+    const targetHeight = isExpandedRef.current ? PANEL_MIN_HEIGHT : PANEL_MAX_HEIGHT;
+    isExpandedRef.current = !isExpandedRef.current;
+    
+    Animated.parallel([
+      Animated.spring(animatedY, {
+        toValue: targetHeight,
+        useNativeDriver: false,
+      }),
+      Animated.timing(searchBarOpacity, {
+        toValue: isExpandedRef.current ? 0 : 1,
+        duration: 200,
+        useNativeDriver: true,
+      })
+    ]).start();
+    
+    currentY.current = targetHeight;
+  };
+
+  // PanResponder for dragging the panel
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: (e, gesture) => {
-        const newValue = Math.max(
+      onPanResponderMove: (evt, gestureState) => {
+        const newHeight = Math.max(
           PANEL_MIN_HEIGHT,
-          Math.min(PANEL_MAX_HEIGHT, currentY.current - gesture.dy)
+          Math.min(PANEL_MAX_HEIGHT, currentY.current - gestureState.dy)
         );
-        animatedY.setValue(newValue);
+        
+        animatedY.setValue(newHeight);
+        updateSearchBarOpacity(newHeight);
       },
-      onPanResponderRelease: (e, gesture) => {
+      onPanResponderRelease: (evt, gestureState) => {
         currentY.current = Math.max(
           PANEL_MIN_HEIGHT,
-          Math.min(PANEL_MAX_HEIGHT, currentY.current - gesture.dy)
+          Math.min(PANEL_MAX_HEIGHT, currentY.current - gestureState.dy)
         );
+        
+        const velocityThreshold = 0.5;
+        const isFastSwipe = Math.abs(gestureState.vy) > velocityThreshold;
+        
+        let targetHeight;
+        
+        if (isFastSwipe) {
+          // Fast swipe - go in swipe direction
+          targetHeight = gestureState.vy > 0 ? PANEL_MIN_HEIGHT : PANEL_MAX_HEIGHT;
+        } else {
+          // Snap to nearest based on position
+          const halfwayPoint = PANEL_MIN_HEIGHT + (PANEL_MAX_HEIGHT - PANEL_MIN_HEIGHT) / 2;
+          targetHeight = currentY.current > halfwayPoint ? PANEL_MAX_HEIGHT : PANEL_MIN_HEIGHT;
+        }
+        
+        isExpandedRef.current = targetHeight === PANEL_MAX_HEIGHT;
+        
+        Animated.parallel([
+          Animated.spring(animatedY, {
+            toValue: targetHeight,
+            useNativeDriver: false,
+          }),
+          Animated.timing(searchBarOpacity, {
+            toValue: isExpandedRef.current ? 0 : 1,
+            duration: 200,
+            useNativeDriver: true,
+          })
+        ]).start();
+        
+        currentY.current = targetHeight;
       },
     })
   ).current;
@@ -163,23 +226,32 @@ export const GetSuggestions: NavioScreen = observer(() => {
         )}
       </MapView>
 
-      {/* Floating Search Bar */}
-      <View style={styles.searchBarContainer}>
+      {/* Floating Search Bar with fade effect */}
+      <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity }]}>
         <TextInput
           placeholder="Search Location"
           value={location}
           onChangeText={handleLocationChange}
           style={styles.searchBar}
         />
-      </View>
+      </Animated.View>
 
       {/* Draggable Sliding Panel */}
       <Animated.View
         style={[styles.slidingPanel, { height: animatedY }]}
         {...panResponder.panHandlers}
       >
-        <View>
+        <View style={styles.panelContent}>
           <Text text50 marginB-s2>Get Suggestions</Text>
+          
+          {/* Drag handle */}
+          <TouchableOpacity 
+            style={styles.dragHandle} 
+            onPress={togglePanel}
+            activeOpacity={0.8}
+          >
+            <View style={styles.dragHandleBar} />
+          </TouchableOpacity>
 
           <View style={styles.categoryContainer}>
             <TouchableOpacity
@@ -210,82 +282,73 @@ export const GetSuggestions: NavioScreen = observer(() => {
             </TouchableOpacity>
           </View>
 
-          {selectedOption === "recreation" && (
-            <View>
-              <Text text60 marginB-s2>Choose Recreation Types</Text>
-              <View style={styles.optionsContainer}>
-                {recreationOptions.map(option => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.optionBox,
-                      selectedRecreation.includes(option) && styles.optionBoxSelected,
-                    ]}
-                    onPress={() => toggleSelection(option, "recreation")}
-                  >
-                    <Text
-                      style={[
-                        styles.optionText,
-                        selectedRecreation.includes(option) && styles.optionTextSelected,
-                      ]}
+          {/* Scrollable Content */}
+          <ScrollView style={styles.scrollContainer}>
+            {selectedOption === "recreation" && (
+              <View>
+                <Text text60 marginB-s2>Choose Recreation Types</Text>
+                <View style={styles.optionsContainer}>
+                  {recreationOptions.map(option => (
+                    <TouchableOpacity
+                      key={option}
+                      style={[styles.optionBox, selectedRecreation.includes(option) && styles.optionBoxSelected]}
+                      onPress={() => toggleSelection(option, "recreation")}
                     >
-                      {option}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <Text
+                        style={[styles.optionText, selectedRecreation.includes(option) && styles.optionTextSelected]}
+                      >
+                        {option}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
-          )}
+            )}
 
-          {selectedOption === "diner" && (
-            <View>
-              <Text text60 marginB-s2>Choose Diner Types</Text>
-              <View style={styles.optionsContainer}>
-                {dinerOptions.map(option => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.optionBox,
-                      selectedDiner.includes(option) && styles.optionBoxSelected,
-                    ]}
-                    onPress={() => toggleSelection(option, "diner")}
-                  >
-                    <Text
-                      style={[
-                        styles.optionText,
-                        selectedDiner.includes(option) && styles.optionTextSelected,
-                      ]}
+            {selectedOption === "diner" && (
+              <View>
+                <Text text60 marginB-s2>Choose Diner Types</Text>
+                <View style={styles.optionsContainer}>
+                  {dinerOptions.map(option => (
+                    <TouchableOpacity
+                      key={option}
+                      style={[styles.optionBox, selectedDiner.includes(option) && styles.optionBoxSelected]}
+                      onPress={() => toggleSelection(option, "diner")}
                     >
-                      {option}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <Text
+                        style={[styles.optionText, selectedDiner.includes(option) && styles.optionTextSelected]}
+                      >
+                        {option}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
-          )}
+            )}
 
-          <Button label="Get Suggestions" onPress={fetchSuggestions} marginB-s2 disabled={loading} />
+            <Button label="Get Suggestions" onPress={fetchSuggestions} marginB-s2 disabled={loading} />
 
-          {loading ? (
-            <Text text70M>Loading suggestions...</Text>
-          ) : (
-            suggestions.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => item.web_url && Linking.openURL(item.web_url)}
-                style={styles.suggestionCard}
-              >
-                {item.photoUrl && (
-                  <Image source={{ uri: item.photoUrl }} style={styles.suggestionImage} />
-                )}
-                <Text text60BO marginT-s2 marginB-s1>{item.name}</Text>
-                <Text text70 marginB-s1>{item.address_obj?.address_string || "No address available"}</Text>
-                <Text>
-                  {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
-                </Text>
-              </TouchableOpacity>
-            ))
-          )}
+            {loading ? (
+              <Text text70M>Loading suggestions...</Text>
+            ) : (
+              suggestions.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => item.web_url && Linking.openURL(item.web_url)}
+                  style={styles.suggestionCard}
+                >
+                  {item.photoUrl && (
+                    <Image source={{ uri: item.photoUrl }} style={styles.suggestionImage} />
+                  )}
+                  <Text text60BO marginT-s2 marginB-s1>{item.name}</Text>
+                  <Text text70 marginB-s1>{item.address_obj?.address_string || "No address available"}</Text>
+                  <Text>
+                    {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
         </View>
       </Animated.View>
     </View>
@@ -319,9 +382,30 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: "#fff",
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 10,
+  },
+  panelContent: {
+    flex: 1,
+  },
+  dragHandle: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginTop: -10,
+    marginBottom: 10,
+  },
+  dragHandleBar: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#ccc',
+    borderRadius: 3,
   },
   categoryContainer: {
     flexDirection: "row",
@@ -369,6 +453,9 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: "white",
+  },
+  scrollContainer: {
+    flex: 1,
   },
   suggestionCard: {
     padding: 16,
