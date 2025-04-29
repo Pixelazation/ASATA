@@ -10,6 +10,7 @@ import {useAppearance} from '@app/utils/hooks';
 import {Bounceable} from 'rn-bounceable';
 import {Icon, IconName} from '@app/components/icon';
 import {useStores} from '@app/stores';
+import { supabase } from '@app/lib/supabase';
 
 export const Settings: NavioScreen = observer(() => {
   useAppearance(); // for Dark Mode
@@ -44,21 +45,45 @@ export const Settings: NavioScreen = observer(() => {
   const handleRunTutorials = () => {
     console.log('Run Tutorials Pressed');
   };
+  const handleDeactivateAccount = async () => {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Error fetching user:', authError);
+      return;
+    }
 
-  const accountActions: {title: string; icon: IconName; onPress: () => void}[] = [
+    try {
+      const { error } = await supabase
+        .from('UserDetails')
+        .update({ activity_status: false })
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error deactivating account:', error);
+        return;
+      }
+
+      console.log('Account deactivated successfully');
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Unexpected error:', error);
+    }
+  };
+
+  const accountActions: { title: string; icon: IconName; onPress: () => void }[] = [
     {
       title: 'Edit Account',
-      icon: 'create-outline', // Use a valid icon name
+      icon: 'create-outline',
       onPress: handleEditAccount,
     },
     {
-      title: 'Delete Account',
-      icon: 'trash-outline', // Use a valid icon name
-      onPress: handleDeleteAccount,
+      title: 'Deactivate Account',
+      icon: 'power-outline', // Updated icon
+      onPress: () => setModalVisible(true), // Show confirmation modal
     },
     {
       title: 'Logout',
-      icon: 'log-out-outline', // Use a valid icon name
+      icon: 'log-out-outline',
       onPress: handleLogout,
     },
   ];
@@ -112,13 +137,13 @@ export const Settings: NavioScreen = observer(() => {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Are you sure?</Text>
-              <Text style={styles.modalMessage}>Do you really want to delete your account?</Text>
+              <Text style={styles.modalMessage}>Do you really want to deactivate your account?</Text>
               <View style={styles.modalButtons}>
                 <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
                   <Text style={styles.modalButtonText}>Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={confirmDeleteAccount} style={styles.modalButton}>
-                  <Text style={styles.modalButtonText}>Delete</Text>
+                <TouchableOpacity onPress={handleDeactivateAccount} style={styles.modalButton}>
+                  <Text style={styles.modalButtonText}>Deactivate</Text>
                 </TouchableOpacity>
               </View>
             </View>
