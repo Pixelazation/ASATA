@@ -4,17 +4,17 @@ import {View, Text} from 'react-native-ui-lib';
 import { colors } from '../../utils/designSystem';
 
 type Props = {
-  title?: string;
+  finished?: boolean;
 };
 
-export const LineProgressNode: React.FC<Props> = ({title}) => {
+export const LineProgressNode: React.FC<Props> = ({finished}) => {
   return (
     <View style={styles.container}>
-      <View style={styles.outer}>
+      <View style={finished ? [styles.outer, styles.finished] : styles.outer}>
         <View style={styles.inner}>
         </View>
       </View>
-      <View style={styles.line}/>
+      <View style={finished ? [styles.line, styles.finished] : styles.line}/>
     </View>
   );
 };
@@ -46,5 +46,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginVertical: -2,
     zIndex: -1,
+  },
+  finished: {
+    backgroundColor: colors.accent,
   }
 })

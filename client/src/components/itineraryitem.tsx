@@ -3,7 +3,7 @@ import { View, Text, Colors } from "react-native-ui-lib";
 import { ImageBackground, StyleSheet } from "react-native";
 import { Row } from "./row";
 import { IconButton } from "./iconbutton";
-import { formatDate } from "../utils/dateutils";
+import { timestampToDateString } from "../utils/dateutils";
 import { BG_IMAGE } from '../assets';
 import { Icon } from './icon';
 import { useServices } from '../services';
@@ -41,11 +41,11 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
         <View style={styles.bottomContainer}>
           <View style={styles.dateContainer}>
             <Text style={styles.dateText}>
-              {formatDate(startDate)} - {formatDate(endDate)}
+              {timestampToDateString(startDate)} - {timestampToDateString(endDate)}
             </Text>
           </View>
           <Row style={styles.row}>
-            <IconButton name="pencil" onPress={() => navio.push('Itinerary', {itineraryId: id, name: name, location: location})}/>
+            <IconButton name="pencil" onPress={() => navio.push('Itinerary', {itineraryId: id})}/>
             <IconButton name="copy" />
             <IconButton name="trash" color={Colors.red30} onPress={onDelete} />
           </Row>

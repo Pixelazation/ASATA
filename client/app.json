@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "Expo Starter",
+    "owner": "team-kyot",
     "slug": "expo-starter",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -27,13 +28,23 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "io.batyr.expostarter"
+      "package": "io.batyr.expostarter",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ]
     ],
     "extra": {
       "eas": {

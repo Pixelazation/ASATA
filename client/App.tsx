@@ -1,3 +1,4 @@
+import 'react-native-url-polyfill/auto';
 import 'expo-dev-client';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {LogBox} from 'react-native';
@@ -22,6 +23,7 @@ import {useAppearance} from '@app/utils/hooks';
 LogBox.ignoreLogs([
   'Require',
   'Found screens with the same name nested inside one another.', // for navio in some cases
+  "The new TextField implementation does not support the 'expandable' prop",
 ]);
 
 export default (): JSX.Element => {

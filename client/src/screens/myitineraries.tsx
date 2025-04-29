@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { Text, View, Button, Colors } from "react-native-ui-lib";
 import { observer } from "mobx-react";
@@ -11,6 +11,7 @@ import { ItineraryApi } from "@app/services/api/itineraries";
 import { IconButton } from "../components/iconbutton";
 import { colors } from '../utils/designSystem';
 import { FloatingActionButton } from '../components/atoms/floating-action-button';
+import { useFocusEffect } from '@react-navigation/native';
 
 export type Params = {
   itineraryId?: string;
@@ -25,10 +26,12 @@ export const MyItineraries: NavioScreen = observer(() => {
   const [itineraries, setItineraries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    configureUI();
-    fetchItineraries(); // Fetch data on mount
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      configureUI();
+      fetchItineraries();
+    }, [])
+  )
 
   const configureUI = () => {
     navigation.setOptions({});
@@ -102,7 +105,7 @@ export const MyItineraries: NavioScreen = observer(() => {
       {/* Floating Action Button */}
       <FloatingActionButton
         icon="add"
-        onPress={addDummyItinerary}
+        onPress={() => navio.push("ItineraryForm")}
       />
     </View>
   );
