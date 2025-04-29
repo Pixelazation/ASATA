@@ -136,7 +136,46 @@ export class ItineraryApi {
     if (error) throw error;
     return data;
   }
-  
+
+  /** 📍 Get the current, next, or latest activity from the tracked itinerary */
+  static async getCurrentOrRelevantActivity() {
+    // Step 1: Get tracked itinerary ID using existing function
+    const itineraryId = await ItineraryApi.fetchTrackedItinerary();
+    if (!itineraryId) return null;
+
+    // Step 2: Get all activities using existing function
+    const activities = await ItineraryApi.getActivities(itineraryId);
+    if (!activities || activities.length === 0) return null;
+
+    const now = Date.now();
+
+    // Step 3: Find current activity
+    const current = activities.find((activity) => {
+      const start = new Date(activity.start_time).getTime();
+      const end = new Date(activity.end_time).getTime();
+      return now >= start && now <= end;
+    });
+    if (current) return { status: "current", activity: current };
+
+    // Step 4: Find upcoming activity
+    const upcoming = activities.find((activity) => {
+      const start = new Date(activity.start_time).getTime();
+      return start > now;
+    });
+    if (upcoming) return { status: "upcoming", activity: upcoming };
+
+    // Step 5: Find latest past activity
+    const pastActivities = activities
+      .filter((activity) => new Date(activity.end_time).getTime() < now)
+      .sort((a, b) =>
+        new Date(b.end_time).getTime() - new Date(a.end_time).getTime()
+      );
+    if (pastActivities.length > 0) {
+      return { status: "latest", activity: pastActivities[0] };
+    }
+
+    return null;
+  }
 
   /** ✏️ Update an existing itinerary */
   static async updateItinerary(id: string, updates: Partial<any>) {

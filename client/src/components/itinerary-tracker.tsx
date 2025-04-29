@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {View, Text} from 'react-native-ui-lib';
 import {Icon} from '@app/components/icon'; // Assuming Icon is imported from your project
 import { Image, StyleSheet } from 'react-native';
 import { BG_IMAGE } from '../assets';
+import { ItineraryApi } from '../services/api/itineraries';
+import { timestampToDateTimeString } from '../utils/dateutils';
+import { useFocusEffect } from '@react-navigation/native';
 
 type Props = {
   title?: string;
@@ -10,9 +13,19 @@ type Props = {
 
 export const ItineraryTracker: React.FC<Props> = ({title}) => {
 
-  const fetchTrackedItineraryDetails = () => {
+  const [tracked, setTracked] = useState<any>(null);
+
+  const fetchTrackedItineraryDetails = async () => {
+    const itinerary = await ItineraryApi.getCurrentOrRelevantActivity();
+    setTracked(itinerary?.activity);
     return;
   }
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTrackedItineraryDetails();
+    }, [])
+  )
 
   return (
     <View style={{ display: 'flex', gap: 16 }}>
@@ -37,20 +50,25 @@ export const ItineraryTracker: React.FC<Props> = ({title}) => {
         </View>
       </View>
 
-      {/* Details */}
-      <View style={{flex: 1, flexDirection: 'row', gap: 8}}>
-        <View>
-          <Image source={BG_IMAGE} resizeMode='cover' style={styles.descImg} />
-        </View>
-        <View style={styles.details}>
-          <View style={{ flex: 1, flexDirection: 'row', gap: 8 }}>
-            <Icon name='cafe' size={24} color='black' />
-            <Text>Activity Name</Text>
+      {tracked ? (
+        <View style={{flex: 1, flexDirection: 'row', gap: 8}}>
+          <View>
+            <Image source={BG_IMAGE} resizeMode='cover' style={styles.descImg} />
           </View>
-          <Text>Start: </Text>
-          <Text>End: </Text>
+          <View style={styles.details}>
+            <View style={{ flex: 1, flexDirection: 'row', gap: 8 }}>
+              <Icon name='cafe' size={24} color='black' />
+              <Text>{tracked.name}</Text>
+            </View>
+            <Text>Start: {timestampToDateTimeString(tracked.start_time)}</Text>
+            <Text>End: {timestampToDateTimeString(tracked.end_time)}</Text>
+          </View>
         </View>
-      </View>
+      ) : (
+        <Text>No itinerary tracked</Text>
+      )}
+
+      
     </View>
   );
 };

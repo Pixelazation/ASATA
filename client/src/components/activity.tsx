@@ -6,6 +6,7 @@ import { Image, StyleSheet } from 'react-native';
 import { BG_IMAGE } from '../assets';
 import { IconButton } from './iconbutton';
 import { ItineraryApi } from '../services/api/itineraries';
+import { timestampToDateTimeString } from '../utils/dateutils';
 
 type Props = {
   activity: ActivityType;
@@ -15,7 +16,7 @@ type Props = {
 
 export const Activity: React.FC<Props> = ({activity, editMode = false, handleDelete}) => {
   const {id, start_time, end_time, cost, category, description, name} = activity;
-  const startTime = new Date(start_time).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const startTime = timestampToDateTimeString(start_time);
 
   const finished = new Date(start_time) < new Date();
 
