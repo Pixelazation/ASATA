@@ -9,6 +9,11 @@ type Props = {
 };
 
 export const ItineraryTracker: React.FC<Props> = ({title}) => {
+
+  const fetchTrackedItineraryDetails = () => {
+    return;
+  }
+
   return (
     <View style={{ display: 'flex', gap: 16 }}>
 

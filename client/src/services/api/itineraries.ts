@@ -46,6 +46,49 @@ export class ItineraryApi {
     return data;
   }
 
+  /** 📌 Track an itinerary for the logged-in user */
+  static async trackItinerary(itineraryId: string) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("UserDetails")
+      .update({ tracked_itinerary: itineraryId })
+      .eq("user_id", user.id); // Assuming UserDetails has a user_id foreign key
+
+    if (error) throw error;
+    return data;
+  }
+
+  /** 📄 Fetch the currently tracked itinerary for the logged-in user */
+  static async fetchTrackedItinerary() {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("UserDetails")
+      .select("tracked_itinerary")
+      .eq("user_id", user.id)
+      .single();
+
+    if (error) throw error;
+    return data?.tracked_itinerary ?? null; // return null if none tracked
+  }
+
+  /** ❌ Untrack the currently tracked itinerary */
+  static async untrackItinerary() {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("UserDetails")
+      .update({ tracked_itinerary: null })
+      .eq("user_id", user.id);
+
+    if (error) throw error;
+    return data;
+  }
+
   /** ➕ Add a new activity for the logged-in user */
   static async addActivity(itineraryId: string, activity: ActivityType) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();

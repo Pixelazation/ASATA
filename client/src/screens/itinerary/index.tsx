@@ -36,6 +36,7 @@ export const Itinerary: NavioScreen = observer(() => {
   const [panelRef, setPanelRef] = useState<SlidingUpPanel | null>();
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tracked, setTracked] = useState<boolean>(false);
 
   const [activities, setActivities] = useState<ActivityType[]>([]);
 
@@ -85,15 +86,33 @@ export const Itinerary: NavioScreen = observer(() => {
     }
   }
 
-  // Start
-  useEffect(() => {
-     // Fetch data on mount
-  }, []);
+  const toggleTrack = async () => {
+    try {
+      if (tracked) {
+        await ItineraryApi.untrackItinerary();
+        console.log('Itinerary untracked successfully.');
+      } else {
+        await ItineraryApi.trackItinerary(itineraryId);
+        console.log('Itinerary tracked successfully.');
+      }
+      
+      checkTracked();
+      panelRef?.hide();
+    } catch (error) {
+      console.error('Error tracking itinerary:', error);
+    }
+  };
+
+  const checkTracked = async () => {
+    const trackedId = await ItineraryApi.fetchTrackedItinerary();
+    setTracked(trackedId == itineraryId);
+  }
 
   useFocusEffect(
     useCallback(() => {
       configureUI();
-      fetchActivities()
+      fetchActivities();
+      checkTracked();
     }, [])
   );
 
@@ -163,8 +182,8 @@ export const Itinerary: NavioScreen = observer(() => {
         />
       ) : (
         <FloatingActionButton
-          icon={'location'}
-          onPress={panelRef?.hide}
+          icon={tracked ? 'stop-circle' : 'location'}
+          onPress={toggleTrack}
         />
       )}
     </SafeAreaView>
