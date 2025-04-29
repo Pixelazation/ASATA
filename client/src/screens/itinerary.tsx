@@ -1,13 +1,12 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {Button, ImageBackground, ScrollView, StyleSheet} from 'react-native';
-import {Gradient, Text, View} from 'react-native-ui-lib';
+import {ImageBackground, ScrollView, StyleSheet} from 'react-native';
+import {Text, View} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 import SlidingUpPanel from 'rn-sliding-up-panel';
 
-import {services, useServices} from '@app/services';
+import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
-import {NavioSection} from '@app/components/sections/NavioSection';
 import { BG_IMAGE } from '../assets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Activity } from '../components/activity';

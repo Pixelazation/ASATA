@@ -1,8 +1,7 @@
 import React from 'react';
-import {View, Text, TextField, Colors} from 'react-native-ui-lib';
+import {View, TextField} from 'react-native-ui-lib';
 import { colors } from '../utils/designSystem';
 import { InputModeOptions, KeyboardTypeOptions } from 'react-native';
-import { Validator } from 'react-native-ui-lib/src/incubator/TextField/types';
 
 type Props = {
   label?: string;
