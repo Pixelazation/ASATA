@@ -22,7 +22,7 @@ export const FormField: React.FC<Props> = (props) => {
       <TextField
         accent
         style={{paddingHorizontal: 16, paddingVertical: 4}}
-        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100, paddingVertical: 4, marginTop: 4}}
+        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100, paddingVertical: 4, paddingRight: 16, marginTop: 4}}
         labelColor={colors.primary}
         labelStyle={{fontWeight: 'bold'}}
         placeholderTextColor={'grey'}

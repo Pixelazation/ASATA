@@ -1,7 +1,9 @@
 import { format } from "date-fns";
 
-export const formatDate = (timestamp: string): string => {
+export const timestampToDateString = (timestamp: string): string => {
   return format(new Date(timestamp), "MMMM d, yyyy"); // Example: March 4, 2025
 };
 
-console.log("✅ formatDate function loaded!"); // Debugging log
+export function dateToDateString(date: Date): string {
+  return format(date, "yyyy/MM/dd");
+}
