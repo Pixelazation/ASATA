@@ -1,5 +1,15 @@
 import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 import { Alert } from "react-native";
+
+// Configure notification behavior
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
 
 export const sendTestNotification = async (message: string) => {
     try {
