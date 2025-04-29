@@ -9,6 +9,7 @@ import {PickerFixed} from '@app/components/picker-fixed';
 export const EditAccount: NavioScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
@@ -17,8 +18,12 @@ export const EditAccount: NavioScreen = () => {
   const [loading, setLoading] = useState(true);
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false); // For error modal
+  const [errorMessage, setErrorMessage] = useState(''); // Error message for the modal
   const [currentField, setCurrentField] = useState('');
   const [currentValue, setCurrentValue] = useState('');
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -55,53 +60,84 @@ export const EditAccount: NavioScreen = () => {
     setCurrentValue(value);
     setModalVisible(true);
   };
-
+  
   const handleModalSave = async () => {
     console.log('Saving modal data for field:', currentField, 'with value:', currentValue);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      let updateData = {};
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Error fetching user:', authError);
+      return;
+    }
+
+    let updateData = {};
+
+    try {
       switch (currentField) {
         case 'Email':
-          setEmail(currentValue);
-          updateData = { email: currentValue };
-          // Update email in authentication table
-          const { error: authError } = await supabase.auth.updateUser({
+          // Attempt to update the email in the authentication table
+          const { error: emailError } = await supabase.auth.updateUser({
             email: currentValue,
           });
-          if (authError) {
-            console.error('Error updating email in authentication table:', authError);
+          if (emailError) {
+            if (emailError.message.includes('already been registered')) {
+              setErrorMessage('A user with this email address has already been registered.');
+              setErrorModalVisible(true); // Show error modal
+            } else {
+              console.error('Error updating email in authentication table:', emailError);
+            }
+            return; // Exit early if there's an error
+          }
+          // Show success modal instructing the user to check their original email
+          setSuccessMessage('A confirmation email has been sent to your original email address. Please check it to confirm the change.');
+          setSuccessModalVisible(true);
+          break;
+
+        case 'Password':
+          if (currentValue !== confirmPassword) {
+            setErrorMessage('Passwords do not match. Please try again.');
+            setErrorModalVisible(true); // Show error modal
             return;
           }
+          const { error: passwordError } = await supabase.auth.updateUser({
+            password: currentValue,
+          });
+          if (passwordError) {
+            console.error('Error updating password in authentication table:', passwordError);
+            return;
+          }
+          console.log('Password updated successfully in authentication table');
           break;
-        case 'Password':
-          setPassword(currentValue);
-          // Assuming password is stored in a different table or handled differently
-          break;
+
         case 'First Name':
           setFirstName(currentValue);
           updateData = { first_name: currentValue };
           break;
+
         case 'Last Name':
           setLastName(currentValue);
           updateData = { last_name: currentValue };
           break;
+
         case 'Birth Date':
           setDateOfBirth(currentValue);
           updateData = { birthdate: currentValue };
           break;
+
         case 'Gender':
           setGender(currentValue);
           updateData = { gender: currentValue };
           break;
+
         case 'Phone Number':
           setPhoneNumber(currentValue);
           updateData = { mobile_number: currentValue };
           break;
+
         default:
           break;
       }
 
+      // Update other fields in the `UserDetails` table
       if (Object.keys(updateData).length > 0) {
         const { error } = await supabase
           .from('UserDetails')
@@ -114,7 +150,10 @@ export const EditAccount: NavioScreen = () => {
           console.log('Field updated successfully:', updateData);
         }
       }
+    } catch (error) {
+      console.error('Error saving modal data:', error);
     }
+
     setModalVisible(false);
   };
 
@@ -128,7 +167,7 @@ export const EditAccount: NavioScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity onPress={() => openModal('Email', email)} style={styles.row}>
+            <TouchableOpacity onPress={() => openModal('Email', email)} style={styles.row}>
         <Text style={styles.label}>Email: {email}</Text>
         <Icon name="chevron-forward" />
       </TouchableOpacity>
@@ -173,25 +212,45 @@ export const EditAccount: NavioScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Edit {currentField}</Text>
-            {currentField === 'Birth Date' ? (
+            {currentField === 'Password' ? (
+              <>
+                {/* Password Input */}
+                <TextInput
+                  style={styles.input}
+                  value={currentValue}
+                  onChangeText={setCurrentValue}
+                  placeholder="Enter new password"
+                  secureTextEntry={true}
+                />
+                {/* Confirm Password Input */}
+                <TextInput
+                  style={styles.input}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Confirm new password"
+                  secureTextEntry={true}
+                />
+              </>
+            ) : currentField === 'Birth Date' ? (
               <DateTimePicker
                 accent
-                fieldStyle={{backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4}}
-                label='Date of Birth'
-                labelStyle={{fontWeight: 'bold'}}
-                placeholder='DD/MM/YYYY'
+                fieldStyle={{ backgroundColor: 'white', borderWidth: 2, borderColor: 'grey', borderRadius: 6, padding: 4 }}
+                label="Date of Birth"
+                labelStyle={{ fontWeight: 'bold' }}
+                placeholder="DD/MM/YYYY"
                 placeholderTextColor={'grey'}
                 value={new Date(currentValue)}
-                onChange={(date: { toISOString: () => string; }) => setCurrentValue(date.toISOString().split('T')[0])}
+                onChange={(date: { toISOString: () => string }) => setCurrentValue(date.toISOString().split('T')[0])}
                 mode="date"
                 maximumDate={new Date()}
               />
             ) : currentField === 'Gender' ? (
               <PickerFixed
                   value={currentValue}
-                  placeholder='Gender'
+                  placeholder="Gender"
                   onValueChange={setCurrentValue}
-                  items={['Male', 'Female', 'Other', 'Prefer not to say']} label={''}
+                  items={['Male', 'Female', 'Other', 'Prefer not to say']}
+                  label={''}
               />
             ) : (
               <TextInput
@@ -209,6 +268,36 @@ export const EditAccount: NavioScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        transparent={true}
+        visible={errorModalVisible}
+        animationType="fade"
+        onRequestClose={() => setErrorModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Error</Text>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+            <Button title="Close" onPress={() => setErrorModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        transparent={true}
+        visible={successModalVisible}
+        animationType="fade"
+        onRequestClose={() => setSuccessModalVisible(false)}
+      >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Success</Text>
+          <Text style={styles.successMessage}>{successMessage}</Text>
+          <Button title="Close" onPress={() => setSuccessModalVisible(false)} />
+        </View>
+      </View>
+    </Modal>
     </ScrollView>
   );
 };
@@ -239,11 +328,12 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width: 180,
+    width: '100%',
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 8,
+    borderRadius: 5,
   },
   modalContainer: {
     flex: 1,
@@ -257,6 +347,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',
+    position: 'relative',
   },
   modalTitle: {
     fontSize: 18,
@@ -268,5 +359,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     marginTop: 10,
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  successMessage: {
+    color: 'green',
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });
