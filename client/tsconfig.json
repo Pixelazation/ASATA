@@ -26,5 +26,5 @@
     "jest.config.js",
     "webpack.config.js"
   ],
-  "extends": "expo/tsconfig.base"
+  "extends": "./node_modules/expo/tsconfig.base"
 }
