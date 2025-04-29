@@ -5,11 +5,13 @@ import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
 import { useServices } from "@app/services";
 import { ItineraryTracker } from "../components/itinerary-tracker";
-import { Carousel } from "../components/carousel"; 
+import { Carousel } from "../components/carousel";
 import { BG_IMAGE } from "@app/assets";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon } from "@app/components/icon";
 import { LocationTracker } from "@app/components/location-tracker";
+import { WeatherTracker } from "@app/components/weather-tracker";
+import { sendTestNotification, requestNotificationPermissions } from "@app/services/notifications";
 
 export const Main: NavioScreen = observer(() => {
   const { navio } = useServices();
@@ -17,6 +19,7 @@ export const Main: NavioScreen = observer(() => {
 
   useEffect(() => {
     configureUI();
+    requestNotificationPermissions(); // Ask for notification permissions
   }, []);
 
   const configureUI = () => {
@@ -63,6 +66,27 @@ export const Main: NavioScreen = observer(() => {
             <Carousel title="Explore new places..." items={recommendationItems} />
             <Carousel title="Promotions" items={promotionItems} />
             <LocationTracker />
+            <WeatherTracker />
+            <View style={styles.buttonRow}>
+              <Button
+                onPress={() => sendTestNotification("You have an activity today!")}
+                style={styles.actionButton}
+              >
+                <Icon name="time-outline" color={styles.icon.color} size={styles.icon.fontSize} />
+              </Button>
+              <Button
+                onPress={() => sendTestNotification("Oh my! It appears to be raining. Do you wish to change your activity?")}
+                style={styles.actionButton}
+              >
+                <Icon name="rainy-outline" color={styles.icon.color} size={styles.icon.fontSize} />
+              </Button>
+              <Button
+                onPress={() => sendTestNotification("You have arrived at an activity area.")}
+                style={styles.actionButton}
+              >
+                <Icon name="location-outline" color={styles.icon.color} size={styles.icon.fontSize} />
+              </Button>
+            </View>
           </View>
         </ScrollView>
       </ImageBackground>
@@ -109,5 +133,16 @@ const styles = StyleSheet.create({
   icon: {
     color: "black",
     fontSize: 32,
+  },
+  actionButton: {
+    width: 56,
+    height: 56,
+    marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: "black",
+    borderRadius: 8,
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
