@@ -9,9 +9,9 @@ import * as Yup from 'yup';
 import { services, useServices } from '@app/services';
 import { useAppearance } from '@app/utils/hooks';
 import { NavioSection } from '@app/components/sections/NavioSection';
-import { FormField } from '../components/form-field';
-import { colors } from '../utils/designSystem';
-import { ItineraryApi } from '../services/api/itineraries';
+import { FormField } from '../../../components/form-field';
+import { colors } from '../../../utils/designSystem';
+import { ItineraryApi } from '../../../services/api/itineraries';
 
 export type Params = {
   type?: 'push' | 'show';

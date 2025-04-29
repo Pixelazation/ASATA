@@ -1,8 +1,7 @@
 import React from 'react';
-import {View, Text, TextField, Colors} from 'react-native-ui-lib';
+import {View, TextField} from 'react-native-ui-lib';
 import { colors } from '../utils/designSystem';
 import { InputModeOptions, KeyboardTypeOptions } from 'react-native';
-import { Validator } from 'react-native-ui-lib/src/incubator/TextField/types';
 
 type Props = {
   label?: string;
@@ -23,7 +22,7 @@ export const FormField: React.FC<Props> = (props) => {
       <TextField
         accent
         style={{paddingHorizontal: 16, paddingVertical: 4}}
-        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100, paddingVertical: 4, marginTop: 4}}
+        fieldStyle={{backgroundColor: '#ECF2F0', borderRadius: 100, paddingVertical: 4, paddingRight: 16, marginTop: 4}}
         labelColor={colors.primary}
         labelStyle={{fontWeight: 'bold'}}
         placeholderTextColor={'grey'}

@@ -9,7 +9,8 @@ import {Example} from '@app/screens/_screen-sample';
 import {MyItineraries} from './screens/myitineraries';
 import {Itinerary} from './screens/itinerary';
 import { GetSuggestions } from './screens/getsuggestions';
-import { ActivityForm } from './screens/activity-form';
+import { ActivityForm } from './screens/itinerary/activity/activity-form';
+import { ItineraryForm } from './screens/itinerary/add';
 
 import {useAppearance} from '@app/utils/hooks';
 import {
@@ -33,6 +34,7 @@ export const navio = Navio.build({
 
     MyItineraries,
     Itinerary,
+    ItineraryForm,
     GetSuggestions,
     ActivityForm,
 
@@ -53,8 +55,8 @@ export const navio = Navio.build({
     AuthSignup
   },
   stacks: {
-    MainStack: ['Main', 'Example', 'GetSuggestions'],
-    MyItinerariesStack:['MyItineraries', 'Itinerary', 'ActivityForm'],
+    MainStack: ['Main', 'Example', 'GetSuggestions' , 'MyItineraries', 'Itinerary', 'ItineraryForm', 'ActivityForm'],
+    MyItinerariesStack:['MyItineraries', 'Itinerary', 'ItineraryForm', 'ActivityForm'],
     SettingsStack:['Settings', 'EditAccount'],
     ExampleStack: {
       screens: ['Example'],

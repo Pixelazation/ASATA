@@ -1,28 +1,25 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {Button, ImageBackground, ScrollView, StyleSheet} from 'react-native';
-import {Gradient, Text, View} from 'react-native-ui-lib';
+import {ImageBackground, ScrollView, StyleSheet} from 'react-native';
+import {Text, View} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 import SlidingUpPanel from 'rn-sliding-up-panel';
 
-import {services, useServices} from '@app/services';
+import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
-import {NavioSection} from '@app/components/sections/NavioSection';
-import { BG_IMAGE } from '../assets';
+import { BG_IMAGE } from '../../assets';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Activity } from '../components/activity';
-import { LineProgressHead } from '../components/atoms/line-progress-head';
-import { IconButton } from '../components/iconbutton';
-import { FloatingActionButton } from '../components/atoms/floating-action-button';
-import { ItineraryApi } from '../services/api/itineraries';
-import { FloatingActionMenu } from '../components/molecules/floating-action-menu';
+import { Activity } from '../../components/activity';
+import { LineProgressHead } from '../../components/atoms/line-progress-head';
+import { IconButton } from '../../components/iconbutton';
+import { FloatingActionButton } from '../../components/atoms/floating-action-button';
+import { ItineraryApi } from '../../services/api/itineraries';
+import { FloatingActionMenu } from '../../components/molecules/floating-action-menu';
 import { useFocusEffect } from '@react-navigation/native';
 
 export type Params = {
   type?: 'push' | 'show';
   itineraryId: string;
-  name: string
-  location: string;
 };
 
 export const Itinerary: NavioScreen = observer(() => {
@@ -31,16 +28,31 @@ export const Itinerary: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const params = navio.useParams<Params>();
 
-  const { itineraryId, name, location } = params;
+  const { itineraryId } = params;
 
   // State
   const [panelRef, setPanelRef] = useState<SlidingUpPanel | null>();
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tracked, setTracked] = useState<boolean>(false);
 
   const [activities, setActivities] = useState<ActivityType[]>([]);
+  const [details, setDetails] = useState<any>();
 
   // Methods
+  const fetchDetails = async () => {
+    setLoading(true);
+    try {
+      const data = await ItineraryApi.getItineraryDetails(itineraryId);
+      console.log("Fetched itinerary:", data); // Debugging log
+      setDetails(data);
+    } catch (error) {
+      console.error("Error fetching details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchActivities = async () => {
     setLoading(true);
     try {
@@ -86,15 +98,34 @@ export const Itinerary: NavioScreen = observer(() => {
     }
   }
 
-  // Start
-  useEffect(() => {
-     // Fetch data on mount
-  }, []);
+  const toggleTrack = async () => {
+    try {
+      if (tracked) {
+        await ItineraryApi.untrackItinerary();
+        console.log('Itinerary untracked successfully.');
+      } else {
+        await ItineraryApi.trackItinerary(itineraryId);
+        console.log('Itinerary tracked successfully.');
+      }
+      
+      checkTracked();
+      panelRef?.hide();
+    } catch (error) {
+      console.error('Error tracking itinerary:', error);
+    }
+  };
+
+  const checkTracked = async () => {
+    const trackedId = await ItineraryApi.fetchTrackedItinerary();
+    setTracked(trackedId == itineraryId);
+  }
 
   useFocusEffect(
     useCallback(() => {
       configureUI();
-      fetchActivities()
+      fetchActivities();
+      fetchDetails();
+      checkTracked();
     }, [])
   );
 
@@ -128,7 +159,7 @@ export const Itinerary: NavioScreen = observer(() => {
           <SlidingUpPanel containerStyle={styles.container} ref={c => setPanelRef(c)} draggableRange={{top: 350, bottom: 50}} snappingPoints={[50, 350]} friction={0.5}>
             <View style={{flex: 1, padding: 16}}>
               <View style={{paddingBottom: 16}}>
-                <Text section>{name}</Text>
+                <Text section>{details?.title}</Text>
               </View>
               <ScrollView contentContainerStyle={{paddingBottom: 100}} showsVerticalScrollIndicator={false}>
                 
@@ -140,7 +171,7 @@ export const Itinerary: NavioScreen = observer(() => {
                     <View style={{flexDirection: 'row', gap: 8}}>
                       <LineProgressHead />
                       <View style={{marginBottom: 16}}>
-                        <Text section>In {location}</Text>
+                        <Text section>In {details?.location}</Text>
                       </View>
                     </View>
                     <View style={{paddingBottom: 64}}>
@@ -164,8 +195,8 @@ export const Itinerary: NavioScreen = observer(() => {
         />
       ) : (
         <FloatingActionButton
-          icon={'location'}
-          onPress={panelRef?.hide}
+          icon={tracked ? 'stop-circle' : 'location'}
+          onPress={toggleTrack}
         />
       )}
     </SafeAreaView>

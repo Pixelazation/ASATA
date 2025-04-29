@@ -15,6 +15,22 @@ export class ItineraryApi {
     return data;
   }
 
+  /** 🔍 Fetch details of a specific itinerary for the logged-in user */
+  static async getItineraryDetails(itineraryId: string) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("Itineraries")
+      .select("*")
+      .eq("id", itineraryId)
+      .eq("user_id", user.id) // Ensure the user owns this itinerary
+      .single(); // Expect only one result
+
+    if (error) throw error;
+    return data;
+  }
+
   static async getActivities(itineraryId: string) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
@@ -41,6 +57,49 @@ export class ItineraryApi {
     const { data, error } = await supabase
       .from("Itineraries")
       .insert([{ ...itinerary, user_id: user.id }]); // Attach user_id automatically
+
+    if (error) throw error;
+    return data;
+  }
+
+  /** 📌 Track an itinerary for the logged-in user */
+  static async trackItinerary(itineraryId: string) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("UserDetails")
+      .update({ tracked_itinerary: itineraryId })
+      .eq("user_id", user.id); // Assuming UserDetails has a user_id foreign key
+
+    if (error) throw error;
+    return data;
+  }
+
+  /** 📄 Fetch the currently tracked itinerary for the logged-in user */
+  static async fetchTrackedItinerary() {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("UserDetails")
+      .select("tracked_itinerary")
+      .eq("user_id", user.id)
+      .single();
+
+    if (error) throw error;
+    return data?.tracked_itinerary ?? null; // return null if none tracked
+  }
+
+  /** ❌ Untrack the currently tracked itinerary */
+  static async untrackItinerary() {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("UserDetails")
+      .update({ tracked_itinerary: null })
+      .eq("user_id", user.id);
 
     if (error) throw error;
     return data;
@@ -93,7 +152,46 @@ export class ItineraryApi {
     if (error) throw error;
     return data;
   }
-  
+
+  /** 📍 Get the current, next, or latest activity from the tracked itinerary */
+  static async getCurrentOrRelevantActivity() {
+    // Step 1: Get tracked itinerary ID using existing function
+    const itineraryId = await ItineraryApi.fetchTrackedItinerary();
+    if (!itineraryId) return null;
+
+    // Step 2: Get all activities using existing function
+    const activities = await ItineraryApi.getActivities(itineraryId);
+    if (!activities || activities.length === 0) return null;
+
+    const now = Date.now();
+
+    // Step 3: Find current activity
+    const current = activities.find((activity) => {
+      const start = new Date(activity.start_time).getTime();
+      const end = new Date(activity.end_time).getTime();
+      return now >= start && now <= end;
+    });
+    if (current) return { status: "current", activity: current };
+
+    // Step 4: Find upcoming activity
+    const upcoming = activities.find((activity) => {
+      const start = new Date(activity.start_time).getTime();
+      return start > now;
+    });
+    if (upcoming) return { status: "upcoming", activity: upcoming };
+
+    // Step 5: Find latest past activity
+    const pastActivities = activities
+      .filter((activity) => new Date(activity.end_time).getTime() < now)
+      .sort((a, b) =>
+        new Date(b.end_time).getTime() - new Date(a.end_time).getTime()
+      );
+    if (pastActivities.length > 0) {
+      return { status: "latest", activity: pastActivities[0] };
+    }
+
+    return null;
+  }
 
   /** ✏️ Update an existing itinerary */
   static async updateItinerary(id: string, updates: Partial<any>) {

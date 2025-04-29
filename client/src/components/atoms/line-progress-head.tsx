@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     width: 10
   },
   line: {
-    backgroundColor: '#D7EAE2',
+    backgroundColor: colors.accent,
     width: 6,
     flex: 1,
     alignSelf: 'center',
