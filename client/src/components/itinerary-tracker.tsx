@@ -6,6 +6,8 @@ import { BG_IMAGE } from '../assets';
 import { ItineraryApi } from '../services/api/itineraries';
 import { timestampToDateTimeString } from '../utils/dateutils';
 import { useFocusEffect } from '@react-navigation/native';
+import { useServices } from '../services';
+import { IconButton } from './iconbutton';
 
 type Props = {
   title?: string;
@@ -13,11 +15,14 @@ type Props = {
 
 export const ItineraryTracker: React.FC<Props> = ({title}) => {
 
+  const { navio } = useServices();
+
   const [tracked, setTracked] = useState<any>(null);
 
   const fetchTrackedItineraryDetails = async () => {
     const itinerary = await ItineraryApi.getCurrentOrRelevantActivity();
     setTracked(itinerary?.activity);
+    console.log(tracked?.itinerary_id);
     return;
   }
 
@@ -35,7 +40,7 @@ export const ItineraryTracker: React.FC<Props> = ({title}) => {
         <Text section textColor>
           Tracked Itinerary
         </Text>
-        <View
+        {/* <View
           style={{
             width: 32,
             height: 32,
@@ -46,8 +51,9 @@ export const ItineraryTracker: React.FC<Props> = ({title}) => {
             justifyContent: 'center',
           }}
         >
-          <Icon name="arrow-forward" size={16} color="black" />
-        </View>
+          {tracked && <Icon name="arrow-forward" size={16} color="black" onPress={() => console.log("I AM PRESSED")} />}
+        </View> */}
+        {tracked && <IconButton name='arrow-forward-circle' onPress={() => navio.push("Itinerary", {itineraryId: tracked?.itinerary_id})} />}
       </View>
 
       {tracked ? (

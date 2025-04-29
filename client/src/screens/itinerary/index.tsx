@@ -20,8 +20,6 @@ import { useFocusEffect } from '@react-navigation/native';
 export type Params = {
   type?: 'push' | 'show';
   itineraryId: string;
-  name: string
-  location: string;
 };
 
 export const Itinerary: NavioScreen = observer(() => {
@@ -30,7 +28,7 @@ export const Itinerary: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const params = navio.useParams<Params>();
 
-  const { itineraryId, name, location } = params;
+  const { itineraryId } = params;
 
   // State
   const [panelRef, setPanelRef] = useState<SlidingUpPanel | null>();
@@ -39,8 +37,22 @@ export const Itinerary: NavioScreen = observer(() => {
   const [tracked, setTracked] = useState<boolean>(false);
 
   const [activities, setActivities] = useState<ActivityType[]>([]);
+  const [details, setDetails] = useState<any>();
 
   // Methods
+  const fetchDetails = async () => {
+    setLoading(true);
+    try {
+      const data = await ItineraryApi.getItineraryDetails(itineraryId);
+      console.log("Fetched itinerary:", data); // Debugging log
+      setDetails(data);
+    } catch (error) {
+      console.error("Error fetching details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchActivities = async () => {
     setLoading(true);
     try {
@@ -112,6 +124,7 @@ export const Itinerary: NavioScreen = observer(() => {
     useCallback(() => {
       configureUI();
       fetchActivities();
+      fetchDetails();
       checkTracked();
     }, [])
   );
@@ -146,7 +159,7 @@ export const Itinerary: NavioScreen = observer(() => {
           <SlidingUpPanel containerStyle={styles.container} ref={c => setPanelRef(c)} draggableRange={{top: 350, bottom: 50}} snappingPoints={[50, 350]} friction={0.5}>
             <View style={{flex: 1, padding: 16}}>
               <View style={{paddingBottom: 16}}>
-                <Text section>{name}</Text>
+                <Text section>{details?.title}</Text>
               </View>
               <ScrollView contentContainerStyle={{paddingBottom: 100}} showsVerticalScrollIndicator={false}>
                 
@@ -158,7 +171,7 @@ export const Itinerary: NavioScreen = observer(() => {
                     <View style={{flexDirection: 'row', gap: 8}}>
                       <LineProgressHead />
                       <View style={{marginBottom: 16}}>
-                        <Text section>In {location}</Text>
+                        <Text section>In {details?.location}</Text>
                       </View>
                     </View>
                     <View style={{paddingBottom: 64}}>

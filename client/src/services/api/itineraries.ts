@@ -15,6 +15,22 @@ export class ItineraryApi {
     return data;
   }
 
+  /** 🔍 Fetch details of a specific itinerary for the logged-in user */
+  static async getItineraryDetails(itineraryId: string) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("Itineraries")
+      .select("*")
+      .eq("id", itineraryId)
+      .eq("user_id", user.id) // Ensure the user owns this itinerary
+      .single(); // Expect only one result
+
+    if (error) throw error;
+    return data;
+  }
+
   static async getActivities(itineraryId: string) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");

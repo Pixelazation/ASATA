@@ -55,7 +55,7 @@ export const navio = Navio.build({
     AuthSignup
   },
   stacks: {
-    MainStack: ['Main', 'Example', 'GetSuggestions'],
+    MainStack: ['Main', 'Example', 'GetSuggestions' , 'MyItineraries', 'Itinerary', 'ItineraryForm', 'ActivityForm'],
     MyItinerariesStack:['MyItineraries', 'Itinerary', 'ItineraryForm', 'ActivityForm'],
     SettingsStack:['Settings', 'EditAccount'],
     ExampleStack: {
