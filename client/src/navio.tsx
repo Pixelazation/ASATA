@@ -9,7 +9,7 @@ import {Example} from '@app/screens/_screen-sample';
 import {MyItineraries} from './screens/myitineraries';
 import {Itinerary} from './screens/itinerary';
 import { GetSuggestions } from './screens/getsuggestions';
-import { ActivityForm } from './screens/activity-form';
+import { ActivityForm } from './screens/itinerary/activity/activity-form';
 
 import {useAppearance} from '@app/utils/hooks';
 import {

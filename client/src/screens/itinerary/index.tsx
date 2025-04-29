@@ -7,14 +7,14 @@ import SlidingUpPanel from 'rn-sliding-up-panel';
 
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
-import { BG_IMAGE } from '../assets';
+import { BG_IMAGE } from '../../assets';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Activity } from '../components/activity';
-import { LineProgressHead } from '../components/atoms/line-progress-head';
-import { IconButton } from '../components/iconbutton';
-import { FloatingActionButton } from '../components/atoms/floating-action-button';
-import { ItineraryApi } from '../services/api/itineraries';
-import { FloatingActionMenu } from '../components/molecules/floating-action-menu';
+import { Activity } from '../../components/activity';
+import { LineProgressHead } from '../../components/atoms/line-progress-head';
+import { IconButton } from '../../components/iconbutton';
+import { FloatingActionButton } from '../../components/atoms/floating-action-button';
+import { ItineraryApi } from '../../services/api/itineraries';
+import { FloatingActionMenu } from '../../components/molecules/floating-action-menu';
 import { useFocusEffect } from '@react-navigation/native';
 
 export type Params = {
