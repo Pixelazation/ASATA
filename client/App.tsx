@@ -1,3 +1,4 @@
+import 'react-native-url-polyfill/auto';
 import 'expo-dev-client';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {LogBox} from 'react-native';

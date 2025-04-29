@@ -9,6 +9,7 @@ import { Carousel } from "../components/carousel";
 import { BG_IMAGE } from "@app/assets";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon } from "@app/components/icon";
+import { LocationTracker } from "@app/components/location-tracker";
 
 export const Main: NavioScreen = observer(() => {
   const { navio } = useServices();
@@ -61,6 +62,7 @@ export const Main: NavioScreen = observer(() => {
 
             <Carousel title="Explore new places..." items={recommendationItems} />
             <Carousel title="Promotions" items={promotionItems} />
+            <LocationTracker />
           </View>
         </ScrollView>
       </ImageBackground>
