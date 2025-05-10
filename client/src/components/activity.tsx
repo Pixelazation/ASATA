@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {View, Text} from 'react-native-ui-lib';
 import { LineProgressNode } from './atoms/line-progress-node';
 import { Icon } from './icon';
-import { Image, StyleSheet } from 'react-native';
+import { Image, Pressable, StyleSheet } from 'react-native';
 import { BG_IMAGE } from '../assets';
 import { IconButton } from './iconbutton';
 import { ItineraryApi } from '../services/api/itineraries';
 import { timestampToDateTimeString } from '../utils/dateutils';
+import { ActivityModal } from './molecules/activity-modal';
 
 type Props = {
   activity: ActivityType;
@@ -20,6 +21,8 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
 
   const finished = new Date(start_time) < new Date();
 
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+
   return (
     <View style={styles.container}>
       <LineProgressNode finished={finished} />
@@ -27,7 +30,8 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
         <Text style={styles.time}>
           {startTime}
         </Text>
-        <View style={styles.details}>
+        <ActivityModal visible={modalVisible} closeModal={() => setModalVisible(false)} />
+        <Pressable style={styles.details} onPress={() => setModalVisible(true)}>
           <View style={styles.body}>
             <View style={styles.title}>
               <Icon name='cafe' size={24} color='black' />
@@ -51,7 +55,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
               </View>
             )}
           </View>
-        </View>
+        </Pressable>
       </View>
     </View>
   );
