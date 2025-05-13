@@ -14,6 +14,7 @@ type ItineraryItemProps = {
   location: string;
   startDate: string;
   endDate: string;
+  imageUrl?: string | null;
   onDelete: () => void;
 };
 
@@ -23,6 +24,7 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
   location,
   startDate,
   endDate,
+  imageUrl,
   onDelete,
 }) => {
   const {t, navio} = useServices();
@@ -32,7 +34,7 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
       <View style={styles.titleContainer}>
         <Text style={{fontWeight: "bold"}}>{name}</Text>
       </View>
-      <ImageBackground source={BG_IMAGE} style={styles.imageContainer} imageStyle={styles.image} resizeMode="cover">
+      <ImageBackground source={imageUrl ? {uri: imageUrl} : BG_IMAGE} style={styles.imageContainer} imageStyle={styles.image} resizeMode="cover">
         <Row style={styles.locationContainer}>
           <Icon name="location" color={Colors.red30} size={20}/>
           <Text>{location}</Text>

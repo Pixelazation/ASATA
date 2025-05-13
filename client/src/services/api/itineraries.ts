@@ -45,12 +45,7 @@ export class ItineraryApi {
   }
 
   /** ➕ Add a new itinerary for the logged-in user */
-  static async addItinerary(itinerary: {
-    title: string;
-    start_date: string;
-    end_date: string;
-    budget: number;
-  }) {
+  static async addItinerary(itinerary: AddItineraryDTO) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
 

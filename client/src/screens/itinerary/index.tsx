@@ -37,7 +37,7 @@ export const Itinerary: NavioScreen = observer(() => {
   const [tracked, setTracked] = useState<boolean>(false);
 
   const [activities, setActivities] = useState<ActivityType[]>([]);
-  const [details, setDetails] = useState<any>();
+  const [details, setDetails] = useState<ItineraryType>();
 
   // Methods
   const fetchDetails = async () => {
@@ -140,7 +140,7 @@ export const Itinerary: NavioScreen = observer(() => {
 
   return (
     <SafeAreaView style={{flex: 1}} edges={['top', 'left', 'right']}>
-      <ImageBackground source={BG_IMAGE} resizeMode='cover'>
+      <ImageBackground source={details?.image_url ? {uri: details.image_url} : BG_IMAGE} resizeMode='cover'>
         <View style={styles.header}>
           <View style={styles.headerButton}>
             <IconButton

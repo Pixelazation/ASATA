@@ -23,7 +23,7 @@ export const MyItineraries: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const params = navio.useParams<Params>();
 
-  const [itineraries, setItineraries] = useState<any[]>([]);
+  const [itineraries, setItineraries] = useState<ItineraryType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
@@ -94,6 +94,7 @@ export const MyItineraries: NavioScreen = observer(() => {
               location={itinerary.location || "No location specified"}
               startDate={itinerary.start_date}
               endDate={itinerary.end_date}
+              imageUrl={itinerary.image_url}
               onDelete={() => deleteItinerary(itinerary.id)}
             />
           ))

@@ -5,7 +5,6 @@ import { supabase } from "../../lib/supabase";
 export class MediaApi {
   static async pickImage(): Promise<ImagePicker.ImagePickerAsset | null> {
     const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
       base64: true,
     });
 
@@ -16,7 +15,7 @@ export class MediaApi {
     return null;
   }
 
-  static async uploadImage(imageData: ImagePicker.ImagePickerAsset) {
+  static async uploadImage(imageData: ImagePicker.ImagePickerAsset): Promise<string> {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
 
