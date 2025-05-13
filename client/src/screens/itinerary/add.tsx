@@ -1,5 +1,5 @@
-import React from 'react';
-import { Alert, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet } from 'react-native';
 import { DateTimePicker, Text, View } from 'react-native-ui-lib';
 import { observer } from 'mobx-react';
 import { NavioScreen } from 'rn-navio';
@@ -13,6 +13,9 @@ import { colors } from '../../utils/designSystem';
 import { ItineraryApi } from '../../services/api/itineraries';
 import { dateToDateString } from '../../utils/dateutils';
 import { Icon } from '../../components/icon';
+import { MediaApi } from '../../services/api/media';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ImagePickerAsset } from 'expo-image-picker';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -35,6 +38,8 @@ export const ItineraryForm: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const params = navio.useParams<Params>();
 
+  const [imageData, setImageData] = useState<ImagePickerAsset | null>(null);
+
   React.useEffect(() => {
     navigation.setOptions({});
   }, []);
@@ -53,8 +58,25 @@ export const ItineraryForm: NavioScreen = observer(() => {
     }
   };
 
+  const getImage = async () => {
+    const uri = await MediaApi.pickImage();
+    if (uri) {
+      setImageData(uri);
+    }
+  }
+
+  const uploadImage = async () => {
+    try {
+      const url = await MediaApi.uploadImage(imageData!);
+      console.log('Image uploaded successfully:', url);
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      Alert.alert('Upload Failed', 'Something went wrong while uploading the image.');
+    }
+  }
+
   return (
-    <View>
+    <SafeAreaView style={{ flex: 1 }}>
       <Text section style={styles.header}>Add Itinerary</Text>
         <Formik
         initialValues={{
@@ -68,7 +90,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
         onSubmit={addItinerary}
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
-          <ScrollView contentContainerStyle={{ gap: 16, padding: 16 }}>
+          <ScrollView contentContainerStyle={{ gap: 16, padding: 16, flexGrow: 1 }}>
             <FormField
               label="Itinerary Name"
               placeholder="e.g. Cebu Trip"
@@ -157,10 +179,48 @@ export const ItineraryForm: NavioScreen = observer(() => {
                 Submit
               </Text>
             </View>
+
+            <View style={{ marginTop: 16 }}>
+              <Text
+                onPress={getImage}
+                style={{
+                  backgroundColor: colors.primary,
+                  color: 'white',
+                  padding: 12,
+                  borderRadius: 8,
+                  textAlign: 'center',
+                }}
+              >
+                Get Image
+              </Text>
+            </View>
+            {imageData && (
+              <View>
+                <Image
+                  source={{ uri: imageData.uri }}
+                  style={{ width: 300, height: 200, marginTop: 20, borderRadius: 10 }}
+                  resizeMode="cover"
+                />
+                <Text
+                  onPress={uploadImage}
+                  style={{
+                    backgroundColor: colors.primary,
+                    color: 'white',
+                    padding: 12,
+                    borderRadius: 8,
+                    textAlign: 'center',
+                  }}
+                >
+                  Upload
+                </Text>
+              </View>
+              
+              
+            )}
           </ScrollView>
         )}
       </Formik>
-    </View>
+    </SafeAreaView>
   );
 });
 
