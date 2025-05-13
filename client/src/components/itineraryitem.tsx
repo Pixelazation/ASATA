@@ -4,7 +4,7 @@ import { ImageBackground, StyleSheet } from "react-native";
 import { Row } from "./row";
 import { IconButton } from "./iconbutton";
 import { timestampToDateString } from "../utils/dateutils";
-import { BG_IMAGE } from '../assets';
+import { BG_IMAGE_2 } from '../assets';
 import { Icon } from './icon';
 import { useServices } from '../services';
 
@@ -34,7 +34,7 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
       <View style={styles.titleContainer}>
         <Text style={{fontWeight: "bold"}}>{name}</Text>
       </View>
-      <ImageBackground source={imageUrl ? {uri: imageUrl} : BG_IMAGE} style={styles.imageContainer} imageStyle={styles.image} resizeMode="cover">
+      <ImageBackground source={imageUrl ? {uri: imageUrl} : BG_IMAGE_2} style={styles.imageContainer} imageStyle={styles.image} resizeMode="cover">
         <Row style={styles.locationContainer}>
           <Icon name="location" color={Colors.red30} size={20}/>
           <Text>{location}</Text>
