@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Colors } from "react-native-ui-lib";
-import { ImageBackground, StyleSheet } from "react-native";
+import { ImageBackground, Pressable, StyleSheet } from "react-native";
 import { Row } from "./row";
 import { IconButton } from "./iconbutton";
 import { timestampToDateString } from "../utils/dateutils";
@@ -30,7 +30,7 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
   const {t, navio} = useServices();
 
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={() => navio.push('Itinerary', {itineraryId: id})}>
       <View style={styles.titleContainer}>
         <Text style={{fontWeight: "bold"}}>{name}</Text>
       </View>
@@ -53,7 +53,7 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
           </Row>
         </View>
       </ImageBackground>
-    </View>
+    </Pressable>
   );
 };
 

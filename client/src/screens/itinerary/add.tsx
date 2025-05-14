@@ -18,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { BG_IMAGE_2 } from '../../assets';
 import { ImagePicker } from '../../components/molecules/image-picker';
+import { HeaderBack } from '../../components/molecules/header-back';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -78,7 +79,9 @@ export const ItineraryForm: NavioScreen = observer(() => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ImageBackground source={image ? {uri: image.uri} : BG_IMAGE_2} resizeMode='cover' style={{minHeight: 100, justifyContent: 'center', alignItems: 'center', paddingBottom: 10, marginBottom: -20}}/>
+      <ImageBackground source={image ? {uri: image.uri} : BG_IMAGE_2} resizeMode='cover' style={{minHeight: 100, padding: 20, marginBottom: -20}}>
+        <HeaderBack />
+      </ImageBackground>
       <View bg-white style={{ paddingHorizontal: 32, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
         <Formik
           initialValues={{

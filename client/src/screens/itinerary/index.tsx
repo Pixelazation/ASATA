@@ -7,7 +7,7 @@ import SlidingUpPanel from 'rn-sliding-up-panel';
 
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
-import { BG_IMAGE } from '../../assets';
+import { BG_IMAGE_2 } from '../../assets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Activity } from '../../components/activity';
 import { LineProgressHead } from '../../components/atoms/line-progress-head';
@@ -16,6 +16,7 @@ import { FloatingActionButton } from '../../components/atoms/floating-action-but
 import { ItineraryApi } from '../../services/api/itineraries';
 import { FloatingActionMenu } from '../../components/molecules/floating-action-menu';
 import { useFocusEffect } from '@react-navigation/native';
+import { HeaderBack } from '../../components/molecules/header-back';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -140,14 +141,9 @@ export const Itinerary: NavioScreen = observer(() => {
 
   return (
     <SafeAreaView style={{flex: 1}} edges={['top', 'left', 'right']}>
-      <ImageBackground source={details?.image_url ? {uri: details.image_url} : BG_IMAGE} resizeMode='cover'>
+      <ImageBackground source={details?.image_url ? {uri: details.image_url} : BG_IMAGE_2} resizeMode='cover'>
         <View style={styles.header}>
-          <View style={styles.headerButton}>
-            <IconButton
-              name='arrow-back'
-              onPress={() => navigation.goBack()}
-            />
-          </View>
+          <HeaderBack />
           <View style={styles.headerButton}>
             <IconButton
               name={editMode ? 'eye' : 'pencil'}
