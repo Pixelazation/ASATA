@@ -48,7 +48,7 @@ export const ImagePicker: React.FC<Props> = (props) => {
             onPress={() => setImage(null)}
             style={styles.closeButton}
           >
-            <Icon name="close" size={18} color="#fff" />
+            <Icon name="close" size={18} color={colors.primary} />
           </TouchableOpacity>
         )}
       </View>
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     left: 8,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(255,255,255,0.8)',
     padding: 6,
     borderRadius: 999,
     zIndex: 10,

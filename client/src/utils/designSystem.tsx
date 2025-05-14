@@ -16,8 +16,9 @@ import {Appearance} from '@app/utils/types/enums';
 
 export const colors = {
   primary: '#016A42',
-  secondary: '#469c57',
+  secondary: '#ECF2F0',
   accent: '#016A42',
+  placeholder: '#79767D',
   bgBlue: '#91B9E0',
   _black: Colors.rgba(20, 20, 20, 1),
   _black2: Colors.rgba(50, 50, 50, 1),
