@@ -20,6 +20,7 @@ import { ImagePickerAsset } from 'expo-image-picker';
 import { RadioOption } from '../../../components/atoms/radio-option';
 import { RadioSelection } from '../../../components/molecules/radio-selection';
 import { IconName } from '../../../components/icon';
+import { MediaApi } from '../../../services/api/media';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -62,6 +63,7 @@ export const ActivityForm: NavioScreen = observer(() => {
     try {
       const newActivity = {
         cost: 500,
+        image_url: await uploadImage(),
         ...values
       };
 
@@ -94,6 +96,21 @@ export const ActivityForm: NavioScreen = observer(() => {
       }
     }
   };
+
+  const uploadImage = async (): Promise<string|null> => {
+      if (!image) return null;
+  
+      try {
+        const url = await MediaApi.uploadImage(image!);
+        console.log('Image uploaded successfully:', url);
+        return url;
+      } catch (error) {
+        console.error('Image upload failed:', error);
+        Alert.alert('Upload Failed', 'Something went wrong while uploading the image.');
+      }
+  
+      return null;
+    }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

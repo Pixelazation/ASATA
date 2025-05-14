@@ -16,7 +16,7 @@ type Props = {
 };
 
 export const Activity: React.FC<Props> = ({activity, editMode = false, handleDelete}) => {
-  const {id, start_time, end_time, cost, category, description, name} = activity;
+  const {id, start_time, end_time, cost, category, description, name, image_url} = activity;
   const startTime = timestampToDateTimeString(start_time);
 
   const finished = new Date(start_time) < new Date();
@@ -41,7 +41,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
               <Text style={styles.descText}>
                 {description}
               </Text>
-              <Image source={BG_IMAGE} resizeMode='cover' style={styles.descImg} />
+              <Image source={image_url ? {uri: image_url} : BG_IMAGE} resizeMode='cover' style={styles.descImg} />
             </View>
           </View>
           <View style={styles.footer}>
