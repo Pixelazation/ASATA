@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Image, ScrollView, StyleSheet } from "react-native";
+import { ActivityIndicator, Image, ScrollView, StyleSheet } from "react-native";
 import { Text, View, Button, Colors } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
@@ -13,6 +13,7 @@ import { colors } from '../utils/designSystem';
 import { FloatingActionButton } from '../components/atoms/floating-action-button';
 import { useFocusEffect } from '@react-navigation/native';
 import { CHIBI_EMPTY } from '../assets';
+import { Activity } from '../components/activity';
 
 export type Params = {
   itineraryId?: string;
@@ -85,7 +86,10 @@ export const MyItineraries: NavioScreen = observer(() => {
       <Text section style={styles.header}>My Itineraries</Text>
       <ScrollView contentContainerStyle={{flex: 1, flexGrow: 1}} contentInsetAdjustmentBehavior="always">
         {loading ? (
-          <Text text70M>    Loading itineraries...</Text>
+          <View style={{ flex: 1, flexGrow: 1, gap: 16, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size={120} color={colors.primary} />
+            <Text style={{ textAlign: 'center' }}>Fetching itineraries</Text>
+          </View>
         ) : itineraries.length > 0 ? (
           itineraries.map((itinerary) => (
             <ItineraryItem
