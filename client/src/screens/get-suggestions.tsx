@@ -1,5 +1,3 @@
-// Full updated GetSuggestions.tsx
-
 import React, { useRef, useState } from "react";
 import {
   ScrollView,
