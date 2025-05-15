@@ -163,8 +163,9 @@ export const Itinerary: NavioScreen = observer(() => {
                 {activities.length > 0 ? (
                   <View style={{flex: 1, padding: 16}}>
                     <View style={styles.dragHandleBar} />
-                    <View style={{paddingBottom: 16}}>
+                    <View style={{paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                       <Text section>{details?.title}</Text>
+                      {editMode && <IconButton name="pencil" onPress={() => navio.push('ItineraryForm', {itineraryId})}/>}
                     </View>
                     <ScrollView contentContainerStyle={{paddingBottom: 100}} showsVerticalScrollIndicator={false}>
                       <View>
@@ -185,6 +186,7 @@ export const Itinerary: NavioScreen = observer(() => {
                     <View style={styles.dragHandleBar} />
                     <View style={{paddingBottom: 16}}>
                       <Text section>{details?.title}</Text>
+                      {editMode && <IconButton name="pencil" onPress={() => navio.push('ItineraryForm', {itineraryId})}/>}
                     </View>
                     <Image source={CHIBI_EMPTY} style={{ height: 160, aspectRatio: 1, alignSelf: "center" }} />
                     <View style={{ padding: 32 }}>
