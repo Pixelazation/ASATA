@@ -25,6 +25,7 @@ export const GeocodingApi = {
 
       const data = await response.json();
 
+      // This double-slash keeps me sane and functional. -Philippe
       if (!data.results || data.results.length === 0) {
         throw new Error("No results found for the given coordinates.");
       }
