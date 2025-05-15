@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {View, Text} from 'react-native-ui-lib';
 import { LineProgressNode } from './atoms/line-progress-node';
 import { Icon } from './icon';
-import { Image, StyleSheet } from 'react-native';
+import { Image, Pressable, StyleSheet } from 'react-native';
 import { BG_IMAGE } from '../assets';
 import { IconButton } from './iconbutton';
 import { ItineraryApi } from '../services/api/itineraries';
 import { timestampToDateTimeString } from '../utils/dateutils';
+import { ActivityModal } from './molecules/activity-modal';
 
 type Props = {
   activity: ActivityType;
@@ -15,10 +16,12 @@ type Props = {
 };
 
 export const Activity: React.FC<Props> = ({activity, editMode = false, handleDelete}) => {
-  const {id, start_time, end_time, cost, category, description, name} = activity;
+  const {id, start_time, end_time, cost, category, description, name, image_url} = activity;
   const startTime = timestampToDateTimeString(start_time);
 
   const finished = new Date(start_time) < new Date();
+
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   return (
     <View style={styles.container}>
@@ -27,7 +30,8 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
         <Text style={styles.time}>
           {startTime}
         </Text>
-        <View style={styles.details}>
+        <ActivityModal visible={modalVisible} activityDetails={activity} closeModal={() => setModalVisible(false)} />
+        <Pressable style={styles.details} onPress={() => setModalVisible(true)}>
           <View style={styles.body}>
             <View style={styles.title}>
               <Icon name='cafe' size={24} color='black' />
@@ -37,7 +41,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
               <Text style={styles.descText}>
                 {description}
               </Text>
-              <Image source={BG_IMAGE} resizeMode='cover' style={styles.descImg} />
+              <Image source={image_url ? {uri: image_url} : BG_IMAGE} resizeMode='cover' style={styles.descImg} />
             </View>
           </View>
           <View style={styles.footer}>
@@ -51,7 +55,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
               </View>
             )}
           </View>
-        </View>
+        </Pressable>
       </View>
     </View>
   );
