@@ -8,6 +8,7 @@ import { IconButton } from './iconbutton';
 import { ItineraryApi } from '../services/api/itineraries';
 import { timestampToDateTimeString } from '../utils/dateutils';
 import { ActivityModal } from './molecules/activity-modal';
+import { useServices } from '../services';
 
 type Props = {
   activity: ActivityType;
@@ -16,7 +17,9 @@ type Props = {
 };
 
 export const Activity: React.FC<Props> = ({activity, editMode = false, handleDelete}) => {
-  const {id, start_time, end_time, cost, category, description, name, image_url} = activity;
+  const {navio} = useServices();
+
+  const {id, itinerary_id, start_time, end_time, cost, category, description, name, image_url} = activity;
   const startTime = timestampToDateTimeString(start_time);
 
   const finished = new Date(start_time) < new Date();
@@ -50,7 +53,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
             </Text>
             {editMode && (
               <View style={styles.footerButtons}>
-                <IconButton name='pencil' onPress={() => {}}/>
+                <IconButton name='pencil' onPress={() => {navio.push('ActivityForm', {itinerary_id, activity})}}/>
                 <IconButton name='trash' color='red' onPress={() => handleDelete(id!)}/>
               </View>
             )}

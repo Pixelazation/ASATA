@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Image, ImageBackground, ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, Image, ImageBackground, ScrollView, StyleSheet } from 'react-native';
 import { DateTimePicker, Text, View } from 'react-native-ui-lib';
 import { observer } from 'mobx-react';
 import { NavioScreen } from 'rn-navio';
@@ -22,6 +22,7 @@ import { HeaderBack } from '../../components/molecules/header-back';
 
 export type Params = {
   type?: 'push' | 'show';
+  itineraryId?: string;
 };
 
 const ItinerarySchema = Yup.object().shape({
@@ -39,11 +40,17 @@ export const ItineraryForm: NavioScreen = observer(() => {
   useAppearance();
   const { t, navio } = useServices();
   const navigation = navio.useN();
-  const params = navio.useParams<Params>();
+  const { itineraryId } = navio.useParams<Params>();
 
-  const [image, setImage] = useState<ImagePickerAsset | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [details, setDetails] = useState<ItineraryType>();
+  const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
 
   React.useEffect(() => {
+    if (itineraryId) {
+      fetchDetails();
+    }
+
     navigation.setOptions({});
   }, []);
 
@@ -58,7 +65,36 @@ export const ItineraryForm: NavioScreen = observer(() => {
       console.log(newItinerary);
       navio.goBack();
     } catch (error) {
-      console.error("Error adding activity:", error);
+      console.error("Error adding itinerary:", error);
+    }
+  };
+
+  const fetchDetails = async () => {
+      setLoading(true);
+      try {
+        const data = await ItineraryApi.getItineraryDetails(itineraryId!);
+        console.log("Fetched itinerary:", data); // Debugging log
+        setDetails(data);
+        setImage(data.image_url);
+      } catch (error) {
+        console.error("Error fetching details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  const updateItinerary = async (values: any) => {
+    try {
+      const newItineraryDetails = {
+        image_url: typeof(image) != 'string' ? await uploadImage() : image,
+        ...values
+      };
+
+      await ItineraryApi.updateItinerary(itineraryId!, newItineraryDetails);
+      console.log(newItineraryDetails);
+      navio.goBack();
+    } catch (error) {
+      console.error("Error updating itinerary:", error);
     }
   };
 
@@ -66,7 +102,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
     if (!image) return null;
 
     try {
-      const url = await MediaApi.uploadImage(image!);
+      const url = await MediaApi.uploadImage(image as ImagePickerAsset);
       console.log('Image uploaded successfully:', url);
       return url;
     } catch (error) {
@@ -77,14 +113,26 @@ export const ItineraryForm: NavioScreen = observer(() => {
     return null;
   }
 
-  return (
+  return loading ? (
+    <View style={{ flex: 1, flexGrow: 1, gap: 16, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size={120} color={colors.primary} />
+      <Text style={{ textAlign: 'center' }}>Fetching details</Text>
+    </View>
+  ) : (
     <SafeAreaView style={{ flex: 1 }}>
-      <ImageBackground source={image ? {uri: image.uri} : BG_IMAGE_2} resizeMode='cover' style={{minHeight: 100, padding: 20, marginBottom: -20}}>
+      <ImageBackground source={image ? {uri: typeof(image) == 'string' ? image: image.uri} : BG_IMAGE_2} resizeMode='cover' style={{minHeight: 100, padding: 20, marginBottom: -20}}>
         <HeaderBack />
       </ImageBackground>
       <View bg-white style={{ paddingHorizontal: 32, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
         <Formik
-          initialValues={{
+          enableReinitialize
+          initialValues={details ? {
+            title: details.title,
+            start_date: new Date(details.start_date),
+            end_date: new Date(details.end_date),
+            budget: details.budget.toString(),
+            location: details.location,
+          } : {
             title: '',
             start_date: null,
             end_date: null,
@@ -92,11 +140,11 @@ export const ItineraryForm: NavioScreen = observer(() => {
             location: '',
           }}
           validationSchema={ItinerarySchema}
-          onSubmit={addItinerary}
+          onSubmit={itineraryId ? updateItinerary : addItinerary}
         >
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
             <ScrollView contentContainerStyle={{ gap: 8, marginTop: 8, flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-              <Text section style={styles.header}>Add Itinerary</Text>
+              <Text section style={styles.header}>{itineraryId ? "Edit" : "Add"} Itinerary</Text>
               <FormField
                 label="Itinerary Name"
                 placeholder="e.g. Cebu Trip"
@@ -184,7 +232,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
                     textAlign: 'center',
                   }}
                 >
-                  Save Itinerary
+                  {itineraryId ? "Update" : "Create"} Itinerary
                 </Text>
               </View>
             </ScrollView>
