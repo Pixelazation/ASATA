@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ImageBackground, ScrollView, StyleSheet, Text } from "react-native";
 import { View, Button } from "react-native-ui-lib";
 import { observer } from "mobx-react";
@@ -12,30 +12,58 @@ import { Icon } from "@app/components/icon";
 import { LocationTracker } from "@app/components/location-tracker";
 import { WeatherTracker } from "@app/components/weather-tracker";
 import { sendTestNotification, requestNotificationPermissions } from "@app/services/notifications";
+import { supabase } from "../lib/supabase";
 
 export const Main: NavioScreen = observer(() => {
   const { navio } = useServices();
   const navigation = navio.useN();
 
+  interface PromotionItem {
+    title: string;
+    image: { uri: string };
+    link: string;
+  }
+  
+  const [promotionItems, setPromotionItems] = useState<PromotionItem[]>([]);
+
   useEffect(() => {
     configureUI();
     requestNotificationPermissions(); // Ask for notification permissions
+    fetchPromotionItems(); // Fetch data from Supabase
   }, []);
 
   const configureUI = () => {
     navigation.setOptions({});
   };
 
+  const fetchPromotionItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("location_details_cache")
+        .select("name, web_url, see_all_photos");
+
+      if (error) {
+        console.error("Error fetching promotion items:", error);
+        return;
+      }
+      
+      // Map the data to the required structure
+      const items = data.map((item) => ({
+        title: item.name,
+        image: { uri: item.see_all_photos },
+        link: item.web_url,
+      }));
+
+      setPromotionItems(items);
+    } catch (error) {
+      console.error("Unexpected error fetching promotion items:", error);
+    }
+  };
+  
   const recommendationItems = [
     { title: "Recommendation 1", image: BG_IMAGE },
     { title: "Recommendation 2", image: BG_IMAGE },
     { title: "Recommendation 3", image: BG_IMAGE },
-  ];
-
-  const promotionItems = [
-    { title: "Promotion 1", image: BG_IMAGE },
-    { title: "Promotion 2", image: BG_IMAGE },
-    { title: "Promotion 3", image: BG_IMAGE },
   ];
 
   return (
@@ -63,7 +91,7 @@ export const Main: NavioScreen = observer(() => {
 
             <ItineraryTracker />
 
-            <Carousel title="Explore new places..." items={recommendationItems} />
+            {/* <Carousel title="Explore new places..." items={recommendationItems} /> */}
             <Carousel title="Promotions" items={promotionItems} />
             <LocationTracker />
             <WeatherTracker />
