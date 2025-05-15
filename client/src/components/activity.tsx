@@ -30,7 +30,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
         <Text style={styles.time}>
           {startTime}
         </Text>
-        <ActivityModal visible={modalVisible} closeModal={() => setModalVisible(false)} />
+        <ActivityModal visible={modalVisible} activityDetails={activity} closeModal={() => setModalVisible(false)} />
         <Pressable style={styles.details} onPress={() => setModalVisible(true)}>
           <View style={styles.body}>
             <View style={styles.title}>

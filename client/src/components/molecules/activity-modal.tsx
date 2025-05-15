@@ -7,10 +7,13 @@ import { colors } from '../../utils/designSystem';
 
 type Props = {
   visible: boolean;
+  activityDetails: ActivityType;
   closeModal: () => void;
 };
 
-export const ActivityModal: React.FC<Props> = ({visible, closeModal}) => {
+export const ActivityModal: React.FC<Props> = ({visible, activityDetails, closeModal}) => {
+  const {start_time, end_time, cost, category, description, name, image_url, location} = activityDetails;
+
   return (
     <Modal
       transparent={true}
@@ -22,7 +25,7 @@ export const ActivityModal: React.FC<Props> = ({visible, closeModal}) => {
       <View style={styles.centeredContainer}>
       <Pressable style={styles.details}>
         <View style={styles.body}>
-          <ImageBackground source={BG_IMAGE} resizeMode='cover' style={styles.descImg}>
+          <ImageBackground source={image_url ? {uri: image_url} : BG_IMAGE} resizeMode='cover' style={styles.descImg}>
             <View style={{ flexGrow: 1 }}>
               <View style={styles.calendar}>
                 <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>
@@ -36,7 +39,7 @@ export const ActivityModal: React.FC<Props> = ({visible, closeModal}) => {
             
             <View style={styles.description}>
               <Text style={{ color: 'white', fontSize: 12 }}>
-                Description goes here test
+                {description}
               </Text>
             </View>
           </ImageBackground>
@@ -44,10 +47,10 @@ export const ActivityModal: React.FC<Props> = ({visible, closeModal}) => {
             DAY 00:00 PM
           </Text>
           <Text style={styles.placeName}>
-            Place Name
+            {name}
           </Text>
           <Text style={styles.address}>
-            Address: Lorem ipsum
+            {location}
           </Text>
         </View>
         <View style={styles.footer}>

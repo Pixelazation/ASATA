@@ -6,6 +6,7 @@ type ActivityType = {
   cost: number;
   category: string
   description: string;
+  location: string;
   image_url?: string | null;
   [key: string]: any;
 }
