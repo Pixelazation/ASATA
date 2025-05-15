@@ -59,6 +59,7 @@ export const ActivityForm: NavioScreen = observer(() => {
   React.useEffect(() => {
     if (activity) {
       setImage(activity.image_url as string | null);
+      setCategory(activity.category);
     }
 
     navigation.setOptions({});
@@ -67,7 +68,7 @@ export const ActivityForm: NavioScreen = observer(() => {
   const addActivity = async (values: any) => {
     try {
       const newActivity = {
-        cost: 500,
+        category: category,
         image_url: await uploadImage(),
         ...values
       };
@@ -149,7 +150,6 @@ export const ActivityForm: NavioScreen = observer(() => {
             description: activity.description,
             start_time: new Date(activity.start_time),
             end_time: new Date(activity.end_time),
-            category: activity.category,
             location: activity.location,
             cost: activity.cost ? activity.cost.toString() : '',
           } : {

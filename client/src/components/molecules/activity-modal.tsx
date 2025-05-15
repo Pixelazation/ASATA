@@ -5,6 +5,7 @@ import { ImageBackground, Pressable, StyleSheet, Touchable, TouchableWithoutFeed
 import { BG_IMAGE } from '../../assets';
 import { colors } from '../../utils/designSystem';
 import { dayFromTimestamp, monthFromTimestamp, timeAndDayOfWeekFromTimestamp } from '../../utils/dateutils';
+import { getActivityIcon } from '../../utils/activity-icons';
 
 type Props = {
   visible: boolean;
@@ -48,7 +49,7 @@ export const ActivityModal: React.FC<Props> = ({visible, activityDetails, closeM
             {timeAndDayOfWeekFromTimestamp(start_time)}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Icon name='cafe' size={28} color='black' />
+            <Icon name={getActivityIcon(category)} size={28} color='black' />
             <Text style={styles.placeName}>
               {name}
             </Text>
