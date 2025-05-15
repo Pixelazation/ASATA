@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   ScrollView,
   TextInput,
@@ -22,6 +22,7 @@ import { LocationPhotosApi } from "@app/services/api/location-photos";
 import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location"; // Import expo-location
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -130,6 +131,37 @@ export const GetSuggestions: NavioScreen = observer(() => {
     setSelectedLocation(null);
   };
 
+  // Fetch current location on screen load
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission Denied", "Location permission is required to set the default pin.");
+          return;
+        }
+
+        const currentLocation = await Location.getCurrentPositionAsync({});
+        const coords = {
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+        };
+        console.log(coords)
+        setSelectedLocation(coords);
+
+        // Optionally, reverse geocode to get the address
+        const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
+        if (geocodeResult) {
+          const { route, city, country } = geocodeResult;
+          setLocation(`${route}, ${city}, ${country}`);
+        }
+      } catch (error) {
+        console.error("Error fetching current location:", error);
+        Alert.alert("Error", "Failed to fetch current location.");
+      }
+    })();
+  }, []); // Run only once when the component mounts
+
   // Update search bar opacity based on panel position
   const updateSearchBarOpacity = (panelHeight: number) => {
     const opacity = 1 - (panelHeight - PANEL_MIN_HEIGHT) / (PANEL_MAX_HEIGHT - PANEL_MIN_HEIGHT);
@@ -214,8 +246,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
         provider={PROVIDER_DEFAULT}
         style={StyleSheet.absoluteFillObject}
         initialRegion={{
-          latitude: 10.321684,
-          longitude: 123.898671,
+          latitude: selectedLocation?.latitude || 10.321684, // Default latitude
+          longitude: selectedLocation?.longitude || 123.898671, // Default longitude
           latitudeDelta: 0.1922,
           longitudeDelta: 0.1421,
         }}
