@@ -21,7 +21,6 @@ import { LocationDetailsApi } from "@app/services/api/locationdetails";
 import { LocationPhotosApi } from "@app/services/api/location-photos";
 import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
-import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location"; // Import expo-location
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -48,7 +47,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
   const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
 
-  // Animation refs
   const animatedY = useRef(new Animated.Value(PANEL_MIN_HEIGHT)).current;
   const searchBarOpacity = useRef(new Animated.Value(1)).current;
   const isExpandedRef = useRef(false);
@@ -73,16 +71,23 @@ export const GetSuggestions: NavioScreen = observer(() => {
       let category = "";
       if (selectedOption === "recreation") category = "attractions";
       else if (selectedOption === "diner") category = "restaurants";
+      else if (selectedOption === "accommodation") category = "hotels";
 
       let query = location;
 
       if (!selectedLocation && location.trim()) {
-        query = `${location} ${selectedOption === "recreation" ? selectedRecreation.join(", ") : selectedDiner.join(", ")}`;
+        const selectedFilters =
+          selectedOption === "recreation" ? selectedRecreation.join(", ") :
+          selectedOption === "diner" ? selectedDiner.join(", ") : "";
+        query = `${location} ${selectedFilters}`;
       } else if (selectedLocation) {
         const geocodeResult = await GeocodingApi.reverseGeocode(selectedLocation.latitude, selectedLocation.longitude);
         if (geocodeResult) {
           const { route, city, country } = geocodeResult;
-          query = `${route}, ${city}, ${country} ${selectedOption === "recreation" ? selectedRecreation.join(", ") : selectedDiner.join(", ")}`;
+          const selectedFilters =
+            selectedOption === "recreation" ? selectedRecreation.join(", ") :
+            selectedOption === "diner" ? selectedDiner.join(", ") : "";
+          query = `${route}, ${city}, ${country} ${selectedFilters}`;
         }
       }
 
@@ -163,16 +168,16 @@ export const GetSuggestions: NavioScreen = observer(() => {
   }, []); // Run only once when the component mounts
 
   // Update search bar opacity based on panel position
+
   const updateSearchBarOpacity = (panelHeight: number) => {
     const opacity = 1 - (panelHeight - PANEL_MIN_HEIGHT) / (PANEL_MAX_HEIGHT - PANEL_MIN_HEIGHT);
     searchBarOpacity.setValue(opacity);
   };
 
-  // Toggle panel with animation
   const togglePanel = () => {
     const targetHeight = isExpandedRef.current ? PANEL_MIN_HEIGHT : PANEL_MAX_HEIGHT;
     isExpandedRef.current = !isExpandedRef.current;
-    
+
     Animated.parallel([
       Animated.spring(animatedY, {
         toValue: targetHeight,
@@ -184,11 +189,10 @@ export const GetSuggestions: NavioScreen = observer(() => {
         useNativeDriver: true,
       })
     ]).start();
-    
+
     currentY.current = targetHeight;
   };
 
-  // PanResponder for dragging the panel
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -197,7 +201,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
           PANEL_MIN_HEIGHT,
           Math.min(PANEL_MAX_HEIGHT, currentY.current - gestureState.dy)
         );
-        
         animatedY.setValue(newHeight);
         updateSearchBarOpacity(newHeight);
       },
@@ -206,23 +209,21 @@ export const GetSuggestions: NavioScreen = observer(() => {
           PANEL_MIN_HEIGHT,
           Math.min(PANEL_MAX_HEIGHT, currentY.current - gestureState.dy)
         );
-        
+
         const velocityThreshold = 0.5;
         const isFastSwipe = Math.abs(gestureState.vy) > velocityThreshold;
-        
+
         let targetHeight;
-        
+
         if (isFastSwipe) {
-          // Fast swipe - go in swipe direction
           targetHeight = gestureState.vy > 0 ? PANEL_MIN_HEIGHT : PANEL_MAX_HEIGHT;
         } else {
-          // Snap to nearest based on position
           const halfwayPoint = PANEL_MIN_HEIGHT + (PANEL_MAX_HEIGHT - PANEL_MIN_HEIGHT) / 2;
           targetHeight = currentY.current > halfwayPoint ? PANEL_MAX_HEIGHT : PANEL_MIN_HEIGHT;
         }
-        
+
         isExpandedRef.current = targetHeight === PANEL_MAX_HEIGHT;
-        
+
         Animated.parallel([
           Animated.spring(animatedY, {
             toValue: targetHeight,
@@ -234,7 +235,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
             useNativeDriver: true,
           })
         ]).start();
-        
+
         currentY.current = targetHeight;
       },
     })
@@ -258,7 +259,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
         )}
       </MapView>
 
-      {/* Floating Search Bar with fade effect */}
       <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity }]}>
         <TextInput
           placeholder="Search Location"
@@ -268,15 +268,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
         />
       </Animated.View>
 
-      {/* Draggable Sliding Panel */}
       <Animated.View
         style={[styles.slidingPanel, { height: animatedY }]}
         {...panResponder.panHandlers}
       >
         <View style={styles.panelContent}>
           <Text text50 marginB-s2>Get Suggestions</Text>
-          
-          {/* Drag handle */}
+
           <TouchableOpacity 
             style={styles.dragHandle} 
             onPress={togglePanel}
@@ -288,7 +286,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
           <View style={styles.categoryContainer}>
             <TouchableOpacity
               style={[styles.categoryBox, selectedOption === "accommodation" && styles.categoryBoxSelected]}
-              onPress={() => {}}
+              onPress={() => setSelectedOption("accommodation")}
               activeOpacity={0.8}
             >
               <Text style={styles.categoryIcon}>🏨</Text>
@@ -314,7 +312,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
             </TouchableOpacity>
           </View>
 
-          {/* Scrollable Content */}
           <ScrollView style={styles.scrollContainer}>
             {selectedOption === "recreation" && (
               <View>
