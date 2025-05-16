@@ -6,7 +6,7 @@ import { NavioScreen } from "rn-navio";
 import { useServices } from "@app/services";
 import { ItineraryTracker } from "../components/itinerary-tracker";
 import { Carousel } from "../components/carousel";
-import { BG_IMAGE } from "@app/assets";
+import { BG_IMAGE_2 } from "@app/assets";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon } from "@app/components/icon";
 import { LocationTracker } from "@app/components/location-tracker";
@@ -61,14 +61,14 @@ export const Main: NavioScreen = observer(() => {
   };
   
   const recommendationItems = [
-    { title: "Recommendation 1", image: BG_IMAGE },
-    { title: "Recommendation 2", image: BG_IMAGE },
-    { title: "Recommendation 3", image: BG_IMAGE },
+    { title: "Recommendation 1", image: BG_IMAGE_2 },
+    { title: "Recommendation 2", image: BG_IMAGE_2 },
+    { title: "Recommendation 3", image: BG_IMAGE_2 },
   ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ImageBackground source={BG_IMAGE} style={styles.background}>
+      <ImageBackground source={BG_IMAGE_2} style={styles.background}>
         <ScrollView contentInsetAdjustmentBehavior="always">
           <View style={styles.opaqueContainer}>
             <View style={styles.buttonRow}>
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: "center",
+    height:300,
   },
   opaqueContainer: {
     flex: 1,

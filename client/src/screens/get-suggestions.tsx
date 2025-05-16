@@ -22,6 +22,7 @@ import { LocationPhotosApi } from "@app/services/api/location-photos";
 import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location"; // Import expo-location
+import { MaterialIcons } from '@expo/vector-icons'; // already imported
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -43,7 +44,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [region, setRegion] = useState({
+    latitude: 10.321684,
+    longitude: 123.898671,
+    latitudeDelta: 0.1922,
+    longitudeDelta: 0.1421,
+  });
+  const [deviceLocation, setDeviceLocation] = useState<{ latitude: number; longitude: number } | null>(null); // <-- store device location
 
   const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
   const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
@@ -52,6 +59,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const searchBarOpacity = useRef(new Animated.Value(1)).current;
   const isExpandedRef = useRef(false);
   const currentY = useRef(PANEL_MIN_HEIGHT);
+  const mapRef = useRef<MapView>(null);
 
   const toggleSelection = (item: string, type: "recreation" | "diner") => {
     if (type === "recreation") {
@@ -76,13 +84,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
       let query = location;
 
-      if (!selectedLocation && location.trim()) {
+      if (!region && location.trim()) {
         const selectedFilters =
           selectedOption === "recreation" ? selectedRecreation.join(", ") :
           selectedOption === "diner" ? selectedDiner.join(", ") : "";
         query = `${location} ${selectedFilters}`;
-      } else if (selectedLocation) {
-        const geocodeResult = await GeocodingApi.reverseGeocode(selectedLocation.latitude, selectedLocation.longitude);
+      } else if (region) {
+        const geocodeResult = await GeocodingApi.reverseGeocode(region.latitude, region.longitude);
         if (geocodeResult) {
           const { route, city, country } = geocodeResult;
           const selectedFilters =
@@ -123,7 +131,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const handleMapPress = async (event: any) => {
     const { coordinate } = event.nativeEvent;
-    setSelectedLocation(coordinate);
+    setRegion(coordinate);
 
     const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
     if (result) {
@@ -134,7 +142,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const handleLocationChange = (text: string) => {
     setLocation(text);
-    setSelectedLocation(null);
+    setRegion(null);
   };
 
   // Fetch current location on screen load
@@ -152,8 +160,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude,
         };
-        console.log(coords)
-        setSelectedLocation(coords);
+        setDeviceLocation(coords); // <-- store device location
+        setRegion({ ...coords, latitudeDelta: 0.1922, longitudeDelta: 0.1421 });
 
         // Optionally, reverse geocode to get the address
         const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
@@ -242,25 +250,94 @@ export const GetSuggestions: NavioScreen = observer(() => {
     })
   ).current;
 
+  // Update region when user moves the map
+  const handleRegionChangeComplete = async (newRegion: any) => {
+    setRegion(newRegion);
+
+    // Reverse geocode the center of the map
+    try {
+      const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
+      if (geocodeResult) {
+        const { route, city, country } = geocodeResult;
+        setLocation(`${route}, ${city}, ${country}`);
+      }
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+    }
+  };
+
+  // Center map on current device location
+  const handleCurrentLocation = async () => {
+    try {
+      // Use cached deviceLocation if available
+      let coords = deviceLocation;
+      if (!coords) {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission Denied", "Location permission is required.");
+          return;
+        }
+        const currentLocation = await Location.getCurrentPositionAsync({});
+        coords = {
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+        };
+        setDeviceLocation(coords); // cache for future use
+      }
+
+      const regionCoords = {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        latitudeDelta: 0.1922,
+        longitudeDelta: 0.1421,
+      };
+      setRegion(regionCoords);
+      mapRef.current?.animateToRegion(regionCoords, 1000);
+
+      // Optionally update location text
+      const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
+      if (geocodeResult) {
+        const { route, city, country } = geocodeResult;
+        setLocation(`${route}, ${city}, ${country}`);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch current location.");
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {/* Map and overlays (zIndex: 1) */}
       <MapView
+        ref={mapRef}
         provider={PROVIDER_DEFAULT}
         style={StyleSheet.absoluteFillObject}
-        initialRegion={{
-          latitude: selectedLocation?.latitude || 10.321684, // Default latitude
-          longitude: selectedLocation?.longitude || 123.898671, // Default longitude
-          latitudeDelta: 0.1922,
-          longitudeDelta: 0.1421,
-        }}
+        region={region}
+        onRegionChangeComplete={handleRegionChangeComplete}
         onPress={handleMapPress}
+      />
+      {/* Center Pin Overlay - zIndex: 1 */}
+      <View pointerEvents="none" style={{
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        marginLeft: -24,
+        marginTop: -110,
+        zIndex: 1, // Lower than sliding panel
+      }}>
+        <MaterialIcons name="place" size={48} color="#007AFF" />
+      </View>
+      {/* Current Location Button - zIndex: 1 */}
+      <TouchableOpacity
+        style={[styles.currentLocationButton, { zIndex: 1 }]}
+        onPress={handleCurrentLocation}
+        activeOpacity={0.7}
       >
-        {selectedLocation && (
-          <Marker coordinate={selectedLocation} title="Selected Location" />
-        )}
-      </MapView>
+        <MaterialIcons name="my-location" size={32} color="#007AFF" />
+      </TouchableOpacity>
 
-      <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity }]}>
+      {/* Search bar and sliding panel (higher zIndex) */}
+      <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity, zIndex: 10 }]}>
         <TextInput
           placeholder="Search Location"
           value={location}
@@ -270,11 +347,11 @@ export const GetSuggestions: NavioScreen = observer(() => {
       </Animated.View>
 
       <Animated.View
-        style={[styles.slidingPanel, { height: animatedY }]}
+        style={[styles.slidingPanel, { height: animatedY, zIndex: 10 }]}
         {...panResponder.panHandlers}
       >
         <View style={styles.panelContent}>
-          <Text text50 marginB-s2>Get Suggestions</Text>
+          {/* <Text text50 marginB-s2>Get Suggestions</Text> */}
 
           <TouchableOpacity 
             style={styles.dragHandle} 
@@ -356,7 +433,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
               </View>
             )}
 
-            <Button label="Get Suggestions" onPress={fetchSuggestions} marginB-s2 disabled={loading} />
+            <Button label="Confirm" onPress={fetchSuggestions} marginB-s2 disabled={loading} />
 
             {loading ? (
               <Text text70M>Loading suggestions...</Text>
@@ -500,5 +577,18 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 8,
     marginBottom: 10,
+  },
+  currentLocationButton: {
+    position: "absolute",
+    bottom: 220,
+    right: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    zIndex: 10,
   },
 });
