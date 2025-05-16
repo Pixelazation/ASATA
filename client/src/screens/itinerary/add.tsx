@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, ImageBackground, ScrollView, StyleSheet } from 'react-native';
-import { DateTimePicker, Text, View } from 'react-native-ui-lib';
+import { DateTimePicker, Text, View, Button } from 'react-native-ui-lib';
 import { observer } from 'mobx-react';
 import { NavioScreen } from 'rn-navio';
 import { Formik } from 'formik';
@@ -42,7 +42,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const { itineraryId } = navio.useParams<Params>();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [details, setDetails] = useState<ItineraryType>();
   const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
 
@@ -55,6 +55,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
   }, []);
 
   const addItinerary = async (values: any) => {
+    setLoading(true); // Disable button immediately
     try {
       const newItinerary = {
         image_url: await uploadImage(),
@@ -66,6 +67,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
       navio.goBack();
     } catch (error) {
       console.error("Error adding itinerary:", error);
+      setLoading(false); // Only re-enable if there's an error
     }
   };
 
@@ -84,6 +86,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
     };
 
   const updateItinerary = async (values: any) => {
+    setLoading(true); // Disable button immediately
     try {
       const newItineraryDetails = {
         image_url: typeof(image) != 'string' ? await uploadImage() : image,
@@ -95,6 +98,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
       navio.goBack();
     } catch (error) {
       console.error("Error updating itinerary:", error);
+      setLoading(false); // Only re-enable if there's an error
     }
   };
 
@@ -143,7 +147,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
           onSubmit={itineraryId ? updateItinerary : addItinerary}
         >
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
-            <ScrollView contentContainerStyle={{ gap: 8, marginTop: 8, flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+            <ScrollView contentContainerStyle={{ gap: 8, marginTop: 8, flexGrow: 1, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
               <Text section style={styles.header}>{itineraryId ? "Edit" : "Add"} Itinerary</Text>
               <FormField
                 label="Itinerary Name"
@@ -222,18 +226,23 @@ export const ItineraryForm: NavioScreen = observer(() => {
               <ImagePicker image={image} setImage={setImage}/>
 
               <View style={{ marginTop: 16 }}>
-                <Text
-                  onPress={handleSubmit as any}
+                <Button
+                  label={
+                    loading
+                      ? (itineraryId ? "Updating..." : "Creating...") + " Itinerary"
+                      : (itineraryId ? "Update" : "Create") + " Itinerary"
+                  }
+                  onPress={loading ? undefined : handleSubmit as any}
+                  backgroundColor={loading ? '#d3d3d3' : colors.primary}
+                  color={loading ? '#888' : 'white'}
                   style={{
-                    backgroundColor: colors.primary,
-                    color: 'white',
                     padding: 12,
                     borderRadius: 8,
-                    textAlign: 'center',
+                    opacity: loading ? 0.7 : 1,
+                    marginTop: 0,
                   }}
-                >
-                  {itineraryId ? "Update" : "Create"} Itinerary
-                </Text>
+                  disabled={loading}
+                />
               </View>
             </ScrollView>
           )}

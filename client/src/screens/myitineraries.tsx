@@ -84,11 +84,11 @@ export const MyItineraries: NavioScreen = observer(() => {
   return (
     <View flex bg-bgColor style={styles.screen}>
       <Text section style={styles.header}>My Itineraries</Text>
-      <ScrollView contentContainerStyle={{flex: 1, flexGrow: 1}} contentInsetAdjustmentBehavior="always">
+      <ScrollView contentContainerStyle={{paddingBottom:100}} contentInsetAdjustmentBehavior="always">
         {loading ? (
-          <View style={{ flex: 1, flexGrow: 1, gap: 16, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
             <ActivityIndicator size={120} color={colors.primary} />
-            <Text style={{ textAlign: 'center' }}>Fetching itineraries</Text>
+            <Text style={{ textAlign: 'center', marginTop: 16 }}>Fetching itineraries</Text>
           </View>
         ) : itineraries.length > 0 ? (
           itineraries.map((itinerary) => (
@@ -119,7 +119,7 @@ export const MyItineraries: NavioScreen = observer(() => {
       {/* Floating Action Button */}
       <FloatingActionButton
         icon="add"
-        onPress={() => navio.push("ItineraryForm")}
+        onPress={() => navio.push("ItineraryForm", { itineraryId: undefined })}
       />
     </View>
   );
