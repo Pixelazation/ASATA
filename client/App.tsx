@@ -19,6 +19,7 @@ import {hydrateStores} from '@app/stores';
 import {initServices} from '@app/services';
 import {AppProvider} from '@app/utils/providers';
 import {useAppearance} from '@app/utils/hooks';
+import { supabase } from '@app/lib/supabase';
 
 LogBox.ignoreLogs([
   'Require',
@@ -29,9 +30,15 @@ LogBox.ignoreLogs([
 export default (): JSX.Element => {
   useAppearance();
   const [ready, setReady] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   // `onLaunch` performs actions that have to be done on app launch before displaying app UI.
   // If you need to make some api requests, load remote config, or some other "heavy" actions, you can use `@app/services/onLaunch.tsx`.
+  const checkSession = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setIsLoggedIn(!!user);
+  }, []);
+
   const onLaunch = useCallback(async () => {
     await SplashScreen.preventAutoHideAsync();
 
@@ -39,9 +46,11 @@ export default (): JSX.Element => {
     configureDesignSystem();
     await initServices();
 
+    await checkSession();
+
     setReady(true);
     await SplashScreen.hideAsync();
-  }, []);
+  }, [checkSession]);
 
   useEffect(() => {
     onLaunch();
@@ -69,6 +78,7 @@ export default (): JSX.Element => {
           // [Tip]
           // You can use `root` to change the root of the app depending on global state changes.
           // root={isLoggedIn ? 'AuthStack' : 'AppTabs'}
+          root={isLoggedIn ? 'tabs.AppTabs' : 'stacks.AuthFlow'}
         />
       </AppProvider>
     </GestureHandlerRootView>
