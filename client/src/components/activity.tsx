@@ -8,6 +8,8 @@ import { IconButton } from './iconbutton';
 import { ItineraryApi } from '../services/api/itineraries';
 import { timestampToDateTimeString } from '../utils/dateutils';
 import { ActivityModal } from './molecules/activity-modal';
+import { useServices } from '../services';
+import { getActivityIcon } from '../utils/activity-icons';
 
 type Props = {
   activity: ActivityType;
@@ -16,7 +18,9 @@ type Props = {
 };
 
 export const Activity: React.FC<Props> = ({activity, editMode = false, handleDelete}) => {
-  const {id, start_time, end_time, cost, category, description, name, image_url} = activity;
+  const {navio} = useServices();
+
+  const {id, itinerary_id, start_time, end_time, cost, category, description, name, image_url} = activity;
   const startTime = timestampToDateTimeString(start_time);
 
   const finished = new Date(start_time) < new Date();
@@ -34,7 +38,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
         <Pressable style={styles.details} onPress={() => setModalVisible(true)}>
           <View style={styles.body}>
             <View style={styles.title}>
-              <Icon name='cafe' size={24} color='black' />
+              <Icon name={getActivityIcon(activity.category)} size={24} color='black' />
               <Text style={styles.titleText}>{name}</Text>
             </View>
             <View style={styles.description}>
@@ -46,11 +50,11 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
           </View>
           <View style={styles.footer}>
             <Text style={styles.descText}>
-              $$$
+              Estimated Cost: {cost}
             </Text>
             {editMode && (
               <View style={styles.footerButtons}>
-                <IconButton name='pencil' onPress={() => {}}/>
+                <IconButton name='pencil' onPress={() => {navio.push('ActivityForm', {itinerary_id, activity})}}/>
                 <IconButton name='trash' color='red' onPress={() => handleDelete(id!)}/>
               </View>
             )}

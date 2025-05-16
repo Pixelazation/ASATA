@@ -17,14 +17,15 @@ import { HeaderBack } from '../../../components/molecules/header-back';
 import { BG_IMAGE_2 } from '../../../assets';
 import { ImagePicker } from '../../../components/molecules/image-picker';
 import { ImagePickerAsset } from 'expo-image-picker';
-import { RadioOption } from '../../../components/atoms/radio-option';
 import { RadioSelection } from '../../../components/molecules/radio-selection';
 import { IconName } from '../../../components/icon';
 import { MediaApi } from '../../../services/api/media';
+import { set } from 'lodash';
 
 export type Params = {
   type?: 'push' | 'show';
   itineraryId: string;
+  activity?: ActivityType;
 };
 
 const ActivitySchema = Yup.object().shape({
@@ -44,10 +45,10 @@ export const ActivityForm: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const params = navio.useParams<Params>();
 
-  const [image, setImage] = useState<ImagePickerAsset | null>(null);
+  const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
 
-  const { itineraryId } = params;
+  const { itineraryId, activity } = params;
 
   const categoryOptions = [
     { name: 'food', label: 'Eat', icon: 'restaurant' },
@@ -56,13 +57,18 @@ export const ActivityForm: NavioScreen = observer(() => {
   ] as {name: string, label: string, icon: IconName}[];
 
   React.useEffect(() => {
+    if (activity) {
+      setImage(activity.image_url as string | null);
+      setCategory(activity.category);
+    }
+
     navigation.setOptions({});
   }, []);
 
   const addActivity = async (values: any) => {
     try {
       const newActivity = {
-        cost: 500,
+        category: category,
         image_url: await uploadImage(),
         ...values
       };
@@ -71,37 +77,57 @@ export const ActivityForm: NavioScreen = observer(() => {
       console.log(newActivity);
       navio.goBack();
     } catch (error) {
-      const err = error as { message?: string };
-    
-      console.error("Error adding activity:", err);
-    
-      if (err.message?.includes("overlaps")) {
-        Alert.alert(
-          "Activity Overlap",
-          "This activity overlaps with an existing one. Please choose a different time/date.",
-          [{ text: "OK" }]
-        );
-      } else if (err.message?.includes("dates")) {
-        Alert.alert(
-          "Activity Overlap",
-          "Activity must be within the itinerary dates. Please choose a different time/date.",
-          [{ text: "OK" }]
-        );
-      } else {
-        Alert.alert(
-          "Error",
-          "An unexpected error occurred while adding the activity.",
-          [{ text: "OK" }]
-        );
-      }
+      handleRequestError(error);
     }
   };
+
+  const updateActivity = async (values: any) => {
+    try {
+      const newActivityDetails = {
+        image_url: typeof(image) != 'string' ? await uploadImage() : image,
+        category: category,
+        ...values
+      };
+
+      await ItineraryApi.updateActivity(activity?.id!, newActivityDetails);
+      console.log(newActivityDetails);
+      navio.goBack();
+    } catch (error) {
+      handleRequestError(error);
+    }
+  };
+
+  const handleRequestError = (error: any) => {
+    const err = error as { message?: string };
+    
+    console.error(`Error ${activity ? 'editing' : 'adding'} activity:`, err);
+  
+    if (err.message?.includes("overlaps")) {
+      Alert.alert(
+        "Activity Overlap",
+        "This activity overlaps with an existing one. Please choose a different time/date.",
+        [{ text: "OK" }]
+      );
+    } else if (err.message?.includes("dates")) {
+      Alert.alert(
+        "Activity Overlap",
+        "Activity must be within the itinerary dates. Please choose a different time/date.",
+        [{ text: "OK" }]
+      );
+    } else {
+      Alert.alert(
+        "Error",
+        `An unexpected error occurred while ${activity ? 'editing' : 'adding'}  the activity.`,
+        [{ text: "OK" }]
+      );
+    }
+  }
 
   const uploadImage = async (): Promise<string|null> => {
       if (!image) return null;
   
       try {
-        const url = await MediaApi.uploadImage(image!);
+        const url = await MediaApi.uploadImage(image as ImagePickerAsset);
         console.log('Image uploaded successfully:', url);
         return url;
       } catch (error) {
@@ -114,12 +140,19 @@ export const ActivityForm: NavioScreen = observer(() => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ImageBackground source={image ? {uri: image.uri} : BG_IMAGE_2} resizeMode='cover' style={{minHeight: 100, padding: 20, marginBottom: -20}}>
+      <ImageBackground source={image ? {uri: typeof(image) == 'string' ? image: image.uri} : BG_IMAGE_2} resizeMode='cover' style={{minHeight: 100, padding: 20, marginBottom: -20}}>
         <HeaderBack />
       </ImageBackground>
       <View bg-white style={{ borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
         <Formik
-          initialValues={{
+          initialValues={activity ? {
+            name: activity.name,
+            description: activity.description,
+            start_time: new Date(activity.start_time),
+            end_time: new Date(activity.end_time),
+            location: activity.location,
+            cost: activity.cost ? activity.cost.toString() : '',
+          } : {
             name: '',
             description: '',
             start_time: new Date(),
@@ -128,11 +161,11 @@ export const ActivityForm: NavioScreen = observer(() => {
             location: '',
           }}
           validationSchema={ActivitySchema}
-          onSubmit={addActivity}
+          onSubmit={activity ? updateActivity : addActivity}
         >
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
             <ScrollView contentContainerStyle={{ paddingVertical: 16, paddingHorizontal: 32, paddingBottom: 100, gap: 8 }}>
-              <Text section style={styles.header}>Add Activity</Text>
+              <Text section style={styles.header}>{activity ? "Edit" : "Add"} Activity</Text>
               <FormField
                 label="Name"
                 placeholder="Name"
@@ -150,6 +183,22 @@ export const ActivityForm: NavioScreen = observer(() => {
                 value={values.description}
                 onChangeText={handleChange('description')}
                 onBlur={handleBlur('description')}
+              />
+
+              <FormField
+                label="Estimated Cost"
+                placeholder="(Optional)"
+                value={values.cost}
+                onChangeText={handleChange('cost')}
+                onBlur={handleBlur('cost')}
+              />
+
+              <FormField
+                label="Location"
+                placeholder="Location"
+                value={values.location}
+                onChangeText={handleChange('location')}
+                onBlur={handleBlur('location')}
               />
 
               <View style={{ flexDirection: 'row', gap: 16 }}>
@@ -233,14 +282,6 @@ export const ActivityForm: NavioScreen = observer(() => {
                   minimumDate={new Date()}
                 />
               </View>
-
-              <FormField
-                label="Location"
-                placeholder="Location"
-                value={values.location}
-                onChangeText={handleChange('location')}
-                onBlur={handleBlur('location')}
-              />
 
               <ImagePicker image={image} setImage={setImage} />
 

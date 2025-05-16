@@ -189,7 +189,7 @@ export class ItineraryApi {
   }
 
   /** ✏️ Update an existing itinerary */
-  static async updateItinerary(id: string, updates: Partial<any>) {
+  static async updateItinerary(id: string, updates: Partial<ItineraryType>) {
     const { data, error } = await supabase
       .from("Itineraries")
       .update(updates)
@@ -198,6 +198,17 @@ export class ItineraryApi {
     if (error) throw error;
     return data;
   }
+
+  static async updateActivity(id: string, updates: Partial<ActivityType>) {
+    const { data, error } = await supabase
+      .from("Activities")
+      .update(updates)
+      .eq("id", id);
+
+    if (error) throw error;
+    return data;
+  }
+
   /** ❌ Delete an itinerary */
   static async deleteItinerary(id: string) {
     const { error } = await supabase.from("Itineraries").delete().eq("id", id);

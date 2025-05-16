@@ -4,6 +4,8 @@ import { Icon } from '../icon';
 import { ImageBackground, Pressable, StyleSheet, Touchable, TouchableWithoutFeedback } from 'react-native';
 import { BG_IMAGE } from '../../assets';
 import { colors } from '../../utils/designSystem';
+import { dayFromTimestamp, monthFromTimestamp, timeAndDayOfWeekFromTimestamp } from '../../utils/dateutils';
+import { getActivityIcon } from '../../utils/activity-icons';
 
 type Props = {
   visible: boolean;
@@ -29,10 +31,10 @@ export const ActivityModal: React.FC<Props> = ({visible, activityDetails, closeM
             <View style={{ flexGrow: 1 }}>
               <View style={styles.calendar}>
                 <Text style={{ color: 'white', textAlign: 'center', fontSize: 14 }}>
-                  MM
+                  {monthFromTimestamp(start_time)}
                 </Text>
                 <Text style={{ color: 'white', textAlign: 'center', fontSize: 20}}>
-                  DD
+                  {dayFromTimestamp(start_time)}
                 </Text>
               </View>
             </View>
@@ -44,16 +46,22 @@ export const ActivityModal: React.FC<Props> = ({visible, activityDetails, closeM
             </View>
           </ImageBackground>
           <Text style={{ color: colors.primary }}>
-            DAY 00:00 PM
+            {timeAndDayOfWeekFromTimestamp(start_time)}
           </Text>
-          <Text style={styles.placeName}>
-            {name}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Icon name={getActivityIcon(category)} size={28} color='black' />
+            <Text style={styles.placeName}>
+              {name}
+            </Text>
+          </View>
           <Text style={styles.address}>
-            {location}
+            Location: {location}
+          </Text>
+          <Text style={styles.descText}>
+            Estimated Cost: PHP {cost}
           </Text>
         </View>
-        <View style={styles.footer}>
+        {/* <View style={styles.footer}>
           <View style={styles.title}>
             <Icon name='cafe' size={24} color='black' />
             <Text style={styles.titleText}>Name Here</Text>
@@ -63,7 +71,7 @@ export const ActivityModal: React.FC<Props> = ({visible, activityDetails, closeM
               $$$
             </Text>
           </View>   
-        </View>
+        </View> */}
       </Pressable>
       </View>
       </TouchableWithoutFeedback>
@@ -118,8 +126,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(120, 120, 120, 0.65)',
   },
   descText: {
-    flex: 1,
-    flexGrow: 1,
+    // flex: 1,
+    // flexGrow: 1,
     fontSize: 12,
     fontWeight: '100',
     color: 'gray',

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ImageBackground, ScrollView, StyleSheet} from 'react-native';
+import {ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet} from 'react-native';
 import {Text, View} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
@@ -7,7 +7,7 @@ import SlidingUpPanel from 'rn-sliding-up-panel';
 
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
-import { BG_IMAGE_2 } from '../../assets';
+import { BG_IMAGE_2, CHIBI_EMPTY } from '../../assets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Activity } from '../../components/activity';
 import { LineProgressHead } from '../../components/atoms/line-progress-head';
@@ -17,6 +17,7 @@ import { ItineraryApi } from '../../services/api/itineraries';
 import { FloatingActionMenu } from '../../components/molecules/floating-action-menu';
 import { useFocusEffect } from '@react-navigation/native';
 import { HeaderBack } from '../../components/molecules/header-back';
+import { colors } from '../../utils/designSystem';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -141,60 +142,84 @@ export const Itinerary: NavioScreen = observer(() => {
 
   return (
     <SafeAreaView style={{flex: 1}} edges={['top', 'left', 'right']}>
-      <ImageBackground source={details?.image_url ? {uri: details.image_url} : BG_IMAGE_2} resizeMode='cover'>
-        <View style={styles.header}>
-          <HeaderBack />
-          <View style={styles.headerButton}>
-            <IconButton
-              name={editMode ? 'eye' : 'pencil'}
-              onPress={() => setEditMode(!editMode)}
-            />
+        {loading ? (
+          <View style={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
+            <ActivityIndicator size={120} color={colors.primary} />
+            <Text style={{ textAlign: 'center' }}>Loading itinerary</Text>
           </View>
-        </View>
-        <View style={{flex: 1}}>
-          <SlidingUpPanel containerStyle={styles.container} ref={c => setPanelRef(c)} draggableRange={{top: 350, bottom: 50}} snappingPoints={[50, 350]} friction={0.5}>
-            <View style={{flex: 1, padding: 16}}>
-              <View style={{paddingBottom: 16}}>
-                <Text section>{details?.title}</Text>
+        ) : (
+          <ImageBackground source={details?.image_url ? {uri: details.image_url} : BG_IMAGE_2} resizeMode='cover'>
+            <View style={styles.header}>
+              <HeaderBack />
+              <View style={styles.headerButton}>
+                <IconButton
+                  name={editMode ? 'eye' : 'pencil'}
+                  onPress={() => setEditMode(!editMode)}
+                />
               </View>
-              <ScrollView contentContainerStyle={{paddingBottom: 100}} showsVerticalScrollIndicator={false}>
-                
-
-                {loading ? (
-                  <Text text70M>Loading activities...</Text>
-                ) : activities.length > 0 ? (
-                  <View>
-                    <View style={{flexDirection: 'row', gap: 8}}>
-                      <LineProgressHead />
-                      <View style={{marginBottom: 16}}>
-                        <Text section>In {details?.location}</Text>
+            </View>
+            <View style={{flex: 1}}>
+              <SlidingUpPanel containerStyle={styles.container} ref={c => setPanelRef(c)} draggableRange={{top: 350, bottom: 50}} snappingPoints={[50, 350]} friction={0.5}>
+                {activities.length > 0 ? (
+                  <View style={{flex: 1, padding: 16}}>
+                    <View style={styles.dragHandleBar} />
+                    <View style={{paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                      <Text section>{details?.title}</Text>
+                      {editMode && <IconButton name="pencil" onPress={() => navio.push('ItineraryForm', {itineraryId})}/>}
+                    </View>
+                    <ScrollView contentContainerStyle={{paddingBottom: 100}} showsVerticalScrollIndicator={false}>
+                      <View>
+                        <View style={{flexDirection: 'row', gap: 8}}>
+                          <LineProgressHead />
+                          <View style={{marginBottom: 16}}>
+                            <Text section>In {details?.location}</Text>
+                          </View>
+                        </View>
+                        <View style={{paddingBottom: 64}}>
+                          {activityList}
+                        </View>
                       </View>
-                    </View>
-                    <View style={{paddingBottom: 64}}>
-                      {activityList}
-                    </View>
+                    </ScrollView>
                   </View>
                 ) : (
-                  <Text text70M>No activities found.</Text>
-                )}
-              </ScrollView>
-            </View>
-          </SlidingUpPanel>
-        </View>
-      </ImageBackground>
-
-      {editMode ? (
-        <FloatingActionMenu 
-          icon='add'
-          onPress1={addDummyActivity}
-          onPress2={() => navio.push('ActivityForm', {itineraryId: itineraryId})}
-        />
-      ) : (
-        <FloatingActionButton
-          icon={tracked ? 'stop-circle' : 'location'}
-          onPress={toggleTrack}
-        />
+                  <View style={{flex: 1, padding: 16}}>
+                    <View style={styles.dragHandleBar} />
+                    <View style={{paddingBottom: 16}}>
+                      <Text section>{details?.title}</Text>
+                      {editMode && <IconButton name="pencil" onPress={() => navio.push('ItineraryForm', {itineraryId})}/>}
+                    </View>
+                    <Image source={CHIBI_EMPTY} style={{ height: 160, aspectRatio: 1, alignSelf: "center" }} />
+                    <View style={{ padding: 32 }}>
+                      <Text style={{fontWeight: 'bold', textAlign: 'center'}}>Oops! No Activities Yet!</Text>
+                      <Text style={{textAlign: 'center'}}>
+                        Start planning your adventure by going to edit mode and pressing the + button!
+                      </Text>
+                    </View>
+                  </View>
+                )
+              }
+            </SlidingUpPanel>
+          </View>
+        </ImageBackground>
       )}
+
+      {!loading && (
+        <View style={{ flex: 1 }}>
+          {editMode ? (
+            <FloatingActionMenu 
+              icon='add'
+              onPress1={addDummyActivity}
+              onPress2={() => navio.push('ActivityForm', {itineraryId: itineraryId})}
+            />
+          ) : (
+            <FloatingActionButton
+              icon={tracked ? 'stop-circle' : 'location'}
+              onPress={toggleTrack}
+            />
+          )}
+        </View>
+      )}
+          
     </SafeAreaView>
   );
 });
@@ -219,6 +244,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f8ff',
     borderRadius: 16,
+  },
+  dragHandleBar: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#ccc',
+    borderRadius: 3,
+    alignSelf: 'center',
   },
 });
 

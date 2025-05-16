@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { ActivityIndicator, Image, ScrollView, StyleSheet } from "react-native";
 import { Text, View, Button, Colors } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
@@ -12,6 +12,8 @@ import { IconButton } from "../components/iconbutton";
 import { colors } from '../utils/designSystem';
 import { FloatingActionButton } from '../components/atoms/floating-action-button';
 import { useFocusEffect } from '@react-navigation/native';
+import { CHIBI_EMPTY } from '../assets';
+import { Activity } from '../components/activity';
 
 export type Params = {
   itineraryId?: string;
@@ -82,9 +84,12 @@ export const MyItineraries: NavioScreen = observer(() => {
   return (
     <View flex bg-bgColor style={styles.screen}>
       <Text section style={styles.header}>My Itineraries</Text>
-      <ScrollView contentInsetAdjustmentBehavior="always">
+      <ScrollView contentContainerStyle={{flex: 1, flexGrow: 1}} contentInsetAdjustmentBehavior="always">
         {loading ? (
-          <Text text70M>    Loading itineraries...</Text>
+          <View style={{ flex: 1, flexGrow: 1, gap: 16, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size={120} color={colors.primary} />
+            <Text style={{ textAlign: 'center' }}>Fetching itineraries</Text>
+          </View>
         ) : itineraries.length > 0 ? (
           itineraries.map((itinerary) => (
             <ItineraryItem
@@ -99,7 +104,15 @@ export const MyItineraries: NavioScreen = observer(() => {
             />
           ))
         ) : (
-          <Text text70M>No itineraries found.</Text>
+          <View style={{ flex: 1, flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 64 }}>
+            <Image source={CHIBI_EMPTY} style={{ height: 400, aspectRatio: 1, alignSelf: "center" }} />
+            <View style={{ padding: 32 }}>
+              <Text style={{fontWeight: 'bold', textAlign: 'center'}}>Oops! No Itineraries Yet!</Text>
+              <Text style={{textAlign: 'center'}}>
+                Start planning your adventure by pressing the + button!
+              </Text>
+            </View>
+          </View>
         )}
       </ScrollView>
 

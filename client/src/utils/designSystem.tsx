@@ -154,9 +154,9 @@ export const screenDefaultOptions = (): NativeStackNavigationOptions => ({
 });
 
 export const tabScreenDefaultOptions = (): BottomTabNavigationOptions => ({
-  tabBarActiveTintColor: Colors.primary,
-  tabBarInactiveTintColor: Colors.grey40,
-  tabBarStyle: {backgroundColor: Colors.bgColor, borderTopWidth: 0, elevation: 0},
+  tabBarActiveTintColor: "#1EC485",
+  tabBarInactiveTintColor: Colors.white,
+  tabBarStyle: {backgroundColor: colors.primary, borderTopWidth: 0, elevation: 0},
 });
 
 export const drawerScreenDefaultOptions = (): DrawerNavigationOptions => ({});
@@ -168,13 +168,13 @@ export const getTabBarIcon =
 
 const getTabIconName = (tabName: string, focused: boolean): IconName => {
   if (tabName === 'MainTab') {
-    return focused ? 'home' : 'home-outline';
+    return 'home-outline';
   }
   if (tabName === 'PlaygroundTab') {
-    return focused ? 'clipboard' : 'clipboard-outline';
+    return 'clipboard-outline';
   }
   if (tabName === 'SettingsTab') {
-    return focused ? 'person' : 'person-outline';
+    return 'person-outline';
   }
 
   return 'list';

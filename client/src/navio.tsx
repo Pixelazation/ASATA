@@ -105,70 +105,7 @@ export const navio = Navio.build({
           options: () => ({
             title: 'Account',
             tabBarIcon: getTabBarIcon('SettingsTab'),
-            tabBarBadge: 23,
           }),
-        },
-      },
-    },
-
-    // tabs with drawer
-    TabsWithDrawer: {
-      layout: {
-        MainTab: {
-          stack: 'MainStack',
-          options: () => ({
-            title: 'Main',
-            tabBarIcon: getTabBarIcon('MainTab'),
-          }),
-        },
-        PlaygroundTab: {
-          drawer: 'DrawerForTabs',
-          options: () => ({
-            title: 'Playground',
-            tabBarIcon: getTabBarIcon('PlaygroundTab'),
-          }),
-        },
-      },
-    },
-  },
-  drawers: {
-    // main drawer
-    AppDrawer: {
-      layout: {
-        Main: {
-          stack: 'MainStack',
-          options: {
-            drawerType: 'front',
-          },
-        },
-        Example: {
-          stack: ['Example'],
-        },
-        Playground: {
-          stack: 'PlaygroundStack',
-        },
-        Tabs: {
-          tabs: 'TabsWithDrawer',
-        },
-      },
-    },
-
-    // drawer inside tabs
-    DrawerForTabs: {
-      layout: {
-        FlashList: {
-          stack: ['PlaygroundFlashList'],
-          options: {
-            title: 'Flash List',
-            drawerPosition: 'right',
-          },
-        },
-        ExpoImage: {
-          stack: ['PlaygroundExpoImage'],
-          options: {
-            title: 'Expo Image',
-            drawerPosition: 'right',
-          },
         },
       },
     },

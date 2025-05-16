@@ -7,12 +7,12 @@ import { colors } from '../../utils/designSystem';
 import { MediaApi } from '../../services/api/media';
 
 type Props = {
-  image: ImagePickerAsset | null;
-  setImage: (image: ImagePickerAsset | null) => void;
+  image: ImagePickerAsset | string | null;
+  setImage: (image: ImagePickerAsset | string | null) => void;
 };
 
 export const ImagePicker: React.FC<Props> = (props) => {
-  const {image, setImage} = props
+  const {image, setImage} = props;
 
   const handlePickImage = async () => {
     const result = await MediaApi.pickImage();
@@ -31,7 +31,7 @@ export const ImagePicker: React.FC<Props> = (props) => {
         >
           {image ? (
             <Image
-              source={{ uri: image.uri }}
+              source={{ uri: typeof(image) == 'string' ? image : image.uri }}
               style={styles.image}
               resizeMode="cover"
             />
