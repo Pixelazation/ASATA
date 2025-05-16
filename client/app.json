@@ -28,6 +28,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
+      "googleServicesFile": "./google-services.json",
       "package": "io.batyr.expostarter",
       "permissions": [
         "ACCESS_FINE_LOCATION",
