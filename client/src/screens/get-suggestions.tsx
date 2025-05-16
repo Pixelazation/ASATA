@@ -35,9 +35,10 @@ type Location = {
 export const GetSuggestions: NavioScreen = observer(() => {
   useAppearance();
   const { navio } = useServices();
+  const params = navio.useParams<{ selectedOption?: string }>();
 
   const [location, setLocation] = useState("");
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<string>(params.selectedOption || "");
   const [selectedRecreation, setSelectedRecreation] = useState<string[]>([]);
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);

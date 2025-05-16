@@ -119,7 +119,7 @@ export const MyItineraries: NavioScreen = observer(() => {
       {/* Floating Action Button */}
       <FloatingActionButton
         icon="add"
-        onPress={() => navio.push("ItineraryForm")}
+        onPress={() => navio.push("ItineraryForm", { itineraryId: undefined })}
       />
     </View>
   );

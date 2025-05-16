@@ -42,7 +42,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const { itineraryId } = navio.useParams<Params>();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [details, setDetails] = useState<ItineraryType>();
   const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
 

@@ -72,28 +72,31 @@ export const Main: NavioScreen = observer(() => {
         <ScrollView contentInsetAdjustmentBehavior="always">
           <View style={styles.opaqueContainer}>
             <View style={styles.buttonRow}>
-              <Button onPress={() => console.log("Accommodation")} style={styles.iconButton}>
+              <Button
+                onPress={() => navio.push("GetSuggestions", { selectedOption: "accommodation" })}
+                style={styles.iconButton}
+              >
                 <Icon name="bed" color={styles.icon.color} size={styles.icon.fontSize} />
               </Button>
-              <Button onPress={() => console.log("Recreation")} style={styles.iconButton}>
+              <Button
+                onPress={() => navio.push("GetSuggestions", { selectedOption: "recreation" })}
+                style={styles.iconButton}
+              >
                 <Icon name="walk" color={styles.icon.color} size={styles.icon.fontSize} />
               </Button>
-              <Button onPress={() => console.log("Diner")} style={styles.iconButton}>
+              <Button
+                onPress={() => navio.push("GetSuggestions", { selectedOption: "diner" })}
+                style={styles.iconButton}
+              >
                 <Icon name="pizza" color={styles.icon.color} size={styles.icon.fontSize} />
               </Button>
             </View>
-            <Button
-              label="Get Suggestions"
-              onPress={() => navio.push("GetSuggestions")}
-              backgroundColor="#007AFF"
-              color="white"
-            />
 
             <ItineraryTracker />
 
             {/* <Carousel title="Explore new places..." items={recommendationItems} /> */}
             <Carousel title="Promotions" items={promotionItems} />
-            <LocationTracker />
+            {/* <LocationTracker /> */}
             <WeatherTracker />
             <View style={styles.buttonRow}>
               <Button
