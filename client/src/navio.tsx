@@ -113,7 +113,7 @@ export const navio = Navio.build({
   modals: {
     ExampleModal: {stack: 'ExampleStack'},
   },
-  root: 'stacks.AuthFlow',
+  // root: 'stacks.AuthFlow',
   hooks: [useAppearance],
   defaultOptions: {
     stacks: {
