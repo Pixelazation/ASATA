@@ -20,6 +20,8 @@ import {initServices} from '@app/services';
 import {AppProvider} from '@app/utils/providers';
 import {useAppearance} from '@app/utils/hooks';
 import { supabase } from '@app/lib/supabase';
+import * as Notifications from 'expo-notifications';
+import { registerForPushNotificationsAsync } from './src/services/notifications';
 
 LogBox.ignoreLogs([
   'Require',
@@ -31,6 +33,11 @@ export default (): JSX.Element => {
   useAppearance();
   const [ready, setReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [notification, setNotification] = useState<Notifications.Notification | undefined>(
+    undefined
+  );
 
   // `onLaunch` performs actions that have to be done on app launch before displaying app UI.
   // If you need to make some api requests, load remote config, or some other "heavy" actions, you can use `@app/services/onLaunch.tsx`.
@@ -55,6 +62,25 @@ export default (): JSX.Element => {
   useEffect(() => {
     onLaunch();
   }, [onLaunch]);
+
+  useEffect(() => {
+    registerForPushNotificationsAsync()
+      .then(token => setExpoPushToken(token ?? ''))
+      .catch((error: any) => setExpoPushToken(`${error}`));
+
+    const notificationListener = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      notificationListener.remove();
+      responseListener.remove();
+    };
+  }, []);
 
   const NotReady = useMemo(() => {
     // [Tip]
