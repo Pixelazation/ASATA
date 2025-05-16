@@ -23,6 +23,7 @@ import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location"; // Import expo-location
 import { MaterialIcons } from '@expo/vector-icons'; // already imported
+import { colors } from "@app/utils/designSystem";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -325,7 +326,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
         marginTop: -110,
         zIndex: 1, // Lower than sliding panel
       }}>
-        <MaterialIcons name="place" size={48} color="#007AFF" />
+        <MaterialIcons name="place" size={48} color={colors.primary} />
       </View>
       {/* Current Location Button - zIndex: 1 */}
       <TouchableOpacity
@@ -333,7 +334,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
         onPress={handleCurrentLocation}
         activeOpacity={0.7}
       >
-        <MaterialIcons name="my-location" size={32} color="#007AFF" />
+        <MaterialIcons name="my-location" size={32} color={colors.primary} />
       </TouchableOpacity>
 
       {/* Search bar and sliding panel (higher zIndex) */}
