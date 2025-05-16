@@ -11,10 +11,11 @@ import {Bounceable} from 'rn-bounceable';
 import {Icon, IconName} from '@app/components/icon';
 import {useStores} from '@app/stores';
 import { supabase } from '@app/lib/supabase';
+import { ApiService } from '../../services/api';
 
 export const Settings: NavioScreen = observer(() => {
   useAppearance(); // for Dark Mode
-  const {navio} = useServices();
+  const {navio, api} = useServices();
   const {ui} = useStores();
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -36,11 +37,7 @@ export const Settings: NavioScreen = observer(() => {
     setModalVisible(false);
   };
   const handleLogout = async () => {
-    if (ui.state === 'logged-in') {
-      ui.logout();
-    } else {
-      navio.setRoot('stacks', 'AuthFlow');
-    }
+    if (await api.auth.signout()) navio.setRoot('stacks', 'AuthFlow');
   };
   const handleRunTutorials = () => {
     console.log('Run Tutorials Pressed');

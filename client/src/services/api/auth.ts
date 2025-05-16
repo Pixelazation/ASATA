@@ -30,6 +30,18 @@ export class AuthApi {
     })
   };
 
+  signout = async function () {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+    } else {
+      console.log('User signed out successfully');
+      return true;
+    }
+
+    return false;
+  };
+
   insertUserDetails = async function (details: {
     user_id: string;
     email: string;
