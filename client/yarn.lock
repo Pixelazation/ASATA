@@ -5682,6 +5682,13 @@ expo-constants@~15.4.0, expo-constants@~15.4.3:
   dependencies:
     "@expo/config" "~8.5.0"
 
+expo-constants@~15.4.6:
+  version "15.4.6"
+  resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-15.4.6.tgz#d4e9b21b70c5602457962700f2e90a75356b487b"
+  integrity sha512-vizE69dww2Vl0PTWWvDmK0Jo2/J+WzdcMZlA05YEnEYofQuhKxTVsiuipf79mSOmFavt4UQYC1UnzptzKyfmiQ==
+  dependencies:
+    "@expo/config" "~8.5.0"
+
 expo-dev-client@~3.3.11:
   version "3.3.11"
   resolved "https://registry.npmjs.org/expo-dev-client/-/expo-dev-client-3.3.11.tgz"
@@ -5716,6 +5723,13 @@ expo-dev-menu@4.5.8:
   dependencies:
     expo-dev-menu-interface "1.7.2"
     semver "^7.5.3"
+
+expo-device@~5.9.4:
+  version "5.9.4"
+  resolved "https://registry.yarnpkg.com/expo-device/-/expo-device-5.9.4.tgz#7dc8ba3695e1c0891bbc840a255faac479310c08"
+  integrity sha512-nleq3GghLWWJrj4YH8HiCumnTF/gy4zRd3jedCkO8lMKQg6R1yn3v0ch8NtgPDci749FkNzOtXx/vmFImQalwg==
+  dependencies:
+    ua-parser-js "^0.7.33"
 
 expo-eas-client@~0.11.0:
   version "0.11.2"
@@ -11700,6 +11714,11 @@ ua-parser-js@^0.7.30:
   version "0.7.31"
   resolved "https://registry.npmjs.org/ua-parser-js/-/ua-parser-js-0.7.31.tgz"
   integrity sha512-qLK/Xe9E2uzmYI3qLeOmI0tEOt+TBBQyUIAh4aAgU05FVYzeZrKUdkAZfBNVGRaHVgV0TDkdEngJSw/SyQchkQ==
+
+ua-parser-js@^0.7.33:
+  version "0.7.40"
+  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.40.tgz#c87d83b7bb25822ecfa6397a0da5903934ea1562"
+  integrity sha512-us1E3K+3jJppDBa3Tl0L3MOJiGhe1C6P0+nIvQAFYbxlMAx0h81eOwLmU57xgqToduDDPx3y5QsdjPfDu+FgOQ==
 
 unbox-primitive@^1.0.2:
   version "1.0.2"
