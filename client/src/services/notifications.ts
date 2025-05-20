@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 import * as Device from 'expo-device';
 import { Alert } from "react-native";
 import Constants from 'expo-constants';
+import { supabase } from '../lib/supabase';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -85,3 +86,15 @@ export async function registerForPushNotificationsAsync() {
     handleRegistrationError('Must use physical device for push notifications');
   }
 }
+
+export const updatePushToken = async (expoPushToken: string) => {
+  // Get the current user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    // Update UserDetails with the push token
+    await supabase
+      .from('UserDetails')
+      .update({ expo_push_token: expoPushToken })
+      .eq('user_id', user.id);
+  }
+};
