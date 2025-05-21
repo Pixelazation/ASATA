@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  FlatList,
   Animated,
   Dimensions,
   PanResponder,
@@ -24,6 +25,7 @@ import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location"; // Import expo-location
 import { MaterialIcons } from '@expo/vector-icons'; // already imported
 import type { Region } from 'react-native-maps';
+import { ItinerarySelectorModal } from "@app/components/add-to-itinerary-modal";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -51,6 +53,10 @@ export const GetSuggestions: NavioScreen = observer(() => {
     latitudeDelta: 0.1922,
     longitudeDelta: 0.1421,
   });
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+
 
   const [deviceLocation, setDeviceLocation] = useState<{ latitude: number; longitude: number } | null>(null); // <-- store device location
 
@@ -457,17 +463,31 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
                   {/* Add to Itinerary Button */}
                   <TouchableOpacity
-                    style={styles.addToItineraryButton}
-                    onPress={() => Alert.alert("Add to Itinerary", `${item.name} added to itinerary!`)}
-                  >
-                    <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
-                  </TouchableOpacity>
+                  onPress={() => {
+                    setSelectedSuggestion(item); // `item` is the clicked suggestion
+                    setModalVisible(true);
+                  }}
+                >
+                  <Text>Add to Itinerary</Text>
+                </TouchableOpacity>
                 </TouchableOpacity>
               ))
             )}
           </ScrollView>
         </View>
       </Animated.View>
+      <ItinerarySelectorModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSelectItinerary={(itinerary) => {
+          // Here you handle adding the selectedSuggestion to the chosen itinerary
+          console.log('Add', selectedSuggestion, 'to itinerary:', itinerary);
+          setModalVisible(false);
+          setSelectedSuggestion(null);
+
+          // Optionally show a confirmation or update your app state here
+        }}
+      />
     </View>
   );
 });
