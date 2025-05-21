@@ -23,6 +23,7 @@ import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location"; // Import expo-location
 import { MaterialIcons } from '@expo/vector-icons'; // already imported
+import type { Region } from 'react-native-maps';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -44,12 +45,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [region, setRegion] = useState({
+  const [region, setRegion] = useState<Region | undefined>({
     latitude: 10.321684,
     longitude: 123.898671,
     latitudeDelta: 0.1922,
     longitudeDelta: 0.1421,
   });
+
   const [deviceLocation, setDeviceLocation] = useState<{ latitude: number; longitude: number } | null>(null); // <-- store device location
 
   const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
@@ -142,7 +144,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const handleLocationChange = (text: string) => {
     setLocation(text);
-    setRegion(null);
+    setRegion(undefined);
   };
 
   // Fetch current location on screen load
