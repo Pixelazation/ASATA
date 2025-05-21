@@ -1,71 +1,117 @@
-import React from 'react';
-import { Modal, TouchableOpacity, StyleSheet } from 'react-native';
-import { View, Text, Button } from 'react-native-ui-lib';
+import React, { useState, useEffect } from "react";
+import { Modal, ScrollView, Text, TouchableOpacity, StyleSheet, View } from "react-native";
+import { ItineraryApi } from "@app/services/api/itineraries";
+import { ItineraryType } from "@app/utils/types/itinerary";
 
-type Itinerary = {
-  id: string;
-  name: string;
-};
-
-type Props = {
+interface Props {
   visible: boolean;
   onClose: () => void;
-  itineraries: Itinerary[];
-  onSelect: (itineraryId: string) => void;
-};
+  onSelectItinerary: (itinerary: ItineraryType) => void;
+}
 
-const AddToItineraryModal: React.FC<Props> = ({
-  visible,
-  onClose,
-  itineraries,
-  onSelect,
-}) => {
+export const ItinerarySelectorModal: React.FC<Props> = ({ visible, onClose, onSelectItinerary }) => {
+  const [itineraries, setItineraries] = useState<ItineraryType[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      fetchUserItineraries();
+    }
+  }, [visible]);
+
+  const fetchUserItineraries = async () => {
+    setLoading(true);
+    try {
+      const data = await ItineraryApi.getItineraries();
+      setItineraries(data);
+    } catch (error) {
+      console.error("Failed to fetch itineraries:", error);
+      setItineraries([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          <Text text60 marginB-s2>Add to Itinerary</Text>
-
-          {itineraries.length === 0 ? (
-            <Text text70 center>
-              You don't have any itineraries yet. Please create one first.
-            </Text>
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent={false}>
+      <View style={styles.modalContainer}>
+        <Text style={styles.header}>Select an Itinerary</Text>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          {loading ? (
+            <Text style={styles.loadingText}>Loading itineraries...</Text>
+          ) : itineraries.length === 0 ? (
+            <Text style={styles.emptyText}>No itineraries found.</Text>
           ) : (
-            itineraries.map(itinerary => (
+            itineraries.map((itinerary) => (
               <TouchableOpacity
                 key={itinerary.id}
-                style={styles.itemButton}
-                onPress={() => onSelect(itinerary.id)}
+                style={styles.itineraryItem}
+                onPress={() => {
+                  onSelectItinerary(itinerary);
+                  onClose();
+                }}
               >
-                <Text text70>{itinerary.name}</Text>
+                <Text style={styles.itineraryTitle}>{itinerary.title}</Text>
+                <Text style={styles.itineraryLocation}>
+                  {itinerary.location || "No location specified"}
+                </Text>
               </TouchableOpacity>
             ))
           )}
-
-          <Button label="Close" onPress={onClose} marginT-s4 />
-        </View>
+        </ScrollView>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Text style={styles.closeText}>Close</Text>
+        </TouchableOpacity>
       </View>
     </Modal>
   );
 };
 
-export default AddToItineraryModal;
-
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    padding: 20,
-  },
   modalContainer: {
-    backgroundColor: 'white',
-    borderRadius: 8,
+    flex: 1,
     padding: 20,
+    backgroundColor: "white",
   },
-  itemButton: {
-    paddingVertical: 12,
+  header: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
+  scrollContainer: {
+    paddingBottom: 40,
+  },
+  itineraryItem: {
+    paddingVertical: 15,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    borderBottomColor: "#ddd",
+  },
+  itineraryTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  itineraryLocation: {
+    fontSize: 14,
+    color: "#666",
+  },
+  loadingText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    color: "#999",
+  },
+  closeButton: {
+    marginTop: 10,
+    alignSelf: "center",
+    padding: 10,
+  },
+  closeText: {
+    color: "blue",
+    fontSize: 16,
   },
 });
