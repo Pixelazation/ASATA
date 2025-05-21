@@ -454,6 +454,14 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   <Text>
                     {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
                   </Text>
+
+                  {/* Add to Itinerary Button */}
+                  <TouchableOpacity
+                    style={styles.addToItineraryButton}
+                    onPress={() => Alert.alert("Add to Itinerary", `${item.name} added to itinerary!`)}
+                  >
+                    <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
+                  </TouchableOpacity>
                 </TouchableOpacity>
               ))
             )}
@@ -476,6 +484,18 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     zIndex: 10,
+  },
+  addToItineraryButton: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#007AFF",
+    borderRadius: 5,
+    alignSelf: "flex-start",
+  },
+  addToItineraryText: {
+    color: "white",
+    fontWeight: "600",
   },
   searchBar: {
     backgroundColor: "white",
