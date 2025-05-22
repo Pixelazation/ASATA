@@ -7,7 +7,7 @@ export default {
     slug: "expo-starter",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/icon.png",
+    icon: "./assets/asata128.ico",
     userInterfaceStyle: "automatic",
     scheme: "myapp",
     splash: {
@@ -27,7 +27,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
+        foregroundImage: "./assets/asata366.png",
         backgroundColor: "#FFFFFF"
       },
       config: {
@@ -43,7 +43,7 @@ export default {
       ]
     },
     web: {
-      favicon: "./assets/favicon.png"
+      favicon: "./assets/asata48.ico"
     },
     plugins: [
       "expo-localization",
