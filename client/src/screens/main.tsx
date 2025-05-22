@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon } from "@app/components/icon";
 import { LocationTracker } from "@app/components/location-tracker";
 import { WeatherTracker } from "@app/components/weather-tracker";
-import { sendTestNotification, requestNotificationPermissions } from "@app/services/notifications";
+import { NotificationsApi } from "@app/services/api/notifications";
 import { supabase } from "../lib/supabase";
 
 export const Main: NavioScreen = observer(() => {
@@ -28,7 +28,7 @@ export const Main: NavioScreen = observer(() => {
 
   useEffect(() => {
     configureUI();
-    requestNotificationPermissions(); // Ask for notification permissions
+    NotificationsApi.requestNotificationPermissions(); // Ask for notification permissions
     fetchPromotionItems(); // Fetch data from Supabase
   }, []);
 
@@ -100,19 +100,19 @@ export const Main: NavioScreen = observer(() => {
             <WeatherTracker />
             <View style={styles.buttonRow}>
               <Button
-                onPress={() => sendTestNotification("You have an activity today!")}
+                onPress={() => NotificationsApi.sendTestNotification("You have an activity today!")}
                 style={styles.actionButton}
               >
                 <Icon name="time-outline" color={styles.icon.color} size={styles.icon.fontSize} />
               </Button>
               <Button
-                onPress={() => sendTestNotification("Oh my! It appears to be raining. Do you wish to change your activity?")}
+                onPress={() => NotificationsApi.sendTestNotification("Oh my! It appears to be raining. Do you wish to change your activity?")}
                 style={styles.actionButton}
               >
                 <Icon name="rainy-outline" color={styles.icon.color} size={styles.icon.fontSize} />
               </Button>
               <Button
-                onPress={() => sendTestNotification("You have arrived at an activity area.")}
+                onPress={() => NotificationsApi.sendTestNotification("You have arrived at an activity area.")}
                 style={styles.actionButton}
               >
                 <Icon name="location-outline" color={styles.icon.color} size={styles.icon.fontSize} />

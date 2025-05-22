@@ -156,7 +156,7 @@ export const ActivityForm: NavioScreen = observer(() => {
             name: '',
             description: '',
             start_time: new Date(),
-            end_time: new Date(),
+            end_time: new Date(Date.now() + 60 * 60 * 1000),
             category: '',
             location: '',
           }}

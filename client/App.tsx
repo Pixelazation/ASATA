@@ -21,7 +21,7 @@ import {AppProvider} from '@app/utils/providers';
 import {useAppearance} from '@app/utils/hooks';
 import { supabase } from '@app/lib/supabase';
 import * as Notifications from 'expo-notifications';
-import { registerForPushNotificationsAsync } from './src/services/notifications';
+import { NotificationsApi } from './src/services/api/notifications';
 
 LogBox.ignoreLogs([
   'Require',
@@ -64,7 +64,16 @@ export default (): JSX.Element => {
   }, [onLaunch]);
 
   useEffect(() => {
-    registerForPushNotificationsAsync()
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session?.user);
+    });
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    NotificationsApi.registerForPushNotificationsAsync()
       .then(token => setExpoPushToken(token ?? ''))
       .catch((error: any) => setExpoPushToken(`${error}`));
 
@@ -81,6 +90,10 @@ export default (): JSX.Element => {
       responseListener.remove();
     };
   }, []);
+
+  useEffect(() => {
+    NotificationsApi.updatePushToken(expoPushToken);
+  }, [isLoggedIn, expoPushToken])
 
   const NotReady = useMemo(() => {
     // [Tip]
