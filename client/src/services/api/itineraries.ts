@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabase";
+import { NotificationsApi } from './notifications';
 
 export class ItineraryApi {
   /** 📌 Fetch all itineraries for the logged-in user */
@@ -62,17 +63,31 @@ export class ItineraryApi {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
 
+    const currentTracked = await this.fetchTrackedItinerary();
+    if (currentTracked) NotificationsApi.unscheduleItineraryNotifications(currentTracked);
+
     const { data, error } = await supabase
       .from("UserDetails")
       .update({ tracked_itinerary: itineraryId })
       .eq("user_id", user.id); // Assuming UserDetails has a user_id foreign key
 
     if (error) throw error;
+
+    const existingActivities = await ItineraryApi.getActivities(itineraryId);
+    if (!existingActivities || existingActivities.length === 0) {
+      throw new Error("No activities found for this itinerary.");
+    }
+
+    existingActivities.forEach(async (activity: ActivityType) => {
+      if (new Date(activity.start_time) > new Date(Date.now()))
+        NotificationsApi.scheduleActivityNotifications(activity);
+    });
+
     return data;
   }
 
   /** 📄 Fetch the currently tracked itinerary for the logged-in user */
-  static async fetchTrackedItinerary() {
+  static async fetchTrackedItinerary(): Promise<string | null> {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
 
@@ -90,6 +105,9 @@ export class ItineraryApi {
   static async untrackItinerary() {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
+
+    const currentTracked = await this.fetchTrackedItinerary();
+    if (currentTracked) NotificationsApi.unscheduleItineraryNotifications(currentTracked);
 
     const { data, error } = await supabase
       .from("UserDetails")

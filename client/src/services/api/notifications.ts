@@ -93,7 +93,48 @@ export const NotificationsApi = {
         .update({ expo_push_token: expoPushToken })
         .eq('user_id', user.id);
     }
-  }
+  },
+
+  scheduleActivityNotifications: async (activity: ActivityType) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const reminder: NotificationType = {
+        user_id: user.id,
+        activity_id: activity.id,
+        itinerary_id: activity.itinerary_id,
+        title: "Upcoming Activity: " + activity.name,
+        body: `${activity.name} is starting in 10 minutes! Get ready!`,
+        schedule_time: new Date(new Date(activity.start_time).getTime() - 10 * 60 * 1000),
+      }
+
+      const starting: NotificationType = {
+        user_id: user.id,
+        activity_id: activity.id,
+        itinerary_id: activity.itinerary_id,
+        title: "Activity Starting: " + activity.name,
+        body: `Ready for ${activity.name}? Or do you need to reschedule?`,
+        schedule_time: new Date(activity.start_time),
+      }
+
+      const { data, error } = await supabase
+        .from('notifications')
+        .insert([reminder, starting])
+
+      if (error) throw error;
+    }
+  },
+
+  unscheduleItineraryNotifications: async (itineraryId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('itinerary_id', itineraryId)
+
+      if (error) throw error;
+    }
+  },
 }
 
 function handleRegistrationError(errorMessage: string) {
