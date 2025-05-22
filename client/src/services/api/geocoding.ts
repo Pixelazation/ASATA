@@ -53,4 +53,35 @@ export const GeocodingApi = {
       return null;
     }
   },
+
+  forwardGeocode: async (address: string) => {
+    try {
+      const url = new URL("https://maps.googleapis.com/maps/api/geocode/json");
+      url.searchParams.append("address", address);
+      url.searchParams.append("key", MAPS_PLATFORM_KEY);
+
+      const response = await fetch(url.toString(), {
+        method: "GET",
+        headers: { accept: "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.results || data.results.length === 0) {
+        throw new Error("No geocoding results.");
+      }
+
+      const location = data.results[0].geometry.location;
+      return {
+        lat: location.lat,
+        lng: location.lng,
+      };
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      return null;
+    }
+  }
 };
