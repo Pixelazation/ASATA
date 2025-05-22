@@ -21,7 +21,7 @@ import {AppProvider} from '@app/utils/providers';
 import {useAppearance} from '@app/utils/hooks';
 import { supabase } from '@app/lib/supabase';
 import * as Notifications from 'expo-notifications';
-import { registerForPushNotificationsAsync, updatePushToken } from './src/services/notifications';
+import { NotificationsApi } from './src/services/api/notifications';
 
 LogBox.ignoreLogs([
   'Require',
@@ -73,7 +73,7 @@ export default (): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    registerForPushNotificationsAsync()
+    NotificationsApi.registerForPushNotificationsAsync()
       .then(token => setExpoPushToken(token ?? ''))
       .catch((error: any) => setExpoPushToken(`${error}`));
 
@@ -92,7 +92,7 @@ export default (): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    updatePushToken(expoPushToken);
+    NotificationsApi.updatePushToken(expoPushToken);
   }, [isLoggedIn, expoPushToken])
 
   const NotReady = useMemo(() => {
