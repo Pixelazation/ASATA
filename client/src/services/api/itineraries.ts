@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabase";
 import { NotificationsApi } from './notifications';
+import { UserApi } from './user';
 
 export class ItineraryApi {
   /** 📌 Fetch all itineraries for the logged-in user */
@@ -62,6 +63,8 @@ export class ItineraryApi {
   static async trackItinerary(itineraryId: string) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
+
+    await UserApi.updateTimezone();
 
     const currentTracked = await this.fetchTrackedItinerary();
     if (currentTracked) NotificationsApi.unscheduleItineraryNotifications(currentTracked);
