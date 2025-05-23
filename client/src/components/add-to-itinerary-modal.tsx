@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, ScrollView, Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import { ItineraryApi } from "@app/services/api/itineraries";
-import { ItineraryType } from "@app/utils/types/itinerary";
 
 interface Props {
   visible: boolean;
