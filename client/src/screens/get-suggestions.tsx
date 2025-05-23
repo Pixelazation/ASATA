@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  FlatList,
   Animated,
   Dimensions,
   PanResponder,
@@ -23,6 +24,8 @@ import { GeocodingApi } from "@app/services/api/geocoding";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location"; // Import expo-location
 import { MaterialIcons } from '@expo/vector-icons'; // already imported
+import type { Region } from 'react-native-maps';
+import { ItinerarySelectorModal } from "@app/components/add-to-itinerary-modal";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -44,12 +47,19 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [region, setRegion] = useState({
+  const [region, setRegion] = useState<Region | undefined>({
     latitude: 10.321684,
     longitude: 123.898671,
     latitudeDelta: 0.1922,
     longitudeDelta: 0.1421,
   });
+
+  const selectedSuggestionRef = useRef<any>(null);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+
+
   const [deviceLocation, setDeviceLocation] = useState<{ latitude: number; longitude: number } | null>(null); // <-- store device location
 
   const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
@@ -77,7 +87,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
     setLoading(true);
     try {
-      let category = "";
+      let category = '';
       if (selectedOption === "recreation") category = "attractions";
       else if (selectedOption === "diner") category = "restaurants";
       else if (selectedOption === "accommodation") category = "hotels";
@@ -129,6 +139,16 @@ export const GetSuggestions: NavioScreen = observer(() => {
     }
   };
 
+  // Determine the category based on selectedOption
+  const getCategoryFromOption = (option: string): string => {
+    switch(option) {
+      case 'recreation': return 'attractions';
+      case 'diner': return 'restaurants';
+      case 'accommodation': return 'hotels';
+      default: return '';
+    }
+  };
+
   const handleMapPress = async (event: any) => {
     const { coordinate } = event.nativeEvent;
     setRegion(coordinate);
@@ -142,7 +162,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const handleLocationChange = (text: string) => {
     setLocation(text);
-    setRegion(null);
+    setRegion(undefined);
   };
 
   // Fetch current location on screen load
@@ -452,12 +472,43 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   <Text>
                     {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
                   </Text>
+
+                  {/* Add to Itinerary Button */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      selectedSuggestionRef.current = item;
+                      setModalVisible(true);
+                    }}
+                  >
+                    <Text>Add to Itinerary</Text>
+                  </TouchableOpacity>
                 </TouchableOpacity>
               ))
             )}
           </ScrollView>
         </View>
       </Animated.View>
+      <ItinerarySelectorModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSelectItinerary={(itinerary) => {
+          const selected = selectedSuggestionRef.current;
+          
+          if (selected) {
+            navio.push('ActivityForm', {
+              itineraryId: itinerary.id,
+              prefill: {
+                name: selected.name,
+                description: selected.description || selected.address_obj?.address_string || '',
+                location: selected.address_obj?.address_string || '',
+                image_url: selected.photoUrl, // <-- Pass the image URL here
+              },
+              category: getCategoryFromOption(selectedOption)
+            });
+          }
+          setModalVisible(false);
+        }}
+      />
     </View>
   );
 });
@@ -474,6 +525,18 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     zIndex: 10,
+  },
+  addToItineraryButton: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#007AFF",
+    borderRadius: 5,
+    alignSelf: "flex-start",
+  },
+  addToItineraryText: {
+    color: "white",
+    fontWeight: "600",
   },
   searchBar: {
     backgroundColor: "white",

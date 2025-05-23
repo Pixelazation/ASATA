@@ -22,11 +22,20 @@ import { IconName } from '../../../components/icon';
 import { MediaApi } from '../../../services/api/media';
 import { set } from 'lodash';
 
+// Update your Params type to include category
 export type Params = {
   type?: 'push' | 'show';
   itineraryId: string;
   activity?: ActivityType;
+  prefill?: {
+    name?: string;
+    description?: string;
+    location?: string;
+    image_url?: string;
+  };
+  category?: string; // Add this line
 };
+
 
 const ActivitySchema = Yup.object().shape({
   name: Yup.string().required('Required'),
@@ -45,31 +54,35 @@ export const ActivityForm: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const params = navio.useParams<Params>();
 
-  const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
+  const { itineraryId, activity, prefill } = params;
+
+  const [image, setImage] = useState<ImagePickerAsset | string | null>(
+    activity?.image_url ?? prefill?.image_url ?? null // <-- Use prefill.image_url if available
+  );
   const [category, setCategory] = useState<string | null>(null);
 
-  const { itineraryId, activity } = params;
-
   const categoryOptions = [
-    { name: 'food', label: 'Eat', icon: 'restaurant' },
-    { name: 'leisure', label: 'Enjoy', icon: 'sunny' },
-    { name: 'accomodation', label: 'Stay', icon: 'business' },
+    { name: 'restaurants', label: 'Eat', icon: 'restaurant' },
+    { name: 'attractions', label: 'Enjoy', icon: 'sunny' },
+    { name: 'hotels', label: 'Stay', icon: 'business' },
   ] as {name: string, label: string, icon: IconName}[];
 
   React.useEffect(() => {
     if (activity) {
       setImage(activity.image_url as string | null);
       setCategory(activity.category);
+    } else if (prefill?.image_url) {
+      setImage(prefill.image_url); // <-- Set image from prefill if present
+    } else if (params.category) {
+      setCategory(params.category);
     }
-
-    navigation.setOptions({});
-  }, []);
+  }, [activity, prefill?.image_url, params.category]);
 
   const addActivity = async (values: any) => {
     try {
       const newActivity = {
         category: category,
-        image_url: await uploadImage(),
+        image_url: typeof(image) != 'string' ? await uploadImage() : image,
         ...values
       };
 
@@ -77,7 +90,7 @@ export const ActivityForm: NavioScreen = observer(() => {
       console.log(newActivity);
       navio.goBack();
     } catch (error) {
-      handleRequestError(error);
+      handleRequestError(error); 
     }
   };
 
@@ -145,21 +158,16 @@ export const ActivityForm: NavioScreen = observer(() => {
       </ImageBackground>
       <View bg-white style={{ borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
         <Formik
-          initialValues={activity ? {
-            name: activity.name,
-            description: activity.description,
-            start_time: new Date(activity.start_time),
-            end_time: new Date(activity.end_time),
-            location: activity.location,
-            cost: activity.cost ? activity.cost.toString() : '',
-          } : {
-            name: '',
-            description: '',
-            start_time: new Date(),
-            end_time: new Date(Date.now() + 60 * 60 * 1000),
-            category: '',
-            location: '',
+          initialValues={{
+            name: activity?.name ?? prefill?.name ?? '',
+            description: activity?.description ?? prefill?.description ?? '',
+            location: activity?.location ?? prefill?.location ?? '',
+            start_time: activity?.start_time ? new Date(activity.start_time) : new Date(),
+            end_time: activity?.end_time ? new Date(activity.end_time) : new Date(new Date().getTime() + 3600000), // Default to 1 hour later
+            cost: activity?.cost ? activity.cost.toString() : '',
+            category: activity?.category ?? '',
           }}
+
           validationSchema={ActivitySchema}
           onSubmit={activity ? updateActivity : addActivity}
         >
