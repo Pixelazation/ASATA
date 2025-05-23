@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity, Modal} from 'react-native';
+import {View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator} from 'react-native';
 import {DateTimePicker} from 'react-native-ui-lib';
 import {NavioScreen} from 'rn-navio';
 import {supabase} from '@app/lib/supabase';
 import {Icon} from '@app/components/icon';
 import {PickerFixed} from '@app/components/picker-fixed';
 import { useStores } from '../../stores';
+import { colors } from '../../utils/designSystem';
 
 export const EditAccount: NavioScreen = () => {
   const [email, setEmail] = useState('');
@@ -165,8 +166,9 @@ export const EditAccount: NavioScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
+      <View style={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
+        <ActivityIndicator size={120} color={colors.primary} />
+        <Text style={{ textAlign: 'center' }}>Fetching account details...</Text>
       </View>
     );
   }

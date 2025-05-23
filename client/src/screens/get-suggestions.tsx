@@ -151,7 +151,12 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const handleMapPress = async (event: any) => {
     const { coordinate } = event.nativeEvent;
-    setRegion(coordinate);
+    setRegion({
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+      latitudeDelta: region?.latitudeDelta || 0.1922,
+      longitudeDelta: region?.longitudeDelta || 0.1421,
+    });
 
     const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
     if (result) {
