@@ -22,11 +22,18 @@ import { IconName } from '../../../components/icon';
 import { MediaApi } from '../../../services/api/media';
 import { set } from 'lodash';
 
+// Update Params type to support prefill fields
 export type Params = {
   type?: 'push' | 'show';
   itineraryId: string;
   activity?: ActivityType;
+  prefill?: {
+    name?: string;
+    description?: string;
+    location?: string;
+  };
 };
+
 
 const ActivitySchema = Yup.object().shape({
   name: Yup.string().required('Required'),
@@ -48,7 +55,7 @@ export const ActivityForm: NavioScreen = observer(() => {
   const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
 
-  const { itineraryId, activity } = params;
+  const { itineraryId, activity, prefill } = params;
 
   const categoryOptions = [
     { name: 'food', label: 'Eat', icon: 'restaurant' },
@@ -77,7 +84,7 @@ export const ActivityForm: NavioScreen = observer(() => {
       console.log(newActivity);
       navio.goBack();
     } catch (error) {
-      handleRequestError(error);
+      handleRequestError(error); 
     }
   };
 
@@ -145,21 +152,16 @@ export const ActivityForm: NavioScreen = observer(() => {
       </ImageBackground>
       <View bg-white style={{ borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
         <Formik
-          initialValues={activity ? {
-            name: activity.name,
-            description: activity.description,
-            start_time: new Date(activity.start_time),
-            end_time: new Date(activity.end_time),
-            location: activity.location,
-            cost: activity.cost ? activity.cost.toString() : '',
-          } : {
-            name: '',
-            description: '',
-            start_time: new Date(),
-            end_time: new Date(),
-            category: '',
-            location: '',
+          initialValues={{
+            name: activity?.name ?? prefill?.name ?? '',
+            description: activity?.description ?? prefill?.description ?? '',
+            location: activity?.location ?? prefill?.location ?? '',
+            start_time: activity?.start_time ? new Date(activity.start_time) : new Date(),
+            end_time: activity?.end_time ? new Date(activity.end_time) : new Date(),
+            cost: activity?.cost ? activity.cost.toString() : '',
+            category: activity?.category ?? '',
           }}
+
           validationSchema={ActivitySchema}
           onSubmit={activity ? updateActivity : addActivity}
         >
