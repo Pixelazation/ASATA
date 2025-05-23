@@ -108,11 +108,13 @@ export const ActivityForm: NavioScreen = observer(() => {
       const newActivityDetails = {
         image_url: typeof(image) != 'string' ? await uploadImage() : image,
         category: category,
-        ...values
+        ...values,
+        cost: values.cost == '' ? undefined : values.cost,
       };
 
+      console.log(values.cost);
       await ItineraryApi.updateActivity(activity?.id!, newActivityDetails);
-      console.log(newActivityDetails);
+      
       navio.goBack();
     } catch (error) {
       handleRequestError(error);

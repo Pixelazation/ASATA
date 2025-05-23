@@ -4,7 +4,7 @@ type ActivityType = {
   name: string;
   start_time: Date;
   end_time: Date;
-  cost: number;
+  cost?: number;
   category: string
   description: string;
   location: string;
