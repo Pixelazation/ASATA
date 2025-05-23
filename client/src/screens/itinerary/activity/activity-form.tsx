@@ -22,7 +22,7 @@ import { IconName } from '../../../components/icon';
 import { MediaApi } from '../../../services/api/media';
 import { set } from 'lodash';
 
-// Update Params type to support prefill fields
+// Update your Params type to include category
 export type Params = {
   type?: 'push' | 'show';
   itineraryId: string;
@@ -32,6 +32,7 @@ export type Params = {
     description?: string;
     location?: string;
   };
+  category?: string; // Add this line
 };
 
 
@@ -58,19 +59,19 @@ export const ActivityForm: NavioScreen = observer(() => {
   const { itineraryId, activity, prefill } = params;
 
   const categoryOptions = [
-    { name: 'food', label: 'Eat', icon: 'restaurant' },
-    { name: 'leisure', label: 'Enjoy', icon: 'sunny' },
-    { name: 'accomodation', label: 'Stay', icon: 'business' },
+    { name: 'restaurants', label: 'Eat', icon: 'restaurant' },
+    { name: 'attractions', label: 'Enjoy', icon: 'sunny' },
+    { name: 'hotels', label: 'Stay', icon: 'business' },
   ] as {name: string, label: string, icon: IconName}[];
 
   React.useEffect(() => {
     if (activity) {
       setImage(activity.image_url as string | null);
       setCategory(activity.category);
+    } else if (params.category) { // Now properly typed
+      setCategory(params.category);
     }
-
-    navigation.setOptions({});
-  }, []);
+  }, [activity, params.category]);
 
   const addActivity = async (values: any) => {
     try {
@@ -157,7 +158,7 @@ export const ActivityForm: NavioScreen = observer(() => {
             description: activity?.description ?? prefill?.description ?? '',
             location: activity?.location ?? prefill?.location ?? '',
             start_time: activity?.start_time ? new Date(activity.start_time) : new Date(),
-            end_time: activity?.end_time ? new Date(activity.end_time) : new Date(),
+            end_time: activity?.end_time ? new Date(activity.end_time) : new Date(new Date().getTime() + 3600000), // Default to 1 hour later
             cost: activity?.cost ? activity.cost.toString() : '',
             category: activity?.category ?? '',
           }}

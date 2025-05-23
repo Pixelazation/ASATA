@@ -87,7 +87,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
     setLoading(true);
     try {
-      let category = "";
+      let category = '';
       if (selectedOption === "recreation") category = "attractions";
       else if (selectedOption === "diner") category = "restaurants";
       else if (selectedOption === "accommodation") category = "hotels";
@@ -136,6 +136,16 @@ export const GetSuggestions: NavioScreen = observer(() => {
       console.error("Error fetching suggestions:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Determine the category based on selectedOption
+  const getCategoryFromOption = (option: string): string => {
+    switch(option) {
+      case 'recreation': return 'attractions';
+      case 'diner': return 'restaurants';
+      case 'accommodation': return 'hotels';
+      default: return '';
     }
   };
 
@@ -486,16 +496,17 @@ export const GetSuggestions: NavioScreen = observer(() => {
           
           if (selected) {
             navio.push('ActivityForm', {
-              itineraryId: itinerary.id, // Make sure itinerary has an `id`
-              name: selected.name,
-              description: selected.description || '', // fallback if null
-              location: selected.address_obj?.address_string || '',
+              itineraryId: itinerary.id,
+              prefill: {
+                name: selected.name,
+                description: selected.description || selected.address_obj?.address_string || '',
+                location: selected.address_obj?.address_string || '',
+              },
+              category: getCategoryFromOption(selectedOption) // Use the function here
             });
           }
           setModalVisible(false);
-          setSelectedSuggestion(null);
         }}
-
       />
     </View>
   );
