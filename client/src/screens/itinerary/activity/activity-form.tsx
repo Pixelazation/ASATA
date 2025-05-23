@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, ImageBackground, ScrollView, StyleSheet } from 'react-native';
+import { Alert, ImageBackground, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { DateTimePicker, Text, View } from 'react-native-ui-lib';
 import { observer } from 'mobx-react';
 import { NavioScreen } from 'rn-navio';
@@ -18,9 +18,10 @@ import { BG_IMAGE_2 } from '../../../assets';
 import { ImagePicker } from '../../../components/molecules/image-picker';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { RadioSelection } from '../../../components/molecules/radio-selection';
-import { IconName } from '../../../components/icon';
+import { Icon, IconName } from '../../../components/icon';
 import { MediaApi } from '../../../services/api/media';
 import { set } from 'lodash';
+import { MapModal } from '../../../components/molecules/map-modal';
 
 // Update your Params type to include category
 export type Params = {
@@ -46,6 +47,8 @@ const ActivitySchema = Yup.object().shape({
     .required('Required'),
   category: Yup.string(),
   location: Yup.string(),
+  cost: Yup.string()
+    .matches(/^\d*\.?\d*$/, 'Estimated Cost must be a number'), // <-- Only allow numbers and optional decimal
 });
 
 export const ActivityForm: NavioScreen = observer(() => {
@@ -60,6 +63,8 @@ export const ActivityForm: NavioScreen = observer(() => {
     activity?.image_url ?? prefill?.image_url ?? null // <-- Use prefill.image_url if available
   );
   const [category, setCategory] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [mapVisible, setMapVisible] = useState<boolean>(false);
 
   const categoryOptions = [
     { name: 'restaurants', label: 'Eat', icon: 'restaurant' },
@@ -79,6 +84,7 @@ export const ActivityForm: NavioScreen = observer(() => {
   }, [activity, prefill?.image_url, params.category]);
 
   const addActivity = async (values: any) => {
+    setSubmitting(true);
     try {
       const newActivity = {
         category: category,
@@ -91,10 +97,13 @@ export const ActivityForm: NavioScreen = observer(() => {
       navio.goBack();
     } catch (error) {
       handleRequestError(error); 
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const updateActivity = async (values: any) => {
+    setSubmitting(true);
     try {
       const newActivityDetails = {
         image_url: typeof(image) != 'string' ? await uploadImage() : image,
@@ -107,6 +116,8 @@ export const ActivityForm: NavioScreen = observer(() => {
       navio.goBack();
     } catch (error) {
       handleRequestError(error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -199,6 +210,7 @@ export const ActivityForm: NavioScreen = observer(() => {
                 value={values.cost}
                 onChangeText={handleChange('cost')}
                 onBlur={handleBlur('cost')}
+                keyboardType="numeric" // <-- Only show numeric keyboard
               />
 
               <FormField
@@ -207,12 +219,17 @@ export const ActivityForm: NavioScreen = observer(() => {
                 value={values.location}
                 onChangeText={handleChange('location')}
                 onBlur={handleBlur('location')}
+                trailingAccessory={
+                  <Pressable onPress={() => setMapVisible(true)}>
+                    <Icon name='map-outline' color={colors.primary} />
+                  </Pressable>
+                }
               />
 
               <View style={{ flexDirection: 'row', gap: 16 }}>
                 <DateTimePicker
                   accent
-                  style={{ paddingHorizontal: 16, paddingVertical: 8 }}
+                  style={{ paddingHorizontal: 16, paddingVertical: 8, minWidth: 140 }} // <-- extended width
                   fieldStyle={{
                     backgroundColor: '#ECF2F0',
                     borderRadius: 100,
@@ -231,7 +248,7 @@ export const ActivityForm: NavioScreen = observer(() => {
                 />
                 <DateTimePicker
                   accent
-                  style={{ paddingHorizontal: 16, paddingVertical: 8 }}
+                  style={{ paddingHorizontal: 16, paddingVertical: 8, minWidth: 140 }} // <-- extended width
                   fieldStyle={{
                     backgroundColor: '#ECF2F0',
                     borderRadius: 100,
@@ -253,7 +270,7 @@ export const ActivityForm: NavioScreen = observer(() => {
               <View style={{ flexDirection: 'row', gap: 16 }}>
                 <DateTimePicker
                   accent
-                  style={{ paddingHorizontal: 16, paddingVertical: 8 }}
+                  style={{ paddingHorizontal: 16, paddingVertical: 8, minWidth: 140 }} // <-- extended width
                   fieldStyle={{
                     backgroundColor: '#ECF2F0',
                     borderRadius: 100,
@@ -272,7 +289,7 @@ export const ActivityForm: NavioScreen = observer(() => {
                 />
                 <DateTimePicker
                   accent
-                  style={{ paddingHorizontal: 16, paddingVertical: 8 }}
+                  style={{ paddingHorizontal: 16, paddingVertical: 8, minWidth: 140 }} // <-- extended width
                   fieldStyle={{
                     backgroundColor: '#ECF2F0',
                     borderRadius: 100,
@@ -293,18 +310,25 @@ export const ActivityForm: NavioScreen = observer(() => {
 
               <ImagePicker image={image} setImage={setImage} />
 
+              <MapModal
+                visible={mapVisible}
+                closeModal={() => setMapVisible(false)}
+                setLocation={(loc) => setFieldValue('location', loc)}
+              />
+
               <View style={{ marginTop: 16 }}>
                 <Text
-                  onPress={handleSubmit as any}
+                  onPress={!submitting ? (handleSubmit as any) : undefined}
                   style={{
-                    backgroundColor: colors.primary,
+                    backgroundColor: submitting ? '#ccc' : colors.primary,
                     color: 'white',
                     padding: 12,
                     borderRadius: 8,
                     textAlign: 'center',
+                    opacity: submitting ? 0.7 : 1,
                   }}
                 >
-                  Submit
+                  {submitting ? 'Submitting...' : 'Submit'}
                 </Text>
               </View>
             </ScrollView>

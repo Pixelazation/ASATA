@@ -94,12 +94,13 @@ export const EditAccount: NavioScreen = () => {
           // Show success modal instructing the user to check their original email
           setSuccessMessage('A confirmation email has been sent to your original email address. Please check it to confirm the change.');
           setSuccessModalVisible(true);
+          setModalVisible(false); // <-- Close edit modal after update
           break;
 
         case 'Password':
           if (currentValue !== confirmPassword) {
             setErrorMessage('Passwords do not match. Please try again.');
-            setErrorModalVisible(true); // Show error modal
+            setErrorModalVisible(true);
             return;
           }
           const { error: passwordError } = await supabase.auth.updateUser({
@@ -110,34 +111,41 @@ export const EditAccount: NavioScreen = () => {
             return;
           }
           console.log('Password updated successfully in authentication table');
+          setModalVisible(false); // <-- Close edit modal after update
           break;
 
         case 'First Name':
           setFirstName(currentValue);
           updateData = { first_name: currentValue };
+          setModalVisible(false); // <-- Close edit modal after update
           break;
 
         case 'Last Name':
           setLastName(currentValue);
           updateData = { last_name: currentValue };
+          setModalVisible(false); // <-- Close edit modal after update
           break;
 
         case 'Birth Date':
           setDateOfBirth(currentValue);
           updateData = { birthdate: currentValue };
+          setModalVisible(false); // <-- Close edit modal after update
           break;
 
         case 'Gender':
           setGender(currentValue);
           updateData = { gender: currentValue };
+          setModalVisible(false); // <-- Close edit modal after update
           break;
 
         case 'Phone Number':
           setPhoneNumber(currentValue);
           updateData = { mobile_number: currentValue };
+          setModalVisible(false); // <-- Close edit modal after update
           break;
 
         default:
+          setModalVisible(false); // <-- Fallback: close modal
           break;
       }
 
@@ -214,7 +222,7 @@ export const EditAccount: NavioScreen = () => {
       <Modal
         transparent={true}
         visible={modalVisible}
-        animationType="slide"
+        animationType="fade" // or "none"
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalContainer}>
@@ -270,8 +278,16 @@ export const EditAccount: NavioScreen = () => {
               />
             )}
             <View style={styles.modalButtonContainer}>
-              <Button title="Cancel" onPress={() => setModalVisible(false)} />
-              <Button title="Save" onPress={handleModalSave} />
+              <Button
+                title="Cancel"
+                onPress={() => setModalVisible(false)}
+                color={colors.primary}
+              />
+              <Button
+                title="Save"
+                onPress={handleModalSave}
+                color={colors.primary}
+              />
             </View>
           </View>
         </View>

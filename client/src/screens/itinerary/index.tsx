@@ -184,7 +184,7 @@ export const Itinerary: NavioScreen = observer(() => {
                 ) : (
                   <View style={{flex: 1, padding: 16}}>
                     <View style={styles.dragHandleBar} />
-                    <View style={{paddingBottom: 16}}>
+                    <View style={{paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                       <Text section>{details?.title}</Text>
                       {editMode && <IconButton name="pencil" onPress={() => navio.push('ItineraryForm', {itineraryId})}/>}
                     </View>
