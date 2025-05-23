@@ -42,7 +42,7 @@ export const GeocodingApi = {
       const country = getComponent("country");
 
       return {
-        fullAddress: `${route}, ${city}, ${country}`, // Combined address
+        fullAddress: `${route ? (route + ", ") : ""}${city}, ${country}`, // Combined address
         route,
         city,
         country,
