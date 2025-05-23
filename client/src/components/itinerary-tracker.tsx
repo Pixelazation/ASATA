@@ -1,13 +1,14 @@
 import React, { useCallback, useState } from 'react';
 import {View, Text} from 'react-native-ui-lib';
 import {Icon} from '@app/components/icon'; // Assuming Icon is imported from your project
-import { Image, StyleSheet } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet } from 'react-native';
 import { BG_IMAGE } from '../assets';
 import { ItineraryApi } from '../services/api/itineraries';
 import { timestampToDateTimeString } from '../utils/dateutils';
 import { useFocusEffect } from '@react-navigation/native';
 import { useServices } from '../services';
 import { IconButton } from './iconbutton';
+import { getActivityIcon } from '../utils/activity-icons';
 
 type Props = {
   title?: string;
@@ -17,12 +18,15 @@ export const ItineraryTracker: React.FC<Props> = ({title}) => {
 
   const { navio } = useServices();
 
-  const [tracked, setTracked] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [tracked, setTracked] = useState<ActivityType|null>(null);
 
   const fetchTrackedItineraryDetails = async () => {
+    setLoading(true);
     const itinerary = await ItineraryApi.getCurrentOrRelevantActivity();
     setTracked(itinerary?.activity);
     console.log(tracked?.itinerary_id);
+    setLoading(false);
     return;
   }
 
@@ -40,40 +44,30 @@ export const ItineraryTracker: React.FC<Props> = ({title}) => {
         <Text section textColor>
           Tracked Itinerary
         </Text>
-        {/* <View
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: 'black',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {tracked && <Icon name="arrow-forward" size={16} color="black" onPress={() => console.log("I AM PRESSED")} />}
-        </View> */}
         {tracked && <IconButton name='arrow-forward-circle' onPress={() => navio.push("Itinerary", {itineraryId: tracked?.itinerary_id})} />}
       </View>
 
-      {tracked ? (
-        <View style={{flex: 1, flexDirection: 'row', gap: 8}}>
-          <View>
-            <Image source={BG_IMAGE} resizeMode='cover' style={styles.descImg} />
-          </View>
-          <View style={styles.details}>
-            <View style={{ flex: 1, flexDirection: 'row', gap: 8 }}>
-              <Icon name='cafe' size={24} color='black' />
-              <Text>{tracked.name}</Text>
-            </View>
-            <Text>Start: {timestampToDateTimeString(tracked.start_time)}</Text>
-            <Text>End: {timestampToDateTimeString(tracked.end_time)}</Text>
-          </View>
-        </View>
+      {loading ? (
+        <ActivityIndicator size={64} />
       ) : (
-        <Text>No itinerary tracked</Text>
+        tracked ? (
+          <View style={{flex: 1, flexDirection: 'row', gap: 8}}>
+            <View>
+              <Image source={tracked ? {uri: tracked.image_url} : BG_IMAGE} resizeMode='cover' style={styles.descImg} />
+            </View>
+            <View style={styles.details}>
+              <View style={{ flex: 1, flexDirection: 'row', gap: 8 }}>
+                <Icon name={getActivityIcon(tracked.category)} size={24} color='black' />
+                <Text style={{fontWeight: 'bold'}}>{tracked.name}</Text>
+              </View>
+              <Text>Start: {timestampToDateTimeString(tracked.start_time)}</Text>
+              <Text>End: {timestampToDateTimeString(tracked.end_time)}</Text>
+            </View>
+          </View>
+        ) : (
+          <Text>No itinerary tracked</Text>
+        )
       )}
-
       
     </View>
   );
