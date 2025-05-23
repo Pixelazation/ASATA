@@ -5,6 +5,7 @@ import {NavioScreen} from 'rn-navio';
 import {supabase} from '@app/lib/supabase';
 import {Icon} from '@app/components/icon';
 import {PickerFixed} from '@app/components/picker-fixed';
+import { useStores } from '../../stores';
 
 export const EditAccount: NavioScreen = () => {
   const [email, setEmail] = useState('');
@@ -24,6 +25,8 @@ export const EditAccount: NavioScreen = () => {
   const [currentValue, setCurrentValue] = useState('');
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  const { auth } = useStores();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -150,6 +153,9 @@ export const EditAccount: NavioScreen = () => {
           console.log('Field updated successfully:', updateData);
         }
       }
+
+      auth.login();
+      
     } catch (error) {
       console.error('Error saving modal data:', error);
     }

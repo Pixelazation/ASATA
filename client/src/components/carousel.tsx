@@ -1,5 +1,6 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text, View, ImageBackground, TouchableOpacity, Linking } from "react-native";
+import { ScrollView, StyleSheet, View, ImageBackground, TouchableOpacity, Linking } from "react-native";
+import { Text } from 'react-native-ui-lib';
 
 type CarouselItem = {
   title: string;
@@ -21,7 +22,7 @@ export const Carousel: React.FC<CarouselProps> = ({ title, items }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <Text section textColor>{title}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
         {items.map((item, index) => (
           <TouchableOpacity key={index} onPress={() => handlePress(item.link)} activeOpacity={0.8}>
@@ -40,6 +41,7 @@ export const Carousel: React.FC<CarouselProps> = ({ title, items }) => {
 const styles = StyleSheet.create({
   container: {
     marginBottom: 20,
+    gap: 16
   },
   title: {
     fontSize: 18,

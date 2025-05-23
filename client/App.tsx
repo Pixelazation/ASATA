@@ -15,7 +15,7 @@ import {
   getStatusBarBGColor,
   getStatusBarStyle,
 } from '@app/utils/designSystem';
-import {hydrateStores} from '@app/stores';
+import {hydrateStores, useStores} from '@app/stores';
 import {initServices} from '@app/services';
 import {AppProvider} from '@app/utils/providers';
 import {useAppearance} from '@app/utils/hooks';
@@ -31,6 +31,8 @@ LogBox.ignoreLogs([
 
 export default (): JSX.Element => {
   useAppearance();
+  const { auth } = useStores();
+
   const [ready, setReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
@@ -44,6 +46,8 @@ export default (): JSX.Element => {
   const checkSession = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setIsLoggedIn(!!user);
+
+    if (user) await auth.login();
   }, []);
 
   const onLaunch = useCallback(async () => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { ImageBackground, ScrollView, StyleSheet, Text } from "react-native";
-import { View, Button } from "react-native-ui-lib";
+import { ImageBackground, ScrollView, StyleSheet } from "react-native";
+import { View, Button, Text } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
 import { useServices } from "@app/services";
@@ -13,9 +13,13 @@ import { LocationTracker } from "@app/components/location-tracker";
 import { WeatherTracker } from "@app/components/weather-tracker";
 import { NotificationsApi } from "@app/services/api/notifications";
 import { supabase } from "../lib/supabase";
+import { colors } from '../utils/designSystem';
+import { UserApi } from '../services/api/user';
+import { useStores } from '../stores';
 
 export const Main: NavioScreen = observer(() => {
   const { navio } = useServices();
+  const { auth } = useStores();
   const navigation = navio.useN();
 
   interface PromotionItem {
@@ -68,28 +72,41 @@ export const Main: NavioScreen = observer(() => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ImageBackground source={BG_IMAGE_2} style={styles.background}>
+      <ImageBackground source={BG_IMAGE_2} style={styles.background} imageStyle={{opacity: 0.5}}>
+        <View style={styles.header}>
+          <Text style={styles.welcomeText}>
+            Welcome back,
+          </Text>
+          <Text style={styles.welcomeName}>
+            {auth.firstName}!
+          </Text>
+        </View>
         <ScrollView contentInsetAdjustmentBehavior="always">
           <View style={styles.opaqueContainer}>
-            <View style={styles.buttonRow}>
-              <Button
-                onPress={() => navio.push("GetSuggestions", { selectedOption: "accommodation" })}
-                style={styles.iconButton}
-              >
-                <Icon name="bed" color={styles.icon.color} size={styles.icon.fontSize} />
-              </Button>
-              <Button
-                onPress={() => navio.push("GetSuggestions", { selectedOption: "recreation" })}
-                style={styles.iconButton}
-              >
-                <Icon name="walk" color={styles.icon.color} size={styles.icon.fontSize} />
-              </Button>
-              <Button
-                onPress={() => navio.push("GetSuggestions", { selectedOption: "diner" })}
-                style={styles.iconButton}
-              >
-                <Icon name="pizza" color={styles.icon.color} size={styles.icon.fontSize} />
-              </Button>
+            <View style={{gap: 16}}>
+              <Text section textColor>
+                Get Suggestions
+              </Text>
+              <View style={styles.buttonRow}>
+                <Button
+                  onPress={() => navio.push("GetSuggestions", { selectedOption: "accommodation" })}
+                  style={styles.iconButton}
+                >
+                  <Icon name="bed" color={styles.icon.color} size={styles.icon.fontSize} />
+                </Button>
+                <Button
+                  onPress={() => navio.push("GetSuggestions", { selectedOption: "recreation" })}
+                  style={styles.iconButton}
+                >
+                  <Icon name="walk" color={styles.icon.color} size={styles.icon.fontSize} />
+                </Button>
+                <Button
+                  onPress={() => navio.push("GetSuggestions", { selectedOption: "diner" })}
+                  style={styles.iconButton}
+                >
+                  <Icon name="pizza" color={styles.icon.color} size={styles.icon.fontSize} />
+                </Button>
+              </View>
             </View>
 
             <ItineraryTracker />
@@ -97,7 +114,7 @@ export const Main: NavioScreen = observer(() => {
             {/* <Carousel title="Explore new places..." items={recommendationItems} /> */}
             <Carousel title="Promotions" items={promotionItems} />
             {/* <LocationTracker /> */}
-            <WeatherTracker />
+            {/* <WeatherTracker />
             <View style={styles.buttonRow}>
               <Button
                 onPress={() => NotificationsApi.sendTestNotification("You have an activity today!")}
@@ -117,7 +134,7 @@ export const Main: NavioScreen = observer(() => {
               >
                 <Icon name="location-outline" color={styles.icon.color} size={styles.icon.fontSize} />
               </Button>
-            </View>
+            </View> */}
           </View>
         </ScrollView>
       </ImageBackground>
@@ -138,7 +155,24 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: "center",
+    backgroundColor: 'black',
     height:300,
+  },
+  header: {
+    position: 'absolute',
+    top: 36,
+    left: 24,
+    paddingBottom: 0,
+  },
+  welcomeText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 32
+  },
+  welcomeName: {
+    color: '#1EC485',
+    fontWeight: 'bold',
+    fontSize: 32
   },
   opaqueContainer: {
     flex: 1,
@@ -147,11 +181,12 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 40,
     padding: 20,
     marginTop: 200,
+    gap: 16,
+    zIndex: 1,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
   },
   iconButton: {
     width: 56,
