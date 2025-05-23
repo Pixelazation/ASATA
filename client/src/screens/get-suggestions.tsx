@@ -485,7 +485,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
           const selected = selectedSuggestionRef.current;
           
           if (selected) {
-            navio.push('ItineraryForm', {
+            navio.push('ActivityForm', {
               itineraryId: itinerary.id, // Make sure itinerary has an `id`
               name: selected.name,
               description: selected.description || '', // fallback if null
