@@ -54,6 +54,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
     longitudeDelta: 0.1421,
   });
 
+  const selectedSuggestionRef = useRef<any>(null);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
 
@@ -463,13 +465,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
                   {/* Add to Itinerary Button */}
                   <TouchableOpacity
-                  onPress={() => {
-                    setSelectedSuggestion(item); // `item` is the clicked suggestion
-                    setModalVisible(true);
-                  }}
-                >
-                  <Text>Add to Itinerary</Text>
-                </TouchableOpacity>
+                    onPress={() => {
+                      selectedSuggestionRef.current = item;
+                      setModalVisible(true);
+                    }}
+                  >
+                    <Text>Add to Itinerary</Text>
+                  </TouchableOpacity>
                 </TouchableOpacity>
               ))
             )}
@@ -480,13 +482,20 @@ export const GetSuggestions: NavioScreen = observer(() => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onSelectItinerary={(itinerary) => {
-          // Here you handle adding the selectedSuggestion to the chosen itinerary
-          console.log('Add', selectedSuggestion, 'to itinerary:', itinerary);
+          const selected = selectedSuggestionRef.current;
+          
+          if (selected) {
+            navio.push('ItineraryForm', {
+              itineraryId: itinerary.id, // Make sure itinerary has an `id`
+              name: selected.name,
+              description: selected.description || '', // fallback if null
+              location: selected.address_obj?.address_string || '',
+            });
+          }
           setModalVisible(false);
           setSelectedSuggestion(null);
-
-          // Optionally show a confirmation or update your app state here
         }}
+
       />
     </View>
   );
