@@ -39,9 +39,7 @@ export const AuthLogin: NavioScreen<Props> = observer(({type = 'push'}) => {
     if (error) {
       Alert.alert(error.message)
     } else {
-      auth.set('email', email)
-      // marking that we are logged in
-      auth.set('state', 'logged-in');
+      auth.login()
 
       // navigating to main app
       navio.setRoot('tabs', 'AppTabs');

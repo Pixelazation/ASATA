@@ -13,9 +13,13 @@ import { LocationTracker } from "@app/components/location-tracker";
 import { WeatherTracker } from "@app/components/weather-tracker";
 import { NotificationsApi } from "@app/services/api/notifications";
 import { supabase } from "../lib/supabase";
+import { colors } from '../utils/designSystem';
+import { UserApi } from '../services/api/user';
+import { useStores } from '../stores';
 
 export const Main: NavioScreen = observer(() => {
   const { navio } = useServices();
+  const { auth } = useStores();
   const navigation = navio.useN();
 
   interface PromotionItem {
@@ -68,7 +72,15 @@ export const Main: NavioScreen = observer(() => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ImageBackground source={BG_IMAGE_2} style={styles.background}>
+      <ImageBackground source={BG_IMAGE_2} style={styles.background} imageStyle={{opacity: 0.5}}>
+        <View style={styles.header}>
+          <Text style={styles.welcomeText}>
+            Welcome back,
+          </Text>
+          <Text style={styles.welcomeName}>
+            {auth.firstName}!
+          </Text>
+        </View>
         <ScrollView contentInsetAdjustmentBehavior="always">
           <View style={styles.opaqueContainer}>
             <View style={styles.buttonRow}>
@@ -138,7 +150,24 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: "center",
+    backgroundColor: 'black',
     height:300,
+  },
+  header: {
+    position: 'absolute',
+    top: 36,
+    left: 24,
+    paddingBottom: 0,
+  },
+  welcomeText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 32
+  },
+  welcomeName: {
+    color: '#1EC485',
+    fontWeight: 'bold',
+    fontSize: 32
   },
   opaqueContainer: {
     flex: 1,
@@ -147,6 +176,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 40,
     padding: 20,
     marginTop: 200,
+    zIndex: 1,
   },
   buttonRow: {
     flexDirection: "row",
