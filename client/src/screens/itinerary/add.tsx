@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Image, ImageBackground, ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, Image, ImageBackground, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { DateTimePicker, Text, View, Button } from 'react-native-ui-lib';
 import { observer } from 'mobx-react';
 import { NavioScreen } from 'rn-navio';
@@ -19,6 +19,7 @@ import { ImagePickerAsset } from 'expo-image-picker';
 import { BG_IMAGE_2 } from '../../assets';
 import { ImagePicker } from '../../components/molecules/image-picker';
 import { HeaderBack } from '../../components/molecules/header-back';
+import { MapModal } from '../../components/molecules/map-modal';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -45,6 +46,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
   const [loading, setLoading] = useState(false);
   const [details, setDetails] = useState<ItineraryType>();
   const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
+  const [mapVisible, setMapVisible] = useState<boolean>(false);
 
   React.useEffect(() => {
     if (itineraryId) {
@@ -171,8 +173,14 @@ export const ItineraryForm: NavioScreen = observer(() => {
                 value={values.location}
                 onChangeText={handleChange('location')}
                 onBlur={handleBlur('location')}
-                trailingAccessory={<Icon name='map-outline' color={colors.primary} />}
+                trailingAccessory={
+                  <Pressable onPress={() => setMapVisible(true)}>
+                    <Icon name='map-outline' color={colors.primary}/>
+                  </Pressable>
+                }
               />
+
+              <MapModal visible={mapVisible} closeModal={() => setMapVisible(false)} setLocation={(loc) => setFieldValue('location', loc)}/>
 
               <View style={{ display: 'flex', flexDirection: 'row', gap: 16 }}>
                 <View style={{ flex: 1 }}>
