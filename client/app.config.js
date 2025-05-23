@@ -7,7 +7,7 @@ export default {
     slug: "expo-starter",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/icon.png",
+    icon: "./assets/icon.png",  //icon.png 128x128
     userInterfaceStyle: "automatic",
     scheme: "myapp",
     splash: {
@@ -27,7 +27,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
+        foregroundImage: "./assets/adaptive-icon.png", //adaptive-icon.png 366x366
         backgroundColor: "#FFFFFF"
       },
       config: {
@@ -43,7 +43,7 @@ export default {
       ]
     },
     web: {
-      favicon: "./assets/favicon.png"
+      favicon: "./assets/favicon.png" //favicon.png 48x48
     },
     plugins: [
       "expo-localization",
