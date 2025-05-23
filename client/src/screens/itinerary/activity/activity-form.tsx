@@ -31,6 +31,7 @@ export type Params = {
     name?: string;
     description?: string;
     location?: string;
+    image_url?: string;
   };
   category?: string; // Add this line
 };
@@ -53,10 +54,12 @@ export const ActivityForm: NavioScreen = observer(() => {
   const navigation = navio.useN();
   const params = navio.useParams<Params>();
 
-  const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
-  const [category, setCategory] = useState<string | null>(null);
-
   const { itineraryId, activity, prefill } = params;
+
+  const [image, setImage] = useState<ImagePickerAsset | string | null>(
+    activity?.image_url ?? prefill?.image_url ?? null // <-- Use prefill.image_url if available
+  );
+  const [category, setCategory] = useState<string | null>(null);
 
   const categoryOptions = [
     { name: 'restaurants', label: 'Eat', icon: 'restaurant' },
@@ -68,16 +71,18 @@ export const ActivityForm: NavioScreen = observer(() => {
     if (activity) {
       setImage(activity.image_url as string | null);
       setCategory(activity.category);
-    } else if (params.category) { // Now properly typed
+    } else if (prefill?.image_url) {
+      setImage(prefill.image_url); // <-- Set image from prefill if present
+    } else if (params.category) {
       setCategory(params.category);
     }
-  }, [activity, params.category]);
+  }, [activity, prefill?.image_url, params.category]);
 
   const addActivity = async (values: any) => {
     try {
       const newActivity = {
         category: category,
-        image_url: await uploadImage(),
+        image_url: typeof(image) != 'string' ? await uploadImage() : image,
         ...values
       };
 

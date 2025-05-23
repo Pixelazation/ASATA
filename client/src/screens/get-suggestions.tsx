@@ -501,8 +501,9 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 name: selected.name,
                 description: selected.description || selected.address_obj?.address_string || '',
                 location: selected.address_obj?.address_string || '',
+                image_url: selected.photoUrl, // <-- Pass the image URL here
               },
-              category: getCategoryFromOption(selectedOption) // Use the function here
+              category: getCategoryFromOption(selectedOption)
             });
           }
           setModalVisible(false);
