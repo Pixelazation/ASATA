@@ -15,13 +15,13 @@ import {
   getStatusBarBGColor,
   getStatusBarStyle,
 } from '@app/utils/designSystem';
-import {hydrateStores} from '@app/stores';
+import {hydrateStores, useStores} from '@app/stores';
 import {initServices} from '@app/services';
 import {AppProvider} from '@app/utils/providers';
 import {useAppearance} from '@app/utils/hooks';
 import { supabase } from '@app/lib/supabase';
 import * as Notifications from 'expo-notifications';
-import { registerForPushNotificationsAsync } from './src/services/notifications';
+import { NotificationsApi } from './src/services/api/notifications';
 
 LogBox.ignoreLogs([
   'Require',
@@ -31,6 +31,8 @@ LogBox.ignoreLogs([
 
 export default (): JSX.Element => {
   useAppearance();
+  const { auth } = useStores();
+
   const [ready, setReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
@@ -44,6 +46,8 @@ export default (): JSX.Element => {
   const checkSession = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setIsLoggedIn(!!user);
+
+    if (user) await auth.login();
   }, []);
 
   const onLaunch = useCallback(async () => {
@@ -64,7 +68,16 @@ export default (): JSX.Element => {
   }, [onLaunch]);
 
   useEffect(() => {
-    registerForPushNotificationsAsync()
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session?.user);
+    });
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    NotificationsApi.registerForPushNotificationsAsync()
       .then(token => setExpoPushToken(token ?? ''))
       .catch((error: any) => setExpoPushToken(`${error}`));
 
@@ -81,6 +94,10 @@ export default (): JSX.Element => {
       responseListener.remove();
     };
   }, []);
+
+  useEffect(() => {
+    NotificationsApi.updatePushToken(expoPushToken);
+  }, [isLoggedIn, expoPushToken])
 
   const NotReady = useMemo(() => {
     // [Tip]

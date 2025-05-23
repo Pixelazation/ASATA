@@ -102,11 +102,11 @@ export const GetSuggestions: NavioScreen = observer(() => {
       } else if (region) {
         const geocodeResult = await GeocodingApi.reverseGeocode(region.latitude, region.longitude);
         if (geocodeResult) {
-          const { route, city, country } = geocodeResult;
+          const { fullAddress } = geocodeResult;
           const selectedFilters =
             selectedOption === "recreation" ? selectedRecreation.join(", ") :
             selectedOption === "diner" ? selectedDiner.join(", ") : "";
-          query = `${route}, ${city}, ${country} ${selectedFilters}`;
+          query = `${fullAddress} ${selectedFilters}`;
         }
       }
 
@@ -155,8 +155,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
     const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
     if (result) {
-      const { route, city, country } = result;
-      setLocation(`${route}, ${city}, ${country}`);
+      const { fullAddress } = result;
+      setLocation(`${fullAddress}`);
     }
   };
 
@@ -186,8 +186,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
         // Optionally, reverse geocode to get the address
         const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
         if (geocodeResult) {
-          const { route, city, country } = geocodeResult;
-          setLocation(`${route}, ${city}, ${country}`);
+          const { fullAddress } = geocodeResult;
+          setLocation(`${fullAddress}`);
         }
       } catch (error) {
         console.error("Error fetching current location:", error);
@@ -278,8 +278,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
     try {
       const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
       if (geocodeResult) {
-        const { route, city, country } = geocodeResult;
-        setLocation(`${route}, ${city}, ${country}`);
+        const { fullAddress } = geocodeResult;
+        setLocation(`${fullAddress}`);
       }
     } catch (error) {
       console.error("Error reverse geocoding:", error);
@@ -317,8 +317,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
       // Optionally update location text
       const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
       if (geocodeResult) {
-        const { route, city, country } = geocodeResult;
-        setLocation(`${route}, ${city}, ${country}`);
+        const { fullAddress } = geocodeResult;
+        setLocation(`${fullAddress}`);
       }
     } catch (error) {
       Alert.alert("Error", "Failed to fetch current location.");

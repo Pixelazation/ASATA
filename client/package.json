@@ -11,6 +11,7 @@
     "start:android": "npx expo start --android",
     "start:ios": "npx expo start --ios",
     "start:web": "npx expo start --web",
+    "dev:android": "eas build --platform android --profile development",
     "prebuild": "npx expo prebuild",
     "run:android": "npx expo run:android",
     "run:android:release": "npx expo run:android --variant release",

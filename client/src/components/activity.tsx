@@ -22,6 +22,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
 
   const {id, itinerary_id, start_time, end_time, cost, category, description, name, image_url} = activity;
   const startTime = timestampToDateTimeString(start_time);
+  const endTime = timestampToDateTimeString(end_time);
 
   const finished = new Date(start_time) < new Date();
 
@@ -32,7 +33,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
       <LineProgressNode finished={finished} />
       <View style={{flex: 1, gap: 8}}>
         <Text style={styles.time}>
-          {startTime}
+          {startTime} - {endTime}
         </Text>
         <ActivityModal visible={modalVisible} activityDetails={activity} closeModal={() => setModalVisible(false)} />
         <Pressable style={styles.details} onPress={() => setModalVisible(true)}>

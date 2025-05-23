@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, Image, ImageBackground, ScrollView} from 'react-native';
+import {Alert, Image, ImageBackground, ScrollView, StyleSheet} from 'react-native';
 import {View, Text, Assets, Button, DateTimePicker, ProgressBar} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
@@ -207,9 +207,9 @@ export const AuthSignup: NavioScreen<Props> = observer(({type = 'push'}) => {
 
   return (
     <ScrollView contentContainerStyle={{flex: 1, justifyContent: 'center', minHeight: 750}}>
-      <ImageBackground source={BG_IMAGE} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30}}>
-        
-          <Image source={LOGO_IMAGE} style={{width: 177, height: 150}} resizeMode='center'/>
+      <ImageBackground source={BG_IMAGE} style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: -30, paddingBottom: 30, position: 'relative'}}>
+          <View style={{...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)',}}/>
+          <Image source={LOGO_IMAGE} style={{width: 240, height: 200}} resizeMode='center'/>
           
       </ImageBackground>
 
