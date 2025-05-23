@@ -480,12 +480,14 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
                   {/* Add to Itinerary Button */}
                   <TouchableOpacity
+                    style={styles.addToItineraryButton}
                     onPress={() => {
                       selectedSuggestionRef.current = item;
                       setModalVisible(true);
-                    }}
+                  }}
+                    activeOpacity={0.8}
                   >
-                    <Text>Add to Itinerary</Text>
+                    <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
                   </TouchableOpacity>
                 </TouchableOpacity>
               ))
