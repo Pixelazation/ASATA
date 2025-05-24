@@ -10044,11 +10044,6 @@ react-native-gesture-handler@~2.14.0:
     lodash "^4.17.21"
     prop-types "^15.7.2"
 
-react-native-linear-gradient@^2.8.3:
-  version "2.8.3"
-  resolved "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-2.8.3.tgz"
-  integrity sha512-KflAXZcEg54PXkLyflaSZQ3PJp4uC4whM7nT/Uot9m0e/qxFV3p6uor1983D1YOBJbJN7rrWdqIjq0T42jOJyA==
-
 react-native-maps@1.10.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/react-native-maps/-/react-native-maps-1.10.0.tgz#1b78270473f4caadc5ff8e8400285b6db9f14e12"
