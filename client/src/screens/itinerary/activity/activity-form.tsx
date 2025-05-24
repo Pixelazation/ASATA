@@ -89,7 +89,8 @@ export const ActivityForm: NavioScreen = observer(() => {
       const newActivity = {
         category: category,
         image_url: typeof(image) != 'string' ? await uploadImage() : image,
-        ...values
+        ...values,
+        cost: values.cost == '' ? undefined : values.cost,
       };
 
       await ItineraryApi.addActivity(itineraryId, newActivity);

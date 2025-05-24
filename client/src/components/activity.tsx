@@ -43,7 +43,7 @@ export const Activity: React.FC<Props> = ({activity, editMode = false, handleDel
               <Text style={styles.titleText}>{name}</Text>
             </View>
             <View style={styles.description}>
-              <Text style={styles.descText}>
+              <Text style={styles.descText} numberOfLines={5}>
                 {description}
               </Text>
               <Image source={image_url ? {uri: image_url} : BG_IMAGE} resizeMode='cover' style={styles.descImg} />
