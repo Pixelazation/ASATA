@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, ScrollView, Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import { ItineraryApi } from "@app/services/api/itineraries";
+import { ItineraryItem } from "./itineraryitem"; // Adjust path if needed
 
 interface Props {
   visible: boolean;
@@ -42,19 +43,20 @@ export const ItinerarySelectorModal: React.FC<Props> = ({ visible, onClose, onSe
             <Text style={styles.emptyText}>No itineraries found.</Text>
           ) : (
             itineraries.map((itinerary) => (
-              <TouchableOpacity
+              <ItineraryItem
                 key={itinerary.id}
-                style={styles.itineraryItem}
+                id={itinerary.id}
+                name={itinerary.title}
+                location={itinerary.location || "No location specified"}
+                startDate={itinerary.start_date}
+                endDate={itinerary.end_date}
+                imageUrl={itinerary.image_url}
                 onPress={() => {
                   onSelectItinerary(itinerary);
                   onClose();
                 }}
-              >
-                <Text style={styles.itineraryTitle}>{itinerary.title}</Text>
-                <Text style={styles.itineraryLocation}>
-                  {itinerary.location || "No location specified"}
-                </Text>
-              </TouchableOpacity>
+                hideDelete // if supported
+              />
             ))
           )}
         </ScrollView>

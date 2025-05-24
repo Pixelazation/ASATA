@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Colors } from "react-native-ui-lib";
-import { ImageBackground, Pressable, StyleSheet } from "react-native";
+import { ImageBackground, Pressable, StyleSheet, TouchableOpacity } from "react-native";
 import { Row } from "./row";
 import { IconButton } from "./iconbutton";
 import { timestampToDateString } from "../utils/dateutils";
@@ -15,7 +15,9 @@ type ItineraryItemProps = {
   startDate: string;
   endDate: string;
   imageUrl?: string | null;
-  onDelete: () => void;
+  onDelete?: () => void; // Make optional
+  onPress?: () => void;  // <-- Add this line
+  hideDelete?: boolean;  // <-- Add this line
 };
 
 export const ItineraryItem: React.FC<ItineraryItemProps> = ({
@@ -26,34 +28,51 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
   endDate,
   imageUrl,
   onDelete,
+  onPress,
+  hideDelete,
 }) => {
-  const {t, navio} = useServices();
+  const { t, navio } = useServices();
+
+  const handlePress = onPress
+    ? onPress
+    : () => navio.push('Itinerary', { itineraryId: id });
 
   return (
-    <Pressable style={styles.container} onPress={() => navio.push('Itinerary', {itineraryId: id})}>
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={0.8}
+      style={styles.container}
+    >
       <View style={styles.titleContainer}>
-        <Text style={{fontWeight: "bold"}}>{name}</Text>
+        <Text style={{ fontWeight: "bold" }}>{name}</Text>
       </View>
-      <ImageBackground source={imageUrl ? {uri: imageUrl} : BG_IMAGE_2} style={styles.imageContainer} imageStyle={styles.image} resizeMode="cover">
+      <ImageBackground
+        source={imageUrl ? { uri: imageUrl } : BG_IMAGE_2}
+        style={styles.imageContainer}
+        imageStyle={styles.image}
+        resizeMode="cover"
+      >
         <Row style={styles.locationContainer}>
-          <Icon name="location" color={Colors.red30} size={20}/>
+          <Icon name="location" color={Colors.red30} size={20} />
           <Text>{location}</Text>
         </Row>
-        
+
         <View style={styles.bottomContainer}>
           <View style={styles.dateContainer}>
             <Text style={styles.dateText}>
               {timestampToDateString(startDate)} - {timestampToDateString(endDate)}
             </Text>
           </View>
-          <Row style={styles.row}>
-            <IconButton name="pencil" onPress={() => navio.push('ItineraryForm', {itineraryId: id})}/>
-            <IconButton name="copy" />
-            <IconButton name="trash" color={Colors.red30} onPress={onDelete} />
-          </Row>
+          {!hideDelete && (
+            <Row style={styles.row}>
+              <IconButton name="pencil" onPress={() => navio.push('ItineraryForm', { itineraryId: id })} />
+              <IconButton name="copy" />
+              <IconButton name="trash" color={Colors.red30} onPress={onDelete} />
+            </Row>
+          )}
         </View>
       </ImageBackground>
-    </Pressable>
+    </TouchableOpacity>
   );
 };
 

@@ -459,32 +459,32 @@ export const GetSuggestions: NavioScreen = observer(() => {
               <Text text70M>Loading suggestions...</Text>
             ) : (
               suggestions.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => item.web_url && Linking.openURL(item.web_url)}
-                  style={styles.suggestionCard}
-                >
-                  {item.photoUrl && (
-                    <Image source={{ uri: item.photoUrl }} style={styles.suggestionImage} />
-                  )}
-                  <Text text60BO marginT-s2 marginB-s1>{item.name}</Text>
-                  <Text text70 marginB-s1>{item.address_obj?.address_string || "No address available"}</Text>
-                  <Text>
-                    {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
-                  </Text>
-
-                  {/* Add to Itinerary Button */}
+                <View key={index} style={styles.suggestionCard}>
+                  <TouchableOpacity
+                    onPress={() => item.web_url && Linking.openURL(item.web_url)}
+                    activeOpacity={0.7}
+                    style={{ flex: 1 }}
+                  >
+                    {item.photoUrl && (
+                      <Image source={{ uri: item.photoUrl }} style={styles.suggestionImage} />
+                    )}
+                    <Text text60BO marginT-s2 marginB-s1>{item.name}</Text>
+                    <Text text70 marginB-s1>{item.address_obj?.address_string || "No address available"}</Text>
+                    <Text>
+                      {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
+                    </Text>
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.addToItineraryButton}
                     onPress={() => {
                       selectedSuggestionRef.current = item;
                       setModalVisible(true);
-                  }}
+                    }}
                     activeOpacity={0.8}
                   >
                     <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
                   </TouchableOpacity>
-                </TouchableOpacity>
+                </View>
               ))
             )}
           </ScrollView>
