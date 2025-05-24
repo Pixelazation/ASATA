@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: "Expo Starter",
+    name: "ASATA",
     owner: "team-kyot",
     slug: "expo-starter",
     version: "1.0.0",

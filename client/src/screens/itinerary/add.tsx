@@ -48,6 +48,8 @@ export const ItineraryForm: NavioScreen = observer(() => {
   const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
   const [mapVisible, setMapVisible] = useState<boolean>(false);
 
+  const params = navio.useParams<{ onCreated?: (id: string) => void }>();
+
   React.useEffect(() => {
     if (itineraryId) {
       fetchDetails();
@@ -57,19 +59,30 @@ export const ItineraryForm: NavioScreen = observer(() => {
   }, []);
 
   const addItinerary = async (values: any) => {
-    setLoading(true); // Disable button immediately
+    setLoading(true);
     try {
       const newItinerary = {
         image_url: await uploadImage(),
         ...values
       };
 
-      await ItineraryApi.addItinerary(newItinerary);
-      console.log(newItinerary);
+      // Correctly extract the new ID from the Supabase response
+      type AddItineraryResponse = { id: string }[];
+      const apiResult = await ItineraryApi.addItinerary(newItinerary) as unknown as AddItineraryResponse;
+      const newId = apiResult?.[0]?.id; // <-- This is the correct way if your API returns 'id'
+
+      // Debug log (optional, but helps during development)
+      console.log('addItinerary result:', apiResult);
+      console.log('Extracted newId:', newId);
+
+      if (params.onCreated && newId) {
+        params.onCreated(newId); // <-- This will open the activity form!
+        return; // Do not call navio.goBack() here
+      }
       navio.goBack();
     } catch (error) {
       console.error("Error adding itinerary:", error);
-      setLoading(false); // Only re-enable if there's an error
+      setLoading(false);
     }
   };
 

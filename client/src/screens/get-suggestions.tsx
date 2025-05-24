@@ -464,32 +464,32 @@ export const GetSuggestions: NavioScreen = observer(() => {
               <Text text70M>Loading suggestions...</Text>
             ) : (
               suggestions.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => item.web_url && Linking.openURL(item.web_url)}
-                  style={styles.suggestionCard}
-                >
-                  {item.photoUrl && (
-                    <Image source={{ uri: item.photoUrl }} style={styles.suggestionImage} />
-                  )}
-                  <Text text60BO marginT-s2 marginB-s1>{item.name}</Text>
-                  <Text text70 marginB-s1>{item.address_obj?.address_string || "No address available"}</Text>
-                  <Text>
-                    {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
-                  </Text>
-
-                  {/* Add to Itinerary Button */}
+                <View key={index} style={styles.suggestionCard}>
+                  <TouchableOpacity
+                    onPress={() => item.web_url && Linking.openURL(item.web_url)}
+                    activeOpacity={0.7}
+                    style={{ flex: 1 }}
+                  >
+                    {item.photoUrl && (
+                      <Image source={{ uri: item.photoUrl }} style={styles.suggestionImage} />
+                    )}
+                    <Text text60BO marginT-s2 marginB-s1>{item.name}</Text>
+                    <Text text70 marginB-s1>{item.address_obj?.address_string || "No address available"}</Text>
+                    <Text>
+                      {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
+                    </Text>
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.addToItineraryButton}
                     onPress={() => {
                       selectedSuggestionRef.current = item;
                       setModalVisible(true);
-                  }}
+                    }}
                     activeOpacity={0.8}
                   >
                     <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
                   </TouchableOpacity>
-                </TouchableOpacity>
+                </View>
               ))
             )}
           </ScrollView>
@@ -500,7 +500,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
         onClose={() => setModalVisible(false)}
         onSelectItinerary={(itinerary) => {
           const selected = selectedSuggestionRef.current;
-          
           if (selected) {
             navio.push('ActivityForm', {
               itineraryId: itinerary.id,
@@ -508,12 +507,32 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 name: selected.name,
                 description: selected.description || selected.address_obj?.address_string || '',
                 location: selected.address_obj?.address_string || '',
-                image_url: selected.photoUrl, // <-- Pass the image URL here
+                image_url: selected.photoUrl,
               },
               category: getCategoryFromOption(selectedOption)
             });
           }
           setModalVisible(false);
+        }}
+        onCreateNew={() => {
+          const selected = selectedSuggestionRef.current;
+          setModalVisible(false);
+          navio.push('ItineraryForm', {
+            onCreated: (newItineraryId: string) => {
+              if (selected) {
+                navio.push('ActivityForm', {
+                  itineraryId: newItineraryId,
+                  prefill: {
+                    name: selected.name,
+                    description: selected.description || selected.address_obj?.address_string || '',
+                    location: selected.address_obj?.address_string || '',
+                    image_url: selected.photoUrl,
+                  },
+                  category: getCategoryFromOption(selectedOption)
+                });
+              }
+            }
+          });
         }}
       />
     </View>
