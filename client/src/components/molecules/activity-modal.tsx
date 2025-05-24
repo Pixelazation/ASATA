@@ -40,7 +40,7 @@ export const ActivityModal: React.FC<Props> = ({visible, activityDetails, closeM
             </View>
             
             <View style={styles.description}>
-              <Text style={{ color: 'white', fontSize: 12 }}>
+              <Text style={{ color: 'white', fontSize: 12 }} numberOfLines={4}>
                 {description}
               </Text>
             </View>
@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
   placeName: {
     fontSize: 24,
     fontWeight: '900',
+    maxWidth: '90%',
   },
   address: {
     fontSize: 12,

@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {ScrollView, Modal, TouchableOpacity, StyleSheet} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {ScrollView, Modal, TouchableOpacity, StyleSheet, Image, View as RNView} from 'react-native';
 import {Text, View, Colors} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
@@ -12,12 +12,85 @@ import {Icon, IconName} from '@app/components/icon';
 import {useStores} from '@app/stores';
 import { supabase } from '@app/lib/supabase';
 import { ApiService } from '../../services/api';
+import { ImagePicker } from '../../components/molecules/image-picker';
+import { MediaApi } from '../../services/api/media';
+import { BG_IMAGE_2 } from '../../assets';
 
 export const Settings: NavioScreen = observer(() => {
   useAppearance(); // for Dark Mode
   const {navio, api} = useServices();
   const {ui} = useStores();
   const [isModalVisible, setModalVisible] = useState(false);
+
+  // Profile image and user name state
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [imagePickerVisible, setImagePickerVisible] = useState(false);
+  const [userName, setUserName] = useState<string>('User');
+
+  // Fetch user info on mount
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('UserDetails')
+          .select('first_name, last_name, profile_pic_url')
+          .eq('user_id', user.id)
+          .single();
+        if (data) {
+          setUserName(`${data.first_name ?? ''} ${data.last_name ?? ''}`.trim() || 'User');
+          setProfileImage(data.profile_pic_url ?? null);
+        }
+      }
+    };
+    fetchUserInfo();
+  }, []);
+
+  // Handle image pick and upload
+  const handleProfileImageChange = async (img: any) => {
+    // If img is null or empty, treat as remove
+    if (!img) {
+      setProfileImage(null);
+
+      // Save the default image (BG_IMAGE_2) to Supabase
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (!authError && user) {
+        await supabase
+          .from('UserDetails')
+          .update({ profile_pic_url: null }) // Remove the URL from DB
+          .eq('user_id', user.id);
+      }
+      setImagePickerVisible(false);
+      return;
+    }
+
+    let imageUrl = typeof img === 'string' ? img : img.uri;
+    // If the image is a new ImagePickerAsset, upload it
+    if (img && img.base64) {
+      try {
+        imageUrl = await MediaApi.uploadImage(img);
+        setProfileImage(imageUrl);
+
+        // Save the image URL to Supabase
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) throw new Error("User not authenticated");
+
+        const { error } = await supabase
+          .from('UserDetails')
+          .update({ profile_pic_url: imageUrl })
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error saving profile image URL:', error);
+        }
+      } catch (error) {
+        console.error('Image upload failed:', error);
+      }
+    } else {
+      setProfileImage(imageUrl);
+    }
+    setImagePickerVisible(false);
+  };
 
   // State
   const [appearance] = useState(ui.appearance);
@@ -88,11 +161,61 @@ export const Settings: NavioScreen = observer(() => {
   return (
     <View flex>
       <ScrollView contentInsetAdjustmentBehavior="always">
+        {/* Profile Picture Section */}
+        <View style={{alignItems: 'center', marginTop: 32, marginBottom: 8}}>
+          <TouchableOpacity onPress={() => setImagePickerVisible(true)} activeOpacity={0.7}>
+            <RNView style={styles.profilePicWrapper}>
+              <Image
+                source={
+                  profileImage
+                    ? { uri: profileImage }
+                    : BG_IMAGE_2 // fallback image
+                }
+                style={styles.profilePic}
+                resizeMode="cover"
+              />
+              <View style={styles.editIconCircle}>
+                <Icon name="camera-outline" color={Colors.primary} size={22} />
+              </View>
+            </RNView>
+          </TouchableOpacity>
+          <Text style={{marginTop: 8, fontWeight: 'bold', fontSize: 16}}>{userName}</Text>
+        </View>
+
+        {/* Image Picker Modal */}
+        <Modal
+          visible={imagePickerVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setImagePickerVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={[styles.modalContent, { padding: 32 }]}>
+              <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
+                Update Profile Picture
+              </Text>
+              <ImagePicker image={profileImage} setImage={handleProfileImageChange} />
+              <TouchableOpacity
+                onPress={() => setImagePickerVisible(false)}
+                style={{
+                  marginTop: 16,
+                  backgroundColor: Colors.primary,
+                  paddingVertical: 10,
+                  paddingHorizontal: 32,
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* My Account Section */}
         <Section title={'My Account'}>
           {accountActions.map(action => (
             <View key={action.title} marginV-s1>
               <Bounceable onPress={action.onPress}>
-                {/*Color might change*/}
                 <View padding-s3 br30 style={{backgroundColor:Colors.rgba(240, 240, 240, 1),}}>
                   <Row>
                     <Icon name={action.icon} size={30}/>
@@ -183,8 +306,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: 300,
-    padding: 20,
+    width: 400,
+    padding: 20, // Increased padding for more space
     backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',
@@ -212,5 +335,39 @@ const styles = StyleSheet.create({
   modalButtonText: {
     fontSize: 16,
     color: Colors.primary,
+  },
+  profilePicWrapper: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    overflow: 'visible', // <-- allow icon to overflow
+    borderWidth: 3,
+    borderColor: Colors.primary, // <-- use your theme color
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    position: 'relative',
+  },
+  profilePic: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+  },
+  editIconCircle: {
+    position: 'absolute',
+    bottom: -8, // <-- move icon further out
+    right: -8,  // <-- move icon further out
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 6,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4, // for shadow on Android
+    shadowColor: '#000', // for shadow on iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
 });
