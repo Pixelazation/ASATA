@@ -51,12 +51,21 @@ export class ItineraryApi {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("Itineraries")
-      .insert([{ ...itinerary, user_id: user.id }]); // Attach user_id automatically
-
+      .insert([{ ...itinerary, user_id: user.id }]);
     if (error) throw error;
-    return data;
+
+    // Fetch the latest itinerary for this user (assuming created_at exists)
+    const { data: latest, error: fetchError } = await supabase
+      .from("Itineraries")
+      .select("id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (fetchError) throw fetchError;
+    return latest;
   }
 
   /** 📌 Track an itinerary for the logged-in user */

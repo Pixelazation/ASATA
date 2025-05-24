@@ -66,15 +66,20 @@ export const ItineraryForm: NavioScreen = observer(() => {
         ...values
       };
 
-      const apiResult = await ItineraryApi.addItinerary(newItinerary);
-      const result = (apiResult ?? []) as { id: string }[];
-      const newId = result?.[0]?.id;
+      // Correctly extract the new ID from the Supabase response
+      type AddItineraryResponse = { id: string }[];
+      const apiResult = await ItineraryApi.addItinerary(newItinerary) as unknown as AddItineraryResponse;
+      const newId = apiResult?.[0]?.id; // <-- This is the correct way if your API returns 'id'
+
+      // Debug log (optional, but helps during development)
+      console.log('addItinerary result:', apiResult);
+      console.log('Extracted newId:', newId);
 
       if (params.onCreated && newId) {
-        params.onCreated(newId);
-      } else {
-        navio.goBack();
+        params.onCreated(newId); // <-- This will open the activity form!
+        return; // Do not call navio.goBack() here
       }
+      navio.goBack();
     } catch (error) {
       console.error("Error adding itinerary:", error);
       setLoading(false);
