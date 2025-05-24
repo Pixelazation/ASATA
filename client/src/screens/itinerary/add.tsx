@@ -48,6 +48,8 @@ export const ItineraryForm: NavioScreen = observer(() => {
   const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
   const [mapVisible, setMapVisible] = useState<boolean>(false);
 
+  const params = navio.useParams<{ onCreated?: (id: string) => void }>();
+
   React.useEffect(() => {
     if (itineraryId) {
       fetchDetails();
@@ -57,19 +59,25 @@ export const ItineraryForm: NavioScreen = observer(() => {
   }, []);
 
   const addItinerary = async (values: any) => {
-    setLoading(true); // Disable button immediately
+    setLoading(true);
     try {
       const newItinerary = {
         image_url: await uploadImage(),
         ...values
       };
 
-      await ItineraryApi.addItinerary(newItinerary);
-      console.log(newItinerary);
-      navio.goBack();
+      const apiResult = await ItineraryApi.addItinerary(newItinerary);
+      const result = (apiResult ?? []) as { id: string }[];
+      const newId = result?.[0]?.id;
+
+      if (params.onCreated && newId) {
+        params.onCreated(newId);
+      } else {
+        navio.goBack();
+      }
     } catch (error) {
       console.error("Error adding itinerary:", error);
-      setLoading(false); // Only re-enable if there's an error
+      setLoading(false);
     }
   };
 

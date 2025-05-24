@@ -2,14 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Modal, ScrollView, Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import { ItineraryApi } from "@app/services/api/itineraries";
 import { ItineraryItem } from "./itineraryitem"; // Adjust path if needed
+import { MaterialIcons } from '@expo/vector-icons'; // or your icon lib
+import { Alert } from "react-native";
 
 interface Props {
   visible: boolean;
   onClose: () => void;
   onSelectItinerary: (itinerary: ItineraryType) => void;
+  onCreateNew?: () => void; // <-- add this
 }
 
-export const ItinerarySelectorModal: React.FC<Props> = ({ visible, onClose, onSelectItinerary }) => {
+export const ItinerarySelectorModal: React.FC<Props> = ({ visible, onClose, onSelectItinerary, onCreateNew }) => {
   const [itineraries, setItineraries] = useState<ItineraryType[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -32,11 +35,29 @@ export const ItinerarySelectorModal: React.FC<Props> = ({ visible, onClose, onSe
     }
   };
 
+  function alert(message: string): void {
+    // Use React Native's Alert API to show a simple alert dialog
+    Alert.alert("Alert", message);
+  }
+
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent={false}>
       <View style={styles.modalContainer}>
         <Text style={styles.header}>Select an Itinerary</Text>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
+          {/* --- Add to New Itinerary Button --- */}
+          <TouchableOpacity
+            style={[styles.itineraryItem, styles.createNewItinerary]}
+            onPress={() => {
+              onClose();
+              onCreateNew && onCreateNew();
+            }}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="add" size={32} color="#007AFF" style={{ marginRight: 12 }} />
+            <Text style={styles.createNewText}>Create New Itinerary from Activity</Text>
+          </TouchableOpacity>
+          {/* --- Existing Itineraries --- */}
           {loading ? (
             <Text style={styles.loadingText}>Loading itineraries...</Text>
           ) : itineraries.length === 0 ? (
@@ -55,7 +76,7 @@ export const ItinerarySelectorModal: React.FC<Props> = ({ visible, onClose, onSe
                   onSelectItinerary(itinerary);
                   onClose();
                 }}
-                hideDelete // if supported
+                hideDelete
               />
             ))
           )}
@@ -73,6 +94,22 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "white",
+  },
+  createNewItinerary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: "#f0f0f0",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#007AFF",
+    justifyContent: 'center',
+  },
+  createNewText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#007AFF",
   },
   header: {
     fontSize: 22,

@@ -163,9 +163,9 @@ export const ActivityForm: NavioScreen = observer(() => {
             description: activity?.description ?? prefill?.description ?? '',
             location: activity?.location ?? prefill?.location ?? '',
             start_time: activity?.start_time ? new Date(activity.start_time) : new Date(),
-            end_time: activity?.end_time ? new Date(activity.end_time) : new Date(new Date().getTime() + 3600000), // Default to 1 hour later
+            end_time: activity?.end_time ? new Date(activity.end_time) : new Date(new Date().getTime() + 3600000),
             cost: activity?.cost ? activity.cost.toString() : '',
-            category: activity?.category ?? '',
+            category: activity?.category ?? params.category ?? '', // <-- add params.category here
           }}
 
           validationSchema={ActivitySchema}
@@ -183,7 +183,15 @@ export const ActivityForm: NavioScreen = observer(() => {
                 // error={touched.name && errors.name ? errors.name : undefined}
               />
 
-              <RadioSelection label='Category' options={categoryOptions} selected={category} selectFunction={setCategory} />
+              <RadioSelection
+                label='Category'
+                options={categoryOptions}
+                selected={values.category}
+                selectFunction={value => {
+                  setFieldValue('category', value);
+                  setCategory(value); // optional, if you use local state elsewhere
+                }}
+              />
 
               <FormField
                 label="Description"

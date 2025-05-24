@@ -495,7 +495,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
         onClose={() => setModalVisible(false)}
         onSelectItinerary={(itinerary) => {
           const selected = selectedSuggestionRef.current;
-          
           if (selected) {
             navio.push('ActivityForm', {
               itineraryId: itinerary.id,
@@ -503,12 +502,32 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 name: selected.name,
                 description: selected.description || selected.address_obj?.address_string || '',
                 location: selected.address_obj?.address_string || '',
-                image_url: selected.photoUrl, // <-- Pass the image URL here
+                image_url: selected.photoUrl,
               },
               category: getCategoryFromOption(selectedOption)
             });
           }
           setModalVisible(false);
+        }}
+        onCreateNew={() => {
+          const selected = selectedSuggestionRef.current;
+          setModalVisible(false);
+          navio.push('ItineraryForm', {
+            onCreated: (newItineraryId: string) => {
+              if (selected) {
+                navio.push('ActivityForm', {
+                  itineraryId: newItineraryId,
+                  prefill: {
+                    name: selected.name,
+                    description: selected.description || selected.address_obj?.address_string || '',
+                    location: selected.address_obj?.address_string || '',
+                    image_url: selected.photoUrl,
+                  },
+                  category: getCategoryFromOption(selectedOption)
+                });
+              }
+            }
+          });
         }}
       />
     </View>
