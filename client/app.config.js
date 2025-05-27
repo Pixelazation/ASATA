@@ -21,7 +21,7 @@ export default {
     assetBundlePatterns: [
       "**/*"
     ],
-    jsEngine: "jsc",
+    // jsEngine: "jsc",
     ios: {
       supportsTablet: true,
       bundleIdentifier: "io.batyr.expo-starter"
