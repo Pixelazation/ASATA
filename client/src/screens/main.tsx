@@ -75,10 +75,10 @@ export const Main: NavioScreen = observer(() => {
       <ImageBackground source={BG_IMAGE_2} style={styles.background} imageStyle={{opacity: 0.5}}>
         <View style={styles.header}>
           <Text style={styles.welcomeText}>
-            Welcome back,
+            Welcome,
           </Text>
           <Text style={styles.welcomeName}>
-            {auth.firstName}!
+            {auth.firstName ? auth.firstName : 'Traveler'}!
           </Text>
         </View>
         <ScrollView contentInsetAdjustmentBehavior="always">
