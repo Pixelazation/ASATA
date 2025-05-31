@@ -35,8 +35,8 @@ const ItinerarySchema = Yup.object().shape({
     .required('Required'),
   budget: Yup.number().moreThan(0),
   location: Yup.string(),
-  longitude: Yup.number(),
-  latitude: Yup.number(),
+  longitude: Yup.number().optional(),
+  latitude: Yup.number().optional(),
 });
 
 export const ItineraryForm: NavioScreen = observer(() => {
@@ -153,16 +153,16 @@ export const ItineraryForm: NavioScreen = observer(() => {
             end_date: new Date(details.end_date),
             budget: details.budget.toString(),
             location: details.location,
-            longitude: details.longitude,
-            latitude: details.latitude,
+            longitude: details.longitude ?? undefined,
+            latitude: details.latitude ?? undefined,
           } : {
             title: '',
             start_date: null,
             end_date: null,
             budget: '',
             location: '',
-            longitude: null,
-            latitude: null,
+            longitude: undefined,
+            latitude: undefined,
           }}
           validationSchema={ItinerarySchema}
           onSubmit={itineraryId ? updateItinerary : addItinerary}
