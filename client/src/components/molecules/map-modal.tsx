@@ -11,21 +11,23 @@ import { GeocodingApi } from '../../services/api/geocoding';
 import { colors } from '../../utils/designSystem';
 
 type Props = {
-  location?: string;
+  initLoc?: {loc: string, long: number | null, lat: number | null}
   setLocation?: (loc: string, long: number, lat: number) => void;
   visible: boolean;
   closeModal: () => void;
 };
 
 export const MapModal: React.FC<Props> = ({
-  location,
+  initLoc,
   setLocation,
   visible,
   closeModal,
 }) => {
   const mapRef = useRef<MapView>(null);
-  const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [address, setAddress] = useState<string>('');
+  const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(
+    initLoc?.long && initLoc?.lat ? {lat: initLoc?.lat, lng: initLoc?.long} : null
+  );
+  const [address, setAddress] = useState<string>(initLoc?.loc ?? '');
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleMapPress = async (e: MapPressEvent) => {

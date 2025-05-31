@@ -202,6 +202,7 @@ export const ItineraryForm: NavioScreen = observer(() => {
               <MapModal
                 visible={mapVisible}
                 closeModal={() => setMapVisible(false)}
+                initLoc={{loc: values['location'], long: values['longitude'] || null, lat: values['latitude'] || null}}
                 setLocation={(loc, long, lat) => {
                   setFieldValue('location', loc);
                   setFieldValue('longitude', long);

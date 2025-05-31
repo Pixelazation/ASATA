@@ -328,6 +328,7 @@ export const ActivityForm: NavioScreen = observer(() => {
               <MapModal
                 visible={mapVisible}
                 closeModal={() => setMapVisible(false)}
+                initLoc={{loc: values['location'], long: values['longitude'], lat: values['latitude']}}
                 setLocation={(loc, long, lat) => {
                   setFieldValue('location', loc);
                   setFieldValue('longitude', long);
