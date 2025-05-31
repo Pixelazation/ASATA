@@ -33,6 +33,8 @@ export type Params = {
     description?: string;
     location?: string;
     image_url?: string;
+    longitude?: number;
+    latitude?: number;
   };
   category?: string; // Add this line
 };
@@ -47,6 +49,8 @@ const ActivitySchema = Yup.object().shape({
     .required('Required'),
   category: Yup.string(),
   location: Yup.string(),
+  longitude: Yup.number().optional(),
+  latitude: Yup.number().optional(),
   cost: Yup.string()
     .matches(/^\d*\.?\d*$/, 'Estimated Cost must be a number'), // <-- Only allow numbers and optional decimal
 });
@@ -176,6 +180,8 @@ export const ActivityForm: NavioScreen = observer(() => {
             name: activity?.name ?? prefill?.name ?? '',
             description: activity?.description ?? prefill?.description ?? '',
             location: activity?.location ?? prefill?.location ?? '',
+            longitude: activity?.longitude ?? prefill?.longitude ?? undefined,
+            latitude: activity?.latitude ?? prefill?.latitude ?? undefined,
             start_time: activity?.start_time ? new Date(activity.start_time) : new Date(),
             end_time: activity?.end_time ? new Date(activity.end_time) : new Date(new Date().getTime() + 3600000),
             cost: activity?.cost ? activity.cost.toString() : '',
@@ -324,7 +330,12 @@ export const ActivityForm: NavioScreen = observer(() => {
               <MapModal
                 visible={mapVisible}
                 closeModal={() => setMapVisible(false)}
-                setLocation={(loc) => setFieldValue('location', loc)}
+                initLoc={{loc: values['location'], long: values['longitude'] || null, lat: values['latitude'] || null}}
+                setLocation={(loc, long, lat) => {
+                  setFieldValue('location', loc);
+                  setFieldValue('longitude', long);
+                  setFieldValue('latitude', lat);
+                }}
               />
 
               <View style={{ marginTop: 16 }}>

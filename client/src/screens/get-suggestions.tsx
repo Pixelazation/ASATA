@@ -498,9 +498,19 @@ export const GetSuggestions: NavioScreen = observer(() => {
       <ItinerarySelectorModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onSelectItinerary={(itinerary) => {
+        onSelectItinerary={async (itinerary) => {
           const selected = selectedSuggestionRef.current;
           if (selected) {
+            if (!selected.longitude || !selected.latitude) {
+              const coords = await GeocodingApi.forwardGeocode(selected.address_obj?.address_string)
+              selected.longitude = coords?.lng;
+              selected.latitude = coords?.lat;
+              console.log(coords);
+            }
+
+            console.log(selected.latitude);
+            console.log(selected.longitude);
+
             navio.push('ActivityForm', {
               itineraryId: itinerary.id,
               prefill: {
@@ -508,6 +518,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 description: selected.description || selected.address_obj?.address_string || '',
                 location: selected.address_obj?.address_string || '',
                 image_url: selected.photoUrl,
+                longitude: selected.longitude,
+                latitude: selected.latitude,
               },
               category: getCategoryFromOption(selectedOption)
             });
@@ -518,8 +530,17 @@ export const GetSuggestions: NavioScreen = observer(() => {
           const selected = selectedSuggestionRef.current;
           setModalVisible(false);
           navio.push('ItineraryForm', {
-            onCreated: (newItineraryId: string) => {
+            onCreated: async (newItineraryId: string) => {
               if (selected) {
+                if (!selected.longitude || !selected.latitude) {
+                  const coords = await GeocodingApi.forwardGeocode(selected.address_obj?.address_string)
+                  selected.longitude = coords?.lng;
+                  selected.latitude = coords?.lat;
+                }
+
+                console.log(selected.latitude);
+                console.log(selected.longitude);
+
                 navio.push('ActivityForm', {
                   itineraryId: newItineraryId,
                   prefill: {
@@ -527,6 +548,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
                     description: selected.description || selected.address_obj?.address_string || '',
                     location: selected.address_obj?.address_string || '',
                     image_url: selected.photoUrl,
+                    longitude: selected.longitude,
+                    latitude: selected.latitude,
                   },
                   category: getCategoryFromOption(selectedOption)
                 });

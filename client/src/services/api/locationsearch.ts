@@ -1,7 +1,8 @@
 import { Alert } from "react-native";
 import { supabase } from "../../lib/supabase"; // adjust path if needed
+import { SUPABASE_URL } from '@env';
 
-const SUPABASE_EDGE_FUNCTION_URL = "https://pnliftjmwbgxvrynghyq.supabase.co/functions/v1/tripadvisor-proxy";
+const SUPABASE_EDGE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/tripadvisor-proxy";
 
 export const LocationSearchApi = {
   search: async (query: string, category?: string) => {

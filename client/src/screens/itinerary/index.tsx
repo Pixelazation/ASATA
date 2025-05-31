@@ -1,9 +1,11 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet} from 'react-native';
+import {ActivityIndicator, Image, ImageBackground, Pressable, ScrollView, StyleSheet} from 'react-native';
 import {Text, View} from 'react-native-ui-lib';
 import {observer} from 'mobx-react';
 import {NavioScreen} from 'rn-navio';
 import SlidingUpPanel from 'rn-sliding-up-panel';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 
 import {useServices} from '@app/services';
 import {useAppearance} from '@app/utils/hooks';
@@ -18,6 +20,7 @@ import { FloatingActionMenu } from '../../components/molecules/floating-action-m
 import { useFocusEffect } from '@react-navigation/native';
 import { HeaderBack } from '../../components/molecules/header-back';
 import { colors } from '../../utils/designSystem';
+import { ActivityMarker } from '../../components/molecules/activity-marker';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -40,6 +43,8 @@ export const Itinerary: NavioScreen = observer(() => {
 
   const [activities, setActivities] = useState<ActivityType[]>([]);
   const [details, setDetails] = useState<ItineraryType>();
+
+  const [userLocation, setUserLocation] = useState<Location.LocationObjectCoords | null>(null);
 
   // Methods
   const fetchDetails = async () => {
@@ -122,12 +127,24 @@ export const Itinerary: NavioScreen = observer(() => {
     setTracked(trackedId == itineraryId);
   }
 
+  const getUserLocation = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      console.warn('Permission to access location was denied');
+      return;
+    }
+
+    const location = await Location.getCurrentPositionAsync({});
+    setUserLocation(location.coords);
+  }
+
   useFocusEffect(
     useCallback(() => {
       configureUI();
       fetchActivities();
       fetchDetails();
       checkTracked();
+      getUserLocation();
     }, [])
   );
 
@@ -148,7 +165,26 @@ export const Itinerary: NavioScreen = observer(() => {
             <Text style={{ textAlign: 'center' }}>Loading itinerary</Text>
           </View>
         ) : (
-          <ImageBackground source={details?.image_url ? {uri: details.image_url} : BG_IMAGE_2} resizeMode='cover'>
+          <View style={{ height: '60%', width: '100%' }}>
+            <MapView
+              style={{ height: '90%', width: '100%', position: 'absolute' }}
+              showsUserLocation
+              showsMyLocationButton={false}
+              pointerEvents='none'
+              toolbarEnabled={false}
+              initialRegion={{
+                latitude: activities[0]?.latitude ?? userLocation?.latitude ?? 10.3157,
+                longitude: activities[0]?.longitude ?? userLocation?.longitude ?? 123.8854,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+              }}
+            >
+              {activities.map((activity, index) => (
+                activity.latitude && activity.longitude && (
+                  <ActivityMarker key={activity.id ?? index} activity={activity} index={index} />
+                )
+              ))}
+            </MapView>
             <View style={styles.header}>
               <HeaderBack />
               <View style={styles.headerButton}>
@@ -162,11 +198,11 @@ export const Itinerary: NavioScreen = observer(() => {
               <SlidingUpPanel containerStyle={styles.container} ref={c => setPanelRef(c)} draggableRange={{top: 350, bottom: 50}} snappingPoints={[50, 350]} friction={0.5}>
                 {activities.length > 0 ? (
                   <View style={{flex: 1, padding: 16}}>
-                    <View style={styles.dragHandleBar} />
-                    <View style={{paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <Pressable style={styles.dragHandleBar} />
+                    <Pressable style={{paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                       <Text section>{details?.title}</Text>
                       {editMode && <IconButton name="pencil" onPress={() => navio.push('ItineraryForm', {itineraryId})}/>}
-                    </View>
+                    </Pressable>
                     <ScrollView contentContainerStyle={{paddingBottom: 100}} showsVerticalScrollIndicator={false}>
                       <View>
                         <View style={{flexDirection: 'row', gap: 8}}>
@@ -200,7 +236,7 @@ export const Itinerary: NavioScreen = observer(() => {
               }
             </SlidingUpPanel>
           </View>
-        </ImageBackground>
+        </View>
       )}
 
       {!loading && (
