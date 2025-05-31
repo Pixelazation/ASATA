@@ -47,6 +47,8 @@ const ActivitySchema = Yup.object().shape({
     .required('Required'),
   category: Yup.string(),
   location: Yup.string(),
+  longitude: Yup.number(),
+  latitude: Yup.number(),
   cost: Yup.string()
     .matches(/^\d*\.?\d*$/, 'Estimated Cost must be a number'), // <-- Only allow numbers and optional decimal
 });
@@ -176,6 +178,8 @@ export const ActivityForm: NavioScreen = observer(() => {
             name: activity?.name ?? prefill?.name ?? '',
             description: activity?.description ?? prefill?.description ?? '',
             location: activity?.location ?? prefill?.location ?? '',
+            longitude: activity?.longitude ?? null,
+            latitude: activity?.latitude ?? null,
             start_time: activity?.start_time ? new Date(activity.start_time) : new Date(),
             end_time: activity?.end_time ? new Date(activity.end_time) : new Date(new Date().getTime() + 3600000),
             cost: activity?.cost ? activity.cost.toString() : '',
@@ -324,7 +328,11 @@ export const ActivityForm: NavioScreen = observer(() => {
               <MapModal
                 visible={mapVisible}
                 closeModal={() => setMapVisible(false)}
-                setLocation={(loc) => setFieldValue('location', loc)}
+                setLocation={(loc, long, lat) => {
+                  setFieldValue('location', loc);
+                  setFieldValue('longitude', long);
+                  setFieldValue('latitude', lat);
+                }}
               />
 
               <View style={{ marginTop: 16 }}>

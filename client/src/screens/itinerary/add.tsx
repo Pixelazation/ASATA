@@ -35,6 +35,8 @@ const ItinerarySchema = Yup.object().shape({
     .required('Required'),
   budget: Yup.number().moreThan(0),
   location: Yup.string(),
+  longitude: Yup.number(),
+  latitude: Yup.number(),
 });
 
 export const ItineraryForm: NavioScreen = observer(() => {
@@ -151,12 +153,16 @@ export const ItineraryForm: NavioScreen = observer(() => {
             end_date: new Date(details.end_date),
             budget: details.budget.toString(),
             location: details.location,
+            longitude: details.longitude,
+            latitude: details.latitude,
           } : {
             title: '',
             start_date: null,
             end_date: null,
             budget: '',
             location: '',
+            longitude: null,
+            latitude: null,
           }}
           validationSchema={ItinerarySchema}
           onSubmit={itineraryId ? updateItinerary : addItinerary}
@@ -193,7 +199,15 @@ export const ItineraryForm: NavioScreen = observer(() => {
                 }
               />
 
-              <MapModal visible={mapVisible} closeModal={() => setMapVisible(false)} setLocation={(loc) => setFieldValue('location', loc)}/>
+              <MapModal
+                visible={mapVisible}
+                closeModal={() => setMapVisible(false)}
+                setLocation={(loc, long, lat) => {
+                  setFieldValue('location', loc);
+                  setFieldValue('longitude', long);
+                  setFieldValue('latitude', lat);
+                }}
+              />
 
               <View style={{ display: 'flex', flexDirection: 'row', gap: 16 }}>
                 <View style={{ flex: 1 }}>

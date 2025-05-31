@@ -12,7 +12,7 @@ import { colors } from '../../utils/designSystem';
 
 type Props = {
   location?: string;
-  setLocation?: (loc: string) => void;
+  setLocation?: (loc: string, long: number, lat: number) => void;
   visible: boolean;
   closeModal: () => void;
 };
@@ -39,8 +39,8 @@ export const MapModal: React.FC<Props> = ({
   };
 
   const confirmLocation = () => {
-    if (setLocation && address) {
-      setLocation(address);
+    if (setLocation && address && selectedCoords) {
+      setLocation(address, selectedCoords.lng, selectedCoords.lat);
       closeModal();
     }
   };

@@ -8,6 +8,8 @@ type ActivityType = {
   category: string
   description: string;
   location: string;
+  longitude?: number;
+  latitude?: number;
   image_url?: string | null;
   [key: string]: any;
 }
