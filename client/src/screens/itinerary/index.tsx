@@ -20,6 +20,7 @@ import { FloatingActionMenu } from '../../components/molecules/floating-action-m
 import { useFocusEffect } from '@react-navigation/native';
 import { HeaderBack } from '../../components/molecules/header-back';
 import { colors } from '../../utils/designSystem';
+import { ActivityMarker } from '../../components/molecules/activity-marker';
 
 export type Params = {
   type?: 'push' | 'show';
@@ -164,11 +165,11 @@ export const Itinerary: NavioScreen = observer(() => {
             <Text style={{ textAlign: 'center' }}>Loading itinerary</Text>
           </View>
         ) : (
-          // <ImageBackground source={details?.image_url ? {uri: details.image_url} : BG_IMAGE_2} resizeMode='cover'>
           <View style={{ height: '60%', width: '100%' }}>
             <MapView
               style={{ height: '90%', width: '100%', position: 'absolute' }}
               showsUserLocation
+              showsMyLocationButton={false}
               pointerEvents='none'
               initialRegion={{
                 latitude: 10.3157,
@@ -176,30 +177,12 @@ export const Itinerary: NavioScreen = observer(() => {
                 latitudeDelta: 0.05,
                 longitudeDelta: 0.05,
               }}
-              region={
-                userLocation
-                  ? {
-                      latitude: userLocation.latitude,
-                      longitude: userLocation.longitude,
-                      latitudeDelta: 0.05,
-                      longitudeDelta: 0.05,
-                    }
-                  : undefined
-              }
             >
-              {/* {activities.map((activity, index) => (
+              {activities.map((activity, index) => (
                 activity.latitude && activity.longitude && (
-                  <Marker
-                    key={index}
-                    coordinate={{
-                      latitude: activity.latitude,
-                      longitude: activity.longitude,
-                    }}
-                    title={activity.name}
-                    description={activity.location}
-                  />
+                  <ActivityMarker key={activity.id ?? index} activity={activity} index={index} />
                 )
-              ))} */}
+              ))}
             </MapView>
             <View style={styles.header}>
               <HeaderBack />
