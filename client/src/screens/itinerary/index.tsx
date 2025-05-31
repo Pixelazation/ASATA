@@ -171,6 +171,7 @@ export const Itinerary: NavioScreen = observer(() => {
               showsUserLocation
               showsMyLocationButton={false}
               pointerEvents='none'
+              toolbarEnabled={false}
               initialRegion={{
                 latitude: 10.3157,
                 longitude: 123.8854,
