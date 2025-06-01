@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ImageBackground, ScrollView, StyleSheet } from "react-native";
-import { View, Button, Text } from "react-native-ui-lib";
+import { View, Button, Text, TouchableOpacity } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
 import { useServices } from "@app/services";
@@ -8,7 +8,7 @@ import { ItineraryTracker } from "../components/itinerary-tracker";
 import { Carousel } from "../components/carousel";
 import { BG_IMAGE_2 } from "@app/assets";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Icon } from "@app/components/icon";
+import { Icon, IconName } from "@app/components/icon";
 import { LocationTracker } from "@app/components/location-tracker";
 import { WeatherTracker } from "@app/components/weather-tracker";
 import { NotificationsApi } from "@app/services/api/notifications";
@@ -64,11 +64,33 @@ export const Main: NavioScreen = observer(() => {
     }
   };
   
-  const recommendationItems = [
-    { title: "Recommendation 1", image: BG_IMAGE_2 },
-    { title: "Recommendation 2", image: BG_IMAGE_2 },
-    { title: "Recommendation 3", image: BG_IMAGE_2 },
-  ];
+  const GetSuggestionButtons = () => {
+    const categoryOptions = [
+      { selectedOption: 'diner', label: 'Eat', icon: 'restaurant' },
+      { selectedOption: 'recreation', label: 'Enjoy', icon: 'sunny' },
+      { selectedOption: 'accommodation', label: 'Stay', icon: 'business' },
+    ]
+
+    return (
+      <View style={styles.buttonRow}>
+        {categoryOptions.map(({ selectedOption, label, icon }, index) => (
+          <View key={index} style={{ alignItems: 'center', gap: 8 }}>
+            <TouchableOpacity
+              onPress={() => navio.push("GetSuggestions", { selectedOption })}
+              style={styles.iconButton}
+            >
+              <Icon
+                name={icon as IconName}
+                color={styles.icon.color}
+                size={styles.icon.fontSize}
+              />
+            </TouchableOpacity>
+            <Text style={styles.label}>{label}</Text>
+          </View>
+        ))}
+      </View>
+    )
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -88,24 +110,7 @@ export const Main: NavioScreen = observer(() => {
                 Get Suggestions
               </Text>
               <View style={styles.buttonRow}>
-                <Button
-                  onPress={() => navio.push("GetSuggestions", { selectedOption: "accommodation" })}
-                  style={styles.iconButton}
-                >
-                  <Icon name="bed" color={styles.icon.color} size={styles.icon.fontSize} />
-                </Button>
-                <Button
-                  onPress={() => navio.push("GetSuggestions", { selectedOption: "recreation" })}
-                  style={styles.iconButton}
-                >
-                  <Icon name="walk" color={styles.icon.color} size={styles.icon.fontSize} />
-                </Button>
-                <Button
-                  onPress={() => navio.push("GetSuggestions", { selectedOption: "diner" })}
-                  style={styles.iconButton}
-                >
-                  <Icon name="pizza" color={styles.icon.color} size={styles.icon.fontSize} />
-                </Button>
+                <GetSuggestionButtons />
               </View>
             </View>
 
@@ -175,7 +180,7 @@ const styles = StyleSheet.create({
     fontSize: 32
   },
   opaqueContainer: {
-    flex: 1,
+    display: 'flex',
     backgroundColor: "rgba(255, 255, 255, 1)",
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
@@ -185,21 +190,25 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   buttonRow: {
+    width: '100%',
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
   },
   iconButton: {
-    width: 56,
-    height: 56,
-    marginHorizontal: 8,
-    borderWidth: 1,
-    borderColor: "black",
+    width: 64, 
+    aspectRatio: 1, 
+    backgroundColor: colors.secondary,
     borderRadius: 8,
-    backgroundColor: "white",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   icon: {
-    color: "black",
+    color: colors.primary,
     fontSize: 32,
+  },
+  label: {
+    color: colors.placeholder,
+    fontWeight: 'bold',
   },
   actionButton: {
     width: 56,
