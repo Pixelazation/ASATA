@@ -128,6 +128,7 @@ export const MyItineraries: NavioScreen = observer(() => {
       {/* Floating Action Button */}
       <FloatingActionButton
         icon="add"
+        loading={fabDisabled} // <-- Show spinner when disabled
         disabled={fabDisabled}
         onPress={handleFabPress}
       />
