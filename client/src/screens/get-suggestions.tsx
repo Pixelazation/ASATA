@@ -40,6 +40,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
   useAppearance();
   const { navio } = useServices();
   const params = navio.useParams<{ selectedOption?: string }>();
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const [location, setLocation] = useState("");
   const [selectedOption, setSelectedOption] = useState<string>(params.selectedOption || "");
@@ -387,14 +388,49 @@ export const GetSuggestions: NavioScreen = observer(() => {
           </TouchableOpacity>
 
           {/* --- Search bar now inside the panel --- */}
-          <View style={{ marginBottom: 16 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
             <TextInput
-              placeholder="Enter City (optional)"
+              placeholder="Search city, hotel, restaurant, or place name"
               value={location}
               onChangeText={handleLocationChange}
-              style={styles.searchBar}
+              style={[styles.searchBar, { flex: 1 }]}
             />
+            <TouchableOpacity
+              onPress={() => setShowTutorial(true)}
+              style={{ marginLeft: 8, padding: 6 }}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="lightbulb-outline" size={26} color="#FFC107" />
+            </TouchableOpacity>
           </View>
+          {showTutorial && (
+            <View style={{
+              backgroundColor: "#fffbe6",
+              borderRadius: 10,
+              padding: 14,
+              marginBottom: 12,
+              borderWidth: 1,
+              borderColor: "#ffe082",
+              shadowColor: "#000",
+              shadowOpacity: 0.08,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <Text style={{ fontWeight: "bold", marginBottom: 6 }}>
+                How to use Get Suggestions
+              </Text>
+              <Text>
+                Enter a city, hotel, restaurant, or place name in the search bar to get suggestions for that location.{"\n"}
+                Or, move the map pin to get suggestions near a specific spot on the map.
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowTutorial(false)}
+                style={{ alignSelf: "flex-end", marginTop: 8 }}
+              >
+                <Text style={{ color: "#016A42", fontWeight: "bold" }}>Got it</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <View style={styles.categoryContainer}>
             <TouchableOpacity
