@@ -9,6 +9,7 @@ import {
   Image,
   FlatList,
   Animated,
+  Easing,
   Dimensions,
   PanResponder,
 } from "react-native";
@@ -75,6 +76,40 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const isExpandedRef = useRef(false);
   const currentY = useRef(PANEL_MIN_HEIGHT);
   const mapRef = useRef<MapView>(null);
+
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const modalTranslateY = useRef(new Animated.Value(100)).current;
+
+  useEffect(() => {
+    if (detailModalVisible) {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+          easing: Easing.linear,
+        }),
+        Animated.spring(modalTranslateY, {
+          toValue: 0,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+          easing: Easing.linear,
+        }),
+        Animated.timing(modalTranslateY, {
+          toValue: 100,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [detailModalVisible]);
 
   const toggleSelection = (item: string, type: "recreation" | "diner") => {
     if (type === "recreation") {
@@ -654,75 +689,98 @@ export const GetSuggestions: NavioScreen = observer(() => {
       {modalSuggestion && (
         <Modal
           visible={detailModalVisible}
-          animationType="slide"
           transparent
+          animationType="none"
           onRequestClose={() => setDetailModalVisible(false)}
         >
-          <View style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
+          <Animated.View
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              opacity: overlayOpacity,
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+            }}
+            pointerEvents={detailModalVisible ? "auto" : "none"}
+          />
+          <Animated.View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              transform: [{ translateY: modalTranslateY.interpolate({
+                inputRange: [0, 100],
+                outputRange: [0, 500]
+              }) }]
+            }}
+            pointerEvents="box-none"
+          >
             <View style={{
               backgroundColor: '#fff',
               borderRadius: 16,
-              padding: 24,
+              padding: 0,
               width: '90%',
               maxHeight: '80%',
+              overflow: 'hidden',
             }}>
-              {/* Image */}
-              {modalSuggestion.photoUrl && (
-                <Image source={{ uri: modalSuggestion.photoUrl }} style={{ width: '100%', height: 180, borderRadius: 10, marginBottom: 12 }} />
-              )}
-              {/* Title */}
-              <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>{modalSuggestion.name}</Text>
-              {/* Address */}
-              <Text style={{ color: '#555', marginBottom: 8 }}>{modalSuggestion.address_obj?.address_string || "No address available"}</Text>
-              {/* Rating */}
-              {modalSuggestion.rating && (
-                <Text style={{ color: "#FFC107", fontWeight: "bold", marginBottom: 8 }}>
-                  {Array.from({ length: Math.round(Number(modalSuggestion.rating) || 0) }, () => "⭐").join("")}
-                </Text>
-              )}
-              {/* Description */}
-              {modalSuggestion.description && (
-                <Text style={{ fontSize: 15, color: "#333", marginBottom: 16 }}>
-                  {modalSuggestion.description}
-                </Text>
-              )}
-              {/* Buttons */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
-                <TouchableOpacity
-                  style={[styles.addToItineraryButton, { flex: 1, marginRight: 8 }]}
-                  onPress={() => {
-                    selectedSuggestionRef.current = modalSuggestion;
-                    setDetailModalVisible(false);
-                    setModalVisible(true);
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.addToItineraryButton, { backgroundColor: "#555", flex: 1, marginLeft: 8 }]}
-                  onPress={() => {
-                    if (modalSuggestion.web_url) Linking.openURL(modalSuggestion.web_url);
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.addToItineraryText}>Open in Web</Text>
-                </TouchableOpacity>
-              </View>
-              {/* Close Button */}
-              <TouchableOpacity
-                onPress={() => setDetailModalVisible(false)}
-                style={{ alignSelf: "center", marginTop: 18 }}
+              <ScrollView
+                contentContainerStyle={{ padding: 24 }}
+                showsVerticalScrollIndicator={false}
               >
-                <Text style={{ color: "#007AFF", fontWeight: "bold" }}>Close</Text>
-              </TouchableOpacity>
+                {/* Image */}
+                {modalSuggestion.photoUrl && (
+                  <Image source={{ uri: modalSuggestion.photoUrl }} style={{ width: '100%', height: 180, borderRadius: 10, marginBottom: 12 }} />
+                )}
+                {/* Title */}
+                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>{modalSuggestion.name}</Text>
+                {/* Address */}
+                <Text style={{ color: '#555', marginBottom: 8 }}>{modalSuggestion.address_obj?.address_string || "No address available"}</Text>
+                {/* Rating */}
+                {modalSuggestion.rating && (
+                  <Text style={{ color: "#FFC107", fontWeight: "bold", marginBottom: 8 }}>
+                    {Array.from({ length: Math.round(Number(modalSuggestion.rating) || 0) }, () => "⭐").join("")}
+                  </Text>
+                )}
+                {/* Description */}
+                {modalSuggestion.description && (
+                  <Text style={{ fontSize: 15, color: "#333", marginBottom: 16 }}>
+                    {modalSuggestion.description}
+                  </Text>
+                )}
+                {/* Buttons */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                  <TouchableOpacity
+                    style={[styles.addToItineraryButton, { flex: 1, marginRight: 8 }]}
+                    onPress={() => {
+                      selectedSuggestionRef.current = modalSuggestion;
+                      setDetailModalVisible(false);
+                      setModalVisible(true);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.addToItineraryButton, { backgroundColor: "#555", flex: 1, marginLeft: 8 }]}
+                    onPress={() => {
+                      if (modalSuggestion.web_url) Linking.openURL(modalSuggestion.web_url);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.addToItineraryText}>Open in Web</Text>
+                  </TouchableOpacity>
+                </View>
+                {/* Close Button */}
+                <TouchableOpacity
+                  onPress={() => setDetailModalVisible(false)}
+                  style={{ alignSelf: "center", marginTop: 18 }}
+                >
+                  <Text style={{ color: "#007AFF", fontWeight: "bold" }}>Close</Text>
+                </TouchableOpacity>
+              </ScrollView>
             </View>
-          </View>
+          </Animated.View>
         </Modal>
       )}
     </View>
