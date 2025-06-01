@@ -158,11 +158,12 @@ export const GetSuggestions: NavioScreen = observer(() => {
       longitudeDelta: region?.longitudeDelta || 0.1421,
     });
 
-    const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
-    if (result) {
-      const { fullAddress } = result;
-      setLocation(`${fullAddress}`);
-    }
+    // Geocoding disabled due to rate limits
+    // const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
+    // if (result) {
+    //   const { fullAddress } = result;
+    //   setLocation(`${fullAddress}`);
+    // }
   };
 
   const handleLocationChange = (text: string) => {
@@ -185,15 +186,15 @@ export const GetSuggestions: NavioScreen = observer(() => {
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude,
         };
-        setDeviceLocation(coords); // <-- store device location
+        setDeviceLocation(coords);
         setRegion({ ...coords, latitudeDelta: 0.1922, longitudeDelta: 0.1421 });
 
-        // Optionally, reverse geocode to get the address
-        const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
-        if (geocodeResult) {
-          const { fullAddress } = geocodeResult;
-          setLocation(`${fullAddress}`);
-        }
+        // Geocoding disabled due to rate limits
+        // const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
+        // if (geocodeResult) {
+        //   const { fullAddress } = geocodeResult;
+        //   setLocation(`${fullAddress}`);
+        // }
       } catch (error) {
         console.error("Error fetching current location:", error);
         Alert.alert("Error", "Failed to fetch current location.");
@@ -278,17 +279,16 @@ export const GetSuggestions: NavioScreen = observer(() => {
   // Update region when user moves the map
   const handleRegionChangeComplete = async (newRegion: any) => {
     setRegion(newRegion);
-
-    // Reverse geocode the center of the map
-    try {
-      const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
-      if (geocodeResult) {
-        const { fullAddress } = geocodeResult;
-        setLocation(`${fullAddress}`);
-      }
-    } catch (error) {
-      console.error("Error reverse geocoding:", error);
-    }
+    // Geocoding disabled due to rate limits
+    // try {
+    //   const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
+    //   if (geocodeResult) {
+    //     const { fullAddress } = geocodeResult;
+    //     setLocation(`${fullAddress}`);
+    //   }
+    // } catch (error) {
+    //   console.error("Error reverse geocoding:", error);
+    // }
   };
 
   // Center map on current device location
@@ -319,12 +319,12 @@ export const GetSuggestions: NavioScreen = observer(() => {
       setRegion(regionCoords);
       mapRef.current?.animateToRegion(regionCoords, 1000);
 
-      // Optionally update location text
-      const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
-      if (geocodeResult) {
-        const { fullAddress } = geocodeResult;
-        setLocation(`${fullAddress}`);
-      }
+      // Geocoding disabled due to rate limits
+      // const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
+      // if (geocodeResult) {
+      //   const { fullAddress } = geocodeResult;
+      //   setLocation(`${fullAddress}`);
+      // }
     } catch (error) {
       Alert.alert("Error", "Failed to fetch current location.");
     }
@@ -498,7 +498,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   </TouchableOpacity>
                 </View>
               ))
-            }
+            )}
           </ScrollView>
         </View>
       </Animated.View>
@@ -711,11 +711,3 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 });
-
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
-  };
-}
