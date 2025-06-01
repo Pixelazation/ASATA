@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text} from 'react-native-ui-lib';
+import {View, ActivityIndicator} from 'react-native';
 import { IconButton } from '../iconbutton';
 import { StyleSheet } from 'react-native';
 import { colors } from '../../utils/designSystem';
@@ -8,12 +8,18 @@ import { IconName } from '../icon';
 type Props = {
   icon: IconName;
   onPress?: () => void;
+  loading?: boolean; // <-- Add this prop
+  disabled?: boolean;
 };
 
-export const FloatingActionButton: React.FC<Props> = ({icon, onPress}) => {
+export const FloatingActionButton: React.FC<Props> = ({icon, onPress, loading, disabled}) => {
   return (
     <View style={styles.fabContainer}>
-      <IconButton name={icon} color={colors.primary} onPress={onPress} />
+      {loading ? (
+        <ActivityIndicator color={colors.primary} />
+      ) : (
+        <IconButton name={icon} color={colors.primary} onPress={onPress} />
+      )}
     </View>
   );
 };

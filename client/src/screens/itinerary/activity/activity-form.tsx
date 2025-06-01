@@ -22,6 +22,7 @@ import { Icon, IconName } from '../../../components/icon';
 import { MediaApi } from '../../../services/api/media';
 import { set } from 'lodash';
 import { MapModal } from '../../../components/molecules/map-modal';
+import { timestampToDateString } from '../../../utils/dateutils'; // Add this import if not present
 
 // Update your Params type to include category
 export type Params = {
@@ -64,17 +65,36 @@ export const ActivityForm: NavioScreen = observer(() => {
   const { itineraryId, activity, prefill } = params;
 
   const [image, setImage] = useState<ImagePickerAsset | string | null>(
-    activity?.image_url ?? prefill?.image_url ?? null // <-- Use prefill.image_url if available
+    activity?.image_url ?? prefill?.image_url ?? null
   );
   const [category, setCategory] = useState<string | null>(params.category ?? null);
   const [submitting, setSubmitting] = useState(false);
   const [mapVisible, setMapVisible] = useState<boolean>(false);
+
+  // Add state for itinerary details
+  const [itineraryDetails, setItineraryDetails] = useState<{ start_date: string; end_date: string } | null>(null);
 
   const categoryOptions = [
     { name: 'restaurants', label: 'Eat', icon: 'restaurant' },
     { name: 'attractions', label: 'Enjoy', icon: 'sunny' },
     { name: 'hotels', label: 'Stay', icon: 'business' },
   ] as {name: string, label: string, icon: IconName}[];
+
+  // Fetch itinerary details on mount
+  React.useEffect(() => {
+    const fetchItineraryDetails = async () => {
+      try {
+        const details = await ItineraryApi.getItineraryDetails(itineraryId);
+        setItineraryDetails({
+          start_date: details.start_date,
+          end_date: details.end_date,
+        });
+      } catch (error) {
+        console.error('Failed to fetch itinerary details:', error);
+      }
+    };
+    fetchItineraryDetails();
+  }, [itineraryId]);
 
   React.useEffect(() => {
     if (activity) {
@@ -324,7 +344,12 @@ export const ActivityForm: NavioScreen = observer(() => {
                   minimumDate={new Date()}
                 />
               </View>
-
+              {/* Show itinerary date range under End Date/Time */}
+              {itineraryDetails && (
+                <Text style={{ textAlign: 'center', color: '#888', fontSize: 13, marginTop: 4 }}>
+                  Must be within: {timestampToDateString(itineraryDetails.start_date)} - {timestampToDateString(itineraryDetails.end_date)}
+                </Text>
+              )}
               <ImagePicker image={image} setImage={setImage} />
 
               <MapModal

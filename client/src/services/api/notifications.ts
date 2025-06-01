@@ -59,7 +59,7 @@ export const NotificationsApi = {
         finalStatus = status;
       }
       if (finalStatus !== 'granted') {
-        handleRegistrationError('Permission not granted to get push token for push notification!');
+        handleRegistrationError('Permission not granted for push notification. Please enable it in settings.');
         return;
       }
       const projectId =
