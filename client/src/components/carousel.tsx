@@ -28,6 +28,7 @@ export const Carousel: React.FC<CarouselProps> = ({ title, items }) => {
           <TouchableOpacity key={index} onPress={() => handlePress(item.link)} activeOpacity={0.8}>
             <View style={styles.item}>
               <ImageBackground source={item.image} style={styles.itemBackground}>
+                <View style={styles.tintOverlay} />
                 <Text style={styles.itemText}>{item.title}</Text>
               </ImageBackground>
             </View>
@@ -51,8 +52,13 @@ const styles = StyleSheet.create({
   scrollView: {
     marginBottom: 20,
   },
+  tintOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // black with 30% opacity
+    zIndex: 1,
+  },
   item: {
-    width: 150,
+    width: 200,
     height: 150,
     justifyContent: "center",
     alignItems: "center",
@@ -72,6 +78,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+    padding: 16,
     textAlign: "center",
+    zIndex: 2
   },
 });
