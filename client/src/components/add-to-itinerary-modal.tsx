@@ -54,8 +54,8 @@ export const ItinerarySelectorModal: React.FC<Props> = ({ visible, onClose, onSe
             }}
             activeOpacity={0.8}
           >
-            <MaterialIcons name="add" size={32} color="#007AFF" style={{ marginRight: 12 }} />
-            <Text style={styles.createNewText}>Create New Itinerary from Activity</Text>
+            <MaterialIcons name="add" size={32} color="#016A42" style={{ marginRight: 12 }} />
+            <Text style={styles.createNewText}>Add to New Itinerary</Text>
           </TouchableOpacity>
           {/* --- Existing Itineraries --- */}
           {loading ? (
@@ -102,14 +102,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    width: "85%",
+    alignSelf: "center",
     borderWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: "#016A42",
     justifyContent: 'center',
   },
   createNewText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#007AFF",
+    color: "#016A42",
   },
   header: {
     fontSize: 22,
@@ -149,7 +151,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   closeText: {
-    color: "blue",
+    color: "#016A42",
     fontSize: 16,
   },
 });

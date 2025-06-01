@@ -458,7 +458,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
               {/* --- Search bar now inside the panel --- */}
               <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
                 <TextInput
-                  placeholder="Search city, hotel, restaurant, or place name"
+                  placeholder="Enter City or Location Name"
                   value={location}
                   onChangeText={handleLocationChange}
                   style={[styles.searchBar, { flex: 1 }]}
