@@ -589,7 +589,21 @@ export const GetSuggestions: NavioScreen = observer(() => {
             {loading ? (
               <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 40 }}>
                 <ActivityIndicator size="large" color="#007AFF" />
-                <Text style={{ marginTop: 16, color: "#555" }}>Loading suggestions...</Text>
+                <Text style={{ marginTop: 16, color: "#555", textAlign: "center" }}>
+                  {(() => {
+                    if (selectedOption === "diner" && selectedDiner.length > 0) {
+                      return `Loading restaurant suggestions for ${selectedDiner.join(", ")}.`;
+                    }
+                    if (selectedOption === "recreation" && selectedRecreation.length > 0) {
+                      return `Loading recreation suggestions for ${selectedRecreation.join(", ")}.`;
+                    }
+                    if (selectedOption === "accommodation") {
+                      return "Loading hotel suggestions.";
+                    }
+                    // fallback
+                    return "Loading suggestions...";
+                  })()}
+                </Text>
               </View>
             ) : (
               suggestions.map((item, index) => (
