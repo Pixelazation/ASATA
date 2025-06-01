@@ -116,30 +116,7 @@ export const Main: NavioScreen = observer(() => {
 
             <ItineraryTracker />
 
-            {/* <Carousel title="Explore new places..." items={recommendationItems} /> */}
             <Carousel title="Promotions" items={promotionItems} />
-            {/* <LocationTracker /> */}
-            {/* <WeatherTracker />
-            <View style={styles.buttonRow}>
-              <Button
-                onPress={() => NotificationsApi.sendTestNotification("You have an activity today!")}
-                style={styles.actionButton}
-              >
-                <Icon name="time-outline" color={styles.icon.color} size={styles.icon.fontSize} />
-              </Button>
-              <Button
-                onPress={() => NotificationsApi.sendTestNotification("Oh my! It appears to be raining. Do you wish to change your activity?")}
-                style={styles.actionButton}
-              >
-                <Icon name="rainy-outline" color={styles.icon.color} size={styles.icon.fontSize} />
-              </Button>
-              <Button
-                onPress={() => NotificationsApi.sendTestNotification("You have arrived at an activity area.")}
-                style={styles.actionButton}
-              >
-                <Icon name="location-outline" color={styles.icon.color} size={styles.icon.fontSize} />
-              </Button>
-            </View> */}
           </View>
         </ScrollView>
       </ImageBackground>
