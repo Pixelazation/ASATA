@@ -1,17 +1,21 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   StyleSheet,
   KeyboardAvoidingView,
   Pressable,
   ActivityIndicator,
+  Alert,
+  TouchableOpacity,
 } from 'react-native';
-import MapView, { Marker, MapPressEvent } from 'react-native-maps';
+import MapView from 'react-native-maps';
 import { View, Text, Button, Modal } from 'react-native-ui-lib';
 import { GeocodingApi } from '../../services/api/geocoding';
 import { colors } from '../../utils/designSystem';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 
 type Props = {
-  initLoc?: {loc: string, long: number | null, lat: number | null}
+  initLoc?: { loc: string, long: number | null, lat: number | null }
   setLocation?: (loc: string, long: number, lat: number) => void;
   visible: boolean;
   closeModal: () => void;
@@ -24,25 +28,75 @@ export const MapModal: React.FC<Props> = ({
   closeModal,
 }) => {
   const mapRef = useRef<MapView>(null);
-  const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(
-    initLoc?.long && initLoc?.lat ? {lat: initLoc?.lat, lng: initLoc?.long} : null
-  );
-  const [address, setAddress] = useState<string>(initLoc?.loc ?? '');
+  const [centerCoords, setCenterCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [address, setAddress] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [deviceCoords, setDeviceCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  const handleMapPress = async (e: MapPressEvent) => {
-    const { latitude, longitude } = e.nativeEvent.coordinate;
-    setSelectedCoords({ lat: latitude, lng: longitude });
+  // Fetch device location on modal open
+  useEffect(() => {
+    if (visible) {
+      (async () => {
+        try {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert("Permission Denied", "Location permission is required.");
+            return;
+          }
+          const currentLocation = await Location.getCurrentPositionAsync({});
+          const coords = {
+            lat: currentLocation.coords.latitude,
+            lng: currentLocation.coords.longitude,
+          };
+          setDeviceCoords(coords);
+          setCenterCoords(coords);
+          setLoading(true);
+          const result = await GeocodingApi.reverseGeocode(coords.lat, coords.lng);
+          setAddress(result ? result.fullAddress : 'Unknown location');
+          setLoading(false);
+          setTimeout(() => {
+            mapRef.current?.animateToRegion({
+              latitude: coords.lat,
+              longitude: coords.lng,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
+            }, 1);
+          }, 300);
+        } catch (e) {
+          Alert.alert("Error", "Failed to fetch current location.");
+        }
+      })();
+    }
+  }, [visible]);
+
+  // Update address when map region changes (center pin)
+  const handleRegionChangeComplete = async (region: any) => {
+    setCenterCoords({ lat: region.latitude, lng: region.longitude });
     setLoading(true);
-    const result = await GeocodingApi.reverseGeocode(latitude, longitude);
-    if (result) setAddress(result.fullAddress);
-    else setAddress('Unknown location');
+    const result = await GeocodingApi.reverseGeocode(region.latitude, region.longitude);
+    setAddress(result ? result.fullAddress : 'Unknown location');
+    setLoading(false);
+  };
+
+  // Center map on current device location
+  const handleCurrentLocation = async () => {
+    if (!deviceCoords) return;
+    mapRef.current?.animateToRegion({
+      latitude: deviceCoords.lat,
+      longitude: deviceCoords.lng,
+      latitudeDelta: 0.05,
+      longitudeDelta: 0.05,
+    }, 1000);
+    setCenterCoords(deviceCoords);
+    setLoading(true);
+    const result = await GeocodingApi.reverseGeocode(deviceCoords.lat, deviceCoords.lng);
+    setAddress(result ? result.fullAddress : 'Unknown location');
     setLoading(false);
   };
 
   const confirmLocation = () => {
-    if (setLocation && address && selectedCoords) {
-      setLocation(address, selectedCoords.lng, selectedCoords.lat);
+    if (setLocation && address && centerCoords) {
+      setLocation(address, centerCoords.lng, centerCoords.lat);
       closeModal();
     }
   };
@@ -63,34 +117,52 @@ export const MapModal: React.FC<Props> = ({
               <MapView
                 ref={mapRef}
                 style={styles.map}
-                onPress={handleMapPress}
                 initialRegion={{
-                  latitude: 10.3157,
-                  longitude: 123.8854,
+                  latitude: centerCoords?.lat ?? 10.3157,
+                  longitude: centerCoords?.lng ?? 123.8854,
                   latitudeDelta: 0.05,
                   longitudeDelta: 0.05,
                 }}
+                onRegionChangeComplete={handleRegionChangeComplete}
+              />
+              {/* Center Pin Overlay */}
+              <View pointerEvents="none" style={styles.centerPinContainer}>
+                <MaterialIcons name="place" size={48} color={colors.primary} />
+              </View>
+              {/* Current Location Button */}
+              <TouchableOpacity
+                style={styles.currentLocationButton}
+                onPress={handleCurrentLocation}
+                activeOpacity={0.7}
               >
-                {selectedCoords && (
-                  <Marker coordinate={{ latitude: selectedCoords.lat, longitude: selectedCoords.lng }} />
-                )}
-              </MapView>
+                <MaterialIcons name="my-location" size={24} color={colors.primary} />
+              </TouchableOpacity>
             </View>
 
             <View style={styles.addressContainer}>
               {loading ? (
                 <ActivityIndicator size="small" color="#666" />
               ) : (
-                <Text style={{fontWeight: 'bold'}}>{address || 'Tap a location on the map'}</Text>
+                <Text style={{ fontWeight: 'bold' }}>{address || 'Tap a location on the map'}</Text>
               )}
             </View>
 
-            <Button
-              label="Confirm Location"
-              onPress={confirmLocation}
-              disabled={!address || loading}
-              backgroundColor={colors.primary}
-            />
+            <View style={styles.buttonRow}>
+              <Button
+                label="Cancel"
+                onPress={closeModal}
+                backgroundColor="#eee"
+                color="#333"
+                style={{ flex: 1, marginRight: 8 }}
+              />
+              <Button
+                label="Confirm"
+                onPress={confirmLocation}
+                disabled={!address || loading}
+                backgroundColor={colors.primary}
+                style={{ flex: 1, marginLeft: 8 }}
+              />
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -109,15 +181,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: 0, // Remove padding for more space
   },
   contentCard: {
-    width: '90%',
-    height: '80%',
-    padding: 16,
-    gap: 16,
+    width: '90%', // Reduced width
+    height: '70%', // Reduced height
+    padding: 12,   // Slightly more padding for smaller card
+    gap: 12,
     backgroundColor: 'white',
-    borderRadius: 16,
+    borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -127,18 +199,46 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     flex: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: 'white',
+    position: 'relative',
   },
-
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  centerPinContainer: {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    marginLeft: -24,
+    marginTop: -48,
+    zIndex: 2,
+    pointerEvents: 'none',
+  },
+  currentLocationButton: {
+    position: "absolute",
+    bottom: 24, // Move further down and right
+    right: 16,
+    width: 32,  // Reduce size
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    zIndex: 3,
+    backgroundColor: "#fff", // Invert: white background
+    // borderWidth: 2, // Removed border/outline
+    // borderColor: colors.primary, // Removed border color
   },
   addressContainer: {
     marginTop: 12,
     alignItems: 'center',
     minHeight: 24,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    marginTop: 8,
   },
   confirmButton: {
     color: colors.primary,
