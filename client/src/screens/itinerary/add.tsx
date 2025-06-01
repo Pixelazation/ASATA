@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, Alert, Image, ImageBackground, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { DateTimePicker, Text, View, Button } from 'react-native-ui-lib';
 import { observer } from 'mobx-react';
@@ -24,6 +24,8 @@ import { MapModal } from '../../components/molecules/map-modal';
 export type Params = {
   type?: 'push' | 'show';
   itineraryId?: string;
+  duplicateId?: string;
+  onCreated?: (id: string) => void;
 };
 
 const ItinerarySchema = Yup.object().shape({
@@ -43,22 +45,36 @@ export const ItineraryForm: NavioScreen = observer(() => {
   useAppearance();
   const { t, navio } = useServices();
   const navigation = navio.useN();
-  const { itineraryId } = navio.useParams<Params>();
+  const { itineraryId, duplicateId, onCreated } = navio.useParams<Params>();
 
   const [loading, setLoading] = useState(false);
   const [details, setDetails] = useState<ItineraryType>();
   const [image, setImage] = useState<ImagePickerAsset | string | null>(null);
   const [mapVisible, setMapVisible] = useState<boolean>(false);
 
-  const params = navio.useParams<{ onCreated?: (id: string) => void }>();
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (itineraryId) {
       fetchDetails();
+    } else if (duplicateId) {
+      fetchDuplicate();
     }
-
     navigation.setOptions({});
   }, []);
+
+  const fetchDuplicate = async () => {
+    try {
+      const data = await ItineraryApi.getItineraryDetails(duplicateId!);
+      // Remove id and adjust title for duplication
+      setDetails({
+        ...data,
+        title: data.title + " (Copy)",
+        // Optionally reset dates or other fields as needed
+      });
+      setImage(data.image_url);
+    } catch (error) {
+      console.error("Error fetching itinerary for duplication:", error);
+    }
+  };
 
   const addItinerary = async (values: any) => {
     setLoading(true);
@@ -68,18 +84,13 @@ export const ItineraryForm: NavioScreen = observer(() => {
         ...values
       };
 
-      // Correctly extract the new ID from the Supabase response
       type AddItineraryResponse = { id: string }[];
       const apiResult = await ItineraryApi.addItinerary(newItinerary) as unknown as AddItineraryResponse;
-      const newId = apiResult?.[0]?.id; // <-- This is the correct way if your API returns 'id'
+      const newId = apiResult?.[0]?.id;
 
-      // Debug log (optional, but helps during development)
-      console.log('addItinerary result:', apiResult);
-      console.log('Extracted newId:', newId);
-
-      if (params.onCreated && newId) {
-        params.onCreated(newId); // <-- This will open the activity form!
-        return; // Do not call navio.goBack() here
+      if (onCreated && newId) {
+        onCreated(newId);
+        return;
       }
       navio.goBack();
     } catch (error) {
@@ -121,7 +132,8 @@ export const ItineraryForm: NavioScreen = observer(() => {
 
   const uploadImage = async (): Promise<string|null> => {
     if (!image) return null;
-
+    // If image is already a URL (string), just return it
+    if (typeof image === 'string') return image;
     try {
       const url = await MediaApi.uploadImage(image as ImagePickerAsset);
       console.log('Image uploaded successfully:', url);
@@ -130,7 +142,6 @@ export const ItineraryForm: NavioScreen = observer(() => {
       console.error('Image upload failed:', error);
       Alert.alert('Upload Failed', 'Something went wrong while uploading the image.');
     }
-
     return null;
   }
 
