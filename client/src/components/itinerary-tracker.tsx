@@ -52,8 +52,8 @@ export const ItineraryTracker: React.FC<Props> = ({title}) => {
       ) : (
         tracked ? (
           <View style={{flex: 1, flexDirection: 'row', gap: 8}}>
-            <View>
-              <Image source={tracked ? {uri: tracked.image_url} : BG_IMAGE} resizeMode='cover' style={styles.descImg} />
+            <View style={[styles.imgContainer, styles.descImg]}>
+              <Image source={tracked.image_url ? {uri: tracked.image_url} : BG_IMAGE} resizeMode='cover' style={styles.descImg} />
             </View>
             <View style={styles.details}>
               <View style={{ flex: 1, flexDirection: 'row', gap: 8 }}>
@@ -86,9 +86,7 @@ const styles = StyleSheet.create({
   },
   details: {
     backgroundColor: 'white',
-    padding: 8,
-    borderWidth: 1,
-    borderColor: 'black',
+    padding: 16,
     borderRadius: 8,
     flex: 1,
     flexGrow: 1,
@@ -128,9 +126,23 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
   descImg: {
-    width: 100,
-    height: 100,
-    borderRadius: 16
+    height: '100%',
+    aspectRatio: 1,
+    borderRadius: 16,
+  },
+  imgContainer: {
+    flex: 1,
+    flexShrink: 1,
+    maxWidth: '35%',
+
+    // iOS Shadows
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 4 },
+
+    // Android Shadow
+    elevation: 4,
   },
   footer: {
     flexDirection: 'row',

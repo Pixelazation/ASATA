@@ -66,7 +66,7 @@ export const ActivityForm: NavioScreen = observer(() => {
   const [image, setImage] = useState<ImagePickerAsset | string | null>(
     activity?.image_url ?? prefill?.image_url ?? null // <-- Use prefill.image_url if available
   );
-  const [category, setCategory] = useState<string | null>(null);
+  const [category, setCategory] = useState<string | null>(params.category ?? null);
   const [submitting, setSubmitting] = useState(false);
   const [mapVisible, setMapVisible] = useState<boolean>(false);
 

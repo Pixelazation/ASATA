@@ -2,11 +2,11 @@ import { IconName } from '../components/icon';
 
 export function getActivityIcon(activityType: string): IconName {
   switch (activityType) {
-    case 'food':
+    case 'restaurants':
       return 'restaurant';
-    case 'leisure':
+    case 'attractions':
       return 'sunny';
-    case 'accomodation':
+    case 'hotels':
       return 'business';
   }
 
