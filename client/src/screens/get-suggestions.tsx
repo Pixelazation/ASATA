@@ -26,6 +26,7 @@ import * as Location from "expo-location"; // Import expo-location
 import { MaterialIcons } from '@expo/vector-icons'; // already imported
 import type { Region } from 'react-native-maps';
 import { ItinerarySelectorModal } from "@app/components/add-to-itinerary-modal";
+import { Modal } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -56,6 +57,9 @@ export const GetSuggestions: NavioScreen = observer(() => {
   });
 
   const selectedSuggestionRef = useRef<any>(null);
+
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [modalSuggestion, setModalSuggestion] = useState<any>(null);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
@@ -481,7 +485,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.scrollContainer}>
             {selectedOption === "recreation" && (
               <View>
                 <Text text60 marginB-s2>Choose Recreation Types</Text>
@@ -533,25 +536,42 @@ export const GetSuggestions: NavioScreen = observer(() => {
               labelStyle={{ color: "white", fontWeight: "bold" }}
             />
 
+          <ScrollView style={styles.scrollContainer}>
             {loading ? (
               <Text text70M>Loading suggestions...</Text>
             ) : (
               suggestions.map((item, index) => (
-                <View key={index} style={styles.suggestionCard}>
-                  <TouchableOpacity
-                    onPress={() => item.web_url && Linking.openURL(item.web_url)}
-                    activeOpacity={0.7}
-                    style={{ flex: 1 }}
-                  >
-                    {item.photoUrl && (
-                      <Image source={{ uri: item.photoUrl }} style={styles.suggestionImage} />
+                <TouchableOpacity
+                  key={index}
+                  style={styles.activityCard}
+                  activeOpacity={0.85}
+                  onPress={() => {
+                    setModalSuggestion(item);
+                    setDetailModalVisible(true);
+                  }}
+                >
+                  {/* Image */}
+                  {item.photoUrl && (
+                    <Image source={{ uri: item.photoUrl }} style={styles.activityImage} />
+                  )}
+                  {/* Title and Rating */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <Text style={styles.activityTitle} numberOfLines={1}>{item.name}</Text>
+                    {item.rating && (
+                      <Text style={styles.activityRating}>
+                        {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("")}
+                      </Text>
                     )}
-                    <Text text60BO marginT-s2 marginB-s1>{item.name}</Text>
-                    <Text text70 marginB-s1>{item.address_obj?.address_string || "No address available"}</Text>
-                    <Text>
-                      {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
-                    </Text>
-                  </TouchableOpacity>
+                  </View>
+                  {/* Address */}
+                  <Text style={styles.activityLocation} numberOfLines={1}>
+                    {item.address_obj?.address_string || "No address available"}
+                  </Text>
+                  {/* Description */}
+                  {item.description ? (
+                    <Text style={styles.activityDescription} numberOfLines={2}>{item.description}</Text>
+                  ) : null}
+                  {/* Add to Itinerary Button */}
                   <TouchableOpacity
                     style={styles.addToItineraryButton}
                     onPress={() => {
@@ -562,9 +582,9 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   >
                     <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
                   </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
               ))
-            )}  
+            )}
           </ScrollView>
         </View>
       </Animated.View>
@@ -631,6 +651,80 @@ export const GetSuggestions: NavioScreen = observer(() => {
           });
         }}
       />
+      {modalSuggestion && (
+        <Modal
+          visible={detailModalVisible}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setDetailModalVisible(false)}
+        >
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <View style={{
+              backgroundColor: '#fff',
+              borderRadius: 16,
+              padding: 24,
+              width: '90%',
+              maxHeight: '80%',
+            }}>
+              {/* Image */}
+              {modalSuggestion.photoUrl && (
+                <Image source={{ uri: modalSuggestion.photoUrl }} style={{ width: '100%', height: 180, borderRadius: 10, marginBottom: 12 }} />
+              )}
+              {/* Title */}
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>{modalSuggestion.name}</Text>
+              {/* Address */}
+              <Text style={{ color: '#555', marginBottom: 8 }}>{modalSuggestion.address_obj?.address_string || "No address available"}</Text>
+              {/* Rating */}
+              {modalSuggestion.rating && (
+                <Text style={{ color: "#FFC107", fontWeight: "bold", marginBottom: 8 }}>
+                  {Array.from({ length: Math.round(Number(modalSuggestion.rating) || 0) }, () => "⭐").join("")}
+                </Text>
+              )}
+              {/* Description */}
+              {modalSuggestion.description && (
+                <Text style={{ fontSize: 15, color: "#333", marginBottom: 16 }}>
+                  {modalSuggestion.description}
+                </Text>
+              )}
+              {/* Buttons */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                <TouchableOpacity
+                  style={[styles.addToItineraryButton, { flex: 1, marginRight: 8 }]}
+                  onPress={() => {
+                    selectedSuggestionRef.current = modalSuggestion;
+                    setDetailModalVisible(false);
+                    setModalVisible(true);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.addToItineraryButton, { backgroundColor: "#555", flex: 1, marginLeft: 8 }]}
+                  onPress={() => {
+                    if (modalSuggestion.web_url) Linking.openURL(modalSuggestion.web_url);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.addToItineraryText}>Open in Web</Text>
+                </TouchableOpacity>
+              </View>
+              {/* Close Button */}
+              <TouchableOpacity
+                onPress={() => setDetailModalVisible(false)}
+                style={{ alignSelf: "center", marginTop: 18 }}
+              >
+                <Text style={{ color: "#007AFF", fontWeight: "bold" }}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 });
@@ -776,4 +870,45 @@ const styles = StyleSheet.create({
     elevation: 5,
     zIndex: 10,
   },
+  activityCard: {
+  padding: 16,
+  borderWidth: 1,
+  borderColor: "#e0e0e0",
+  borderRadius: 14,
+  marginBottom: 16,
+  backgroundColor: "#fff",
+  shadowColor: "#000",
+  shadowOpacity: 0.06,
+  shadowRadius: 4,
+  elevation: 2,
+},
+activityImage: {
+  width: "100%",
+  height: 140,
+  borderRadius: 10,
+  marginBottom: 10,
+  backgroundColor: "#f0f0f0",
+},
+activityTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  flex: 1,
+  marginRight: 8,
+  color: "#222",
+},
+activityLocation: {
+  fontSize: 14,
+  color: "#555",
+  marginBottom: 4,
+},
+activityDescription: {
+  fontSize: 14,
+  color: "#333",
+  marginBottom: 8,
+},
+activityRating: {
+  fontSize: 16,
+  color: "#FFC107",
+  fontWeight: "bold",
+},
 });
