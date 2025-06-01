@@ -57,6 +57,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
     longitudeDelta: 0.1421,
   });
 
+  const [showResults, setShowResults] = useState(false);
+
   const selectedSuggestionRef = useRef<any>(null);
 
   const [detailModalVisible, setDetailModalVisible] = useState(false);
@@ -445,131 +447,138 @@ export const GetSuggestions: NavioScreen = observer(() => {
           >
             <View style={styles.dragHandleBar} />
           </TouchableOpacity>
-
-          {/* --- Search bar now inside the panel --- */}
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
-            <TextInput
-              placeholder="Search city, hotel, restaurant, or place name"
-              value={location}
-              onChangeText={handleLocationChange}
-              style={[styles.searchBar, { flex: 1 }]}
-            />
-            <TouchableOpacity
-              onPress={() => setShowTutorial(true)}
-              style={{ marginLeft: 8, padding: 6 }}
-              activeOpacity={0.7}
-            >
-              <MaterialIcons name="lightbulb-outline" size={26} color="#FFC107" />
-            </TouchableOpacity>
-          </View>
-          {showTutorial && (
-            <View style={{
-              backgroundColor: "#fffbe6",
-              borderRadius: 10,
-              padding: 14,
-              marginBottom: 12,
-              borderWidth: 1,
-              borderColor: "#ffe082",
-              shadowColor: "#000",
-              shadowOpacity: 0.08,
-              shadowRadius: 4,
-              elevation: 2,
-            }}>
-              <Text style={{ fontWeight: "bold", marginBottom: 6 }}>
-                How to use Get Suggestions
-              </Text>
-              <Text>
-                Enter a city, hotel, restaurant, or place name in the search bar to get suggestions for that location.{"\n"}
-                Or, move the map pin to get suggestions near a specific spot on the map.
-              </Text>
-              <TouchableOpacity
-                onPress={() => setShowTutorial(false)}
-                style={{ alignSelf: "flex-end", marginTop: 8 }}
-              >
-                <Text style={{ color: "#016A42", fontWeight: "bold" }}>Got it</Text>
-              </TouchableOpacity>
-            </View>
+          {!showResults && (
+            <>
+              {/* Search bar, category buttons, filters, Find Matches button */}
+              {/* --- Search bar now inside the panel --- */}
+              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+                <TextInput
+                  placeholder="Search city, hotel, restaurant, or place name"
+                  value={location}
+                  onChangeText={handleLocationChange}
+                  style={[styles.searchBar, { flex: 1 }]}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowTutorial(true)}
+                  style={{ marginLeft: 8, padding: 6 }}
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons name="lightbulb-outline" size={26} color="#FFC107" />
+                </TouchableOpacity>
+              </View>
+              {showTutorial && (
+                <View style={{
+                  backgroundColor: "#fffbe6",
+                  borderRadius: 10,
+                  padding: 14,
+                  marginBottom: 12,
+                  borderWidth: 1,
+                  borderColor: "#ffe082",
+                  shadowColor: "#000",
+                  shadowOpacity: 0.08,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}>
+                  <Text style={{ fontWeight: "bold", marginBottom: 6 }}>
+                    How to use Get Suggestions
+                  </Text>
+                  <Text>
+                    Enter a city, hotel, restaurant, or place name in the search bar to get suggestions for that location.{"\n"}
+                    Or, move the map pin to get suggestions near a specific spot on the map.
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setShowTutorial(false)}
+                    style={{ alignSelf: "flex-end", marginTop: 8 }}
+                  >
+                    <Text style={{ color: "#016A42", fontWeight: "bold" }}>Got it</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+    
+              <View style={styles.categoryContainer}>
+                <TouchableOpacity
+                  style={[styles.categoryBox, selectedOption === "accommodation" && styles.categoryBoxSelected]}
+                  onPress={() => setSelectedOption("accommodation")}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.categoryIcon}>🏨</Text>
+                  <Text style={styles.categoryLabel}>Accommodation</Text>
+                </TouchableOpacity>
+    
+                <TouchableOpacity
+                  style={[styles.categoryBox, selectedOption === "recreation" && styles.categoryBoxSelected]}
+                  onPress={() => setSelectedOption("recreation")}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.categoryIcon}>🏖️</Text>
+                  <Text style={styles.categoryLabel}>Recreation</Text>
+                </TouchableOpacity>
+    
+                <TouchableOpacity
+                  style={[styles.categoryBox, selectedOption === "diner" && styles.categoryBoxSelected]}
+                  onPress={() => setSelectedOption("diner")}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.categoryIcon}>🍽️</Text>
+                  <Text style={styles.categoryLabel}>Diner</Text>
+                </TouchableOpacity>
+              </View>
+    
+                {selectedOption === "recreation" && (
+                  <View>
+                    <Text text60 marginB-s2>Choose Recreation Types</Text>
+                    <View style={styles.optionsContainer}>
+                      {recreationOptions.map(option => (
+                        <TouchableOpacity
+                          key={option}
+                          style={[styles.optionBox, selectedRecreation.includes(option) && styles.optionBoxSelected]}
+                          onPress={() => toggleSelection(option, "recreation")}
+                        >
+                          <Text
+                            style={[styles.optionText, selectedRecreation.includes(option) && styles.optionTextSelected]}
+                          >
+                            {option}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+    
+                {selectedOption === "diner" && (
+                  <View>
+                    <Text text60 marginB-s2>Choose Diner Types</Text>
+                    <View style={styles.optionsContainer}>
+                      {dinerOptions.map(option => (
+                        <TouchableOpacity
+                          key={option}
+                          style={[styles.optionBox, selectedDiner.includes(option) && styles.optionBoxSelected]}
+                          onPress={() => toggleSelection(option, "diner")}
+                        >
+                          <Text
+                            style={[styles.optionText, selectedDiner.includes(option) && styles.optionTextSelected]}
+                          >
+                            {option}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+    
+                <Button
+                  label="Find Matches"
+                  onPress={() => {
+                    fetchSuggestions();
+                    setShowResults(true);
+                  }}
+                  marginB-s1
+                  disabled={loading}
+                  backgroundColor="#016A42"
+                  labelStyle={{ color: "white", fontWeight: "bold" }}
+                />
+            </>
           )}
-
-          <View style={styles.categoryContainer}>
-            <TouchableOpacity
-              style={[styles.categoryBox, selectedOption === "accommodation" && styles.categoryBoxSelected]}
-              onPress={() => setSelectedOption("accommodation")}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.categoryIcon}>🏨</Text>
-              <Text style={styles.categoryLabel}>Accommodation</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.categoryBox, selectedOption === "recreation" && styles.categoryBoxSelected]}
-              onPress={() => setSelectedOption("recreation")}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.categoryIcon}>🏖️</Text>
-              <Text style={styles.categoryLabel}>Recreation</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.categoryBox, selectedOption === "diner" && styles.categoryBoxSelected]}
-              onPress={() => setSelectedOption("diner")}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.categoryIcon}>🍽️</Text>
-              <Text style={styles.categoryLabel}>Diner</Text>
-            </TouchableOpacity>
-          </View>
-
-            {selectedOption === "recreation" && (
-              <View>
-                <Text text60 marginB-s2>Choose Recreation Types</Text>
-                <View style={styles.optionsContainer}>
-                  {recreationOptions.map(option => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[styles.optionBox, selectedRecreation.includes(option) && styles.optionBoxSelected]}
-                      onPress={() => toggleSelection(option, "recreation")}
-                    >
-                      <Text
-                        style={[styles.optionText, selectedRecreation.includes(option) && styles.optionTextSelected]}
-                      >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {selectedOption === "diner" && (
-              <View>
-                <Text text60 marginB-s2>Choose Diner Types</Text>
-                <View style={styles.optionsContainer}>
-                  {dinerOptions.map(option => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[styles.optionBox, selectedDiner.includes(option) && styles.optionBoxSelected]}
-                      onPress={() => toggleSelection(option, "diner")}
-                    >
-                      <Text
-                        style={[styles.optionText, selectedDiner.includes(option) && styles.optionTextSelected]}
-                      >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            <Button
-              label="Find Matches"
-              onPress={fetchSuggestions}
-              marginB-s1
-              disabled={loading}
-              backgroundColor="#016A42"
-              labelStyle={{ color: "white", fontWeight: "bold" }}
-            />
 
           <ScrollView style={styles.scrollContainer}>
             {loading ? (
@@ -621,6 +630,38 @@ export const GetSuggestions: NavioScreen = observer(() => {
               ))
             )}
           </ScrollView>
+          {showResults && (
+            <TouchableOpacity
+              style={{
+                position: "absolute",
+                bottom: 32,
+                right: 32,
+                backgroundColor: "#007AFF",
+                borderRadius: 28,
+                width: 56,
+                height: 56,
+                justifyContent: "center",
+                alignItems: "center",
+                elevation: 6,
+                zIndex: 20,
+                shadowColor: "#000",
+                shadowOpacity: 0.18,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 2 },
+              }}
+              onPress={() => {
+                setShowResults(false);
+                setSuggestions([]);
+                setLocation("");
+                setSelectedOption("");
+                setSelectedRecreation([]);
+                setSelectedDiner([]);
+              }}
+              activeOpacity={0.85}
+            >
+              <MaterialIcons name="refresh" size={28} color="#fff" />
+            </TouchableOpacity>
+          )}
         </View>
       </Animated.View>
       <ItinerarySelectorModal
