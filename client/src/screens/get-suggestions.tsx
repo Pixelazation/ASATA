@@ -362,14 +362,14 @@ export const GetSuggestions: NavioScreen = observer(() => {
       </TouchableOpacity>
 
       {/* Search bar and sliding panel (higher zIndex) */}
-      <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity, zIndex: 10 }]}>
+      {/* <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity, zIndex: 10 }]}>
         <TextInput
           placeholder="Search Location"
           value={location}
           onChangeText={handleLocationChange}
           style={styles.searchBar}
         />
-      </Animated.View>
+      </Animated.View> */}
 
       <Animated.View
         style={[styles.slidingPanel, { height: animatedY, zIndex: 10 }]}
@@ -385,6 +385,16 @@ export const GetSuggestions: NavioScreen = observer(() => {
           >
             <View style={styles.dragHandleBar} />
           </TouchableOpacity>
+
+          {/* --- Search bar now inside the panel --- */}
+          <View style={{ marginBottom: 16 }}>
+            <TextInput
+              placeholder="Enter City (optional)"
+              value={location}
+              onChangeText={handleLocationChange}
+              style={styles.searchBar}
+            />
+          </View>
 
           <View style={styles.categoryContainer}>
             <TouchableOpacity
@@ -498,7 +508,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   </TouchableOpacity>
                 </View>
               ))
-            )}
+            )}  
           </ScrollView>
         </View>
       </Animated.View>
