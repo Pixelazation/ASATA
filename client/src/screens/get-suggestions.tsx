@@ -12,6 +12,7 @@ import {
   Easing,
   Dimensions,
   PanResponder,
+  ActivityIndicator,
 } from "react-native";
 import { Text, View, Button } from "react-native-ui-lib";
 import { observer } from "mobx-react";
@@ -582,7 +583,10 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
           <ScrollView style={styles.scrollContainer}>
             {loading ? (
-              <Text text70M>Loading suggestions...</Text>
+              <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 40 }}>
+                <ActivityIndicator size="large" color="#007AFF" />
+                <Text style={{ marginTop: 16, color: "#555" }}>Loading suggestions...</Text>
+              </View>
             ) : (
               suggestions.map((item, index) => (
                 <TouchableOpacity
