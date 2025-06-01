@@ -184,7 +184,14 @@ export const ItineraryForm: NavioScreen = observer(() => {
                 value={values.budget}
                 onChangeText={handleChange('budget')}
                 onBlur={handleBlur('budget')}
+                keyboardType="numeric" // Only numeric input allowed
               />
+
+              {errors.budget && touched.budget && (
+                <Text style={{ color: '#b22222', fontSize: 12, marginTop: -8, marginBottom: 4 }}>
+                  Please enter a valid budget amount.
+                </Text>
+              )}
 
               <FormField
                 label="Location"

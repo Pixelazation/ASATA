@@ -143,7 +143,7 @@ export const MapModal: React.FC<Props> = ({
               {loading ? (
                 <ActivityIndicator size="small" color="#666" />
               ) : (
-                <Text style={{ fontWeight: 'bold' }}>{address || 'Tap a location on the map'}</Text>
+                <Text style={{ fontWeight: 'bold' }}>{address || 'Drag the pin to your desired location.'}</Text>
               )}
             </View>
 
