@@ -96,7 +96,8 @@ export default (): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    NotificationsApi.updatePushToken(expoPushToken);
+    if (expoPushToken != '')
+      NotificationsApi.updatePushToken(expoPushToken);
   }, [isLoggedIn, expoPushToken])
 
   const NotReady = useMemo(() => {
