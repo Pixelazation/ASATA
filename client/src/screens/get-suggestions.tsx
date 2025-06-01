@@ -29,6 +29,7 @@ import { MaterialIcons } from '@expo/vector-icons'; // already imported
 import type { Region } from 'react-native-maps';
 import { ItinerarySelectorModal } from "@app/components/add-to-itinerary-modal";
 import { Modal } from "react-native";
+import { LocationReviewApi } from "@app/services/api/locationreview";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -57,6 +58,9 @@ export const GetSuggestions: NavioScreen = observer(() => {
     latitudeDelta: 0.1922,
     longitudeDelta: 0.1421,
   });
+
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   const [showResults, setShowResults] = useState(false);
 
@@ -596,6 +600,12 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   onPress={() => {
                     setModalSuggestion(item);
                     setDetailModalVisible(true);
+                    setReviews([]);
+                    setReviewsLoading(true);
+                    LocationReviewApi.getReviews(Number(item.location_id)).then(res => {
+                      setReviews(res?.data || []);
+                      setReviewsLoading(false);
+                    });
                   }}
                 >
                   {/* Image */}
@@ -789,7 +799,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 )}
                 {/* Description */}
                 {modalSuggestion.description && (
-                  <Text style={{ fontSize: 15, color: "#333", marginBottom: 16 }}>
+                  <Text style={{ fontSize: 15, color: "#333", marginBottom: 12, textAlign: "justify" }}>
                     {modalSuggestion.description}
                   </Text>
                 )}
@@ -816,6 +826,45 @@ export const GetSuggestions: NavioScreen = observer(() => {
                     <Text style={styles.addToItineraryText}>Open in Web</Text>
                   </TouchableOpacity>
                 </View>
+
+                {/* Reviews Section */}
+                <View style={{ marginTop: 10 }}>
+                  <Text style={{ fontSize: 17, fontWeight: "bold", marginBottom: 8 }}>Reviews</Text>
+                  {reviewsLoading ? (
+                    <ActivityIndicator size="small" color="#007AFF" style={{ marginVertical: 12 }} />
+                  ) : reviews.length === 0 ? (
+                    <Text style={{ color: "#888", fontStyle: "italic" }}>No reviews found.</Text>
+                  ) : (
+                    reviews.map((review: any) => (
+                      <View key={review.id} style={{ marginBottom: 18, borderBottomWidth: 1, borderBottomColor: "#eee", paddingBottom: 12 }}>
+                        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+                          <Image
+                            source={{ uri: review.user?.avatar?.thumbnail }}
+                            style={{ width: 32, height: 32, borderRadius: 16, marginRight: 8, backgroundColor: "#eee" }}
+                          />
+                          <View>
+                            <Text style={{ fontWeight: "bold" }}>{review.user?.username}</Text>
+                            <Text style={{ color: "#888", fontSize: 12 }}>
+                              {review.user?.user_location?.name}
+                            </Text>
+                          </View>
+                        </View>
+                        <Text style={{ fontWeight: "bold", marginBottom: 2 }}>{review.title}</Text>
+                        <Text style={{ color: "#FFC107", marginBottom: 2 }}>
+                          {Array.from({ length: Number(review.rating) || 0 }, () => "⭐").join("")}
+                        </Text>
+                        <Text style={{ color: "#333", marginBottom: 4 }}>{review.text}</Text>
+                        <TouchableOpacity
+                          onPress={() => Linking.openURL(review.url)}
+                          style={{ alignSelf: "flex-start" }}
+                        >
+                          <Text style={{ color: "#007AFF", fontSize: 13 }}>Read full review</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))
+                  )}
+                </View>
+
                 {/* Close Button */}
                 <TouchableOpacity
                   onPress={() => setDetailModalVisible(false)}
