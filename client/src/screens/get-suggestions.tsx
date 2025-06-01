@@ -96,13 +96,26 @@ export const GetSuggestions: NavioScreen = observer(() => {
         filters = filters.concat(selectedDiner);
       }
 
+      // Query logic
       if (location.trim()) {
-        // User typed in the search bar: use search bar + category + filters, DO NOT send latLong
-        query = [location.trim(), selectedOption, ...filters].filter(Boolean).join(" ");
+        // User typed in the search bar
+        if (selectedOption === "accommodation") {
+          // Hotel: use search bar + selected category only
+          query = [location.trim(), selectedOption].filter(Boolean).join(" ");
+        } else {
+          // Recreation or Diner: use search bar + filters only
+          query = [location.trim(), ...filters].filter(Boolean).join(" ");
+        }
         latLong = undefined;
       } else if (region) {
-        // No search bar: use category + filters as query, and send latLong
-        query = [selectedOption, ...filters].filter(Boolean).join(" ");
+        // No search bar
+        if (selectedOption === "accommodation") {
+          // Hotel: use selected category only
+          query = [selectedOption].filter(Boolean).join(" ");
+        } else {
+          // Recreation or Diner: use filters only
+          query = [...filters].filter(Boolean).join(" ");
+        }
         latLong = `${region.latitude},${region.longitude}`;
       } else {
         Alert.alert("Error", "Please enter a location or select a location on the map.");
