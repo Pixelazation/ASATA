@@ -5,7 +5,7 @@ import { SUPABASE_URL } from '@env';
 const SUPABASE_EDGE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/tripadvisor-proxy";
 
 export const LocationSearchApi = {
-  search: async (query: string, category?: string) => {
+  search: async (query: string, category?: string, latLong?: string) => {
     try {
       const {
         data: { session },
@@ -18,6 +18,7 @@ export const LocationSearchApi = {
       url.searchParams.append("searchQuery", query);
       url.searchParams.append("language", "en");
       if (category) url.searchParams.append("category", category);
+      if (latLong) url.searchParams.append("latLong", latLong); // <-- Add latLong if provided
 
       const response = await fetch(url.toString(), {
         method: "GET",
