@@ -81,34 +81,22 @@ export const GetSuggestions: NavioScreen = observer(() => {
   };
 
   const fetchSuggestions = async () => {
-    if (!location.trim()) {
-      Alert.alert("Error", "Please enter a location or select a location on the map.");
-      return;
-    }
-
     setLoading(true);
     try {
-      let category = '';
-      if (selectedOption === "recreation") category = "attractions";
-      else if (selectedOption === "diner") category = "restaurants";
-      else if (selectedOption === "accommodation") category = "hotels";
+      let query = "";
+      let category = getCategoryFromOption(selectedOption);
 
-      let query = location;
-
-      if (!region && location.trim()) {
-        const selectedFilters =
-          selectedOption === "recreation" ? selectedRecreation.join(", ") :
-          selectedOption === "diner" ? selectedDiner.join(", ") : "";
-        query = `${location} ${selectedFilters}`;
+      if (location.trim()) {
+        // User typed a location, use it
+        query = location.trim();
       } else if (region) {
-        const geocodeResult = await GeocodingApi.reverseGeocode(region.latitude, region.longitude);
-        if (geocodeResult) {
-          const { fullAddress } = geocodeResult;
-          const selectedFilters =
-            selectedOption === "recreation" ? selectedRecreation.join(", ") :
-            selectedOption === "diner" ? selectedDiner.join(", ") : "";
-          query = `${fullAddress} ${selectedFilters}`;
-        }
+        // No search bar, use pin
+        // (You may want to reverse geocode here, or just use lat/lng directly)
+        query = `${region.latitude},${region.longitude}`;
+      } else {
+        Alert.alert("Error", "Please enter a location or select a location on the map.");
+        setLoading(false);
+        return;
       }
 
       const data = await LocationSearchApi.search(query, category);
@@ -158,18 +146,22 @@ export const GetSuggestions: NavioScreen = observer(() => {
       latitudeDelta: region?.latitudeDelta || 0.1922,
       longitudeDelta: region?.longitudeDelta || 0.1421,
     });
-
+    
     // Geocoding disabled due to rate limits
     // const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
     // if (result) {
     //   const { fullAddress } = result;
     //   setLocation(`${fullAddress}`);
     // }
+
+    setLocation(""); // Clear search bar if user moves pin
   };
 
   const handleLocationChange = (text: string) => {
     setLocation(text);
-    setRegion(undefined);
+    if (text.trim()) {
+      setRegion(undefined); // Clear pin if user types
+    }
   };
 
   // Fetch current location on screen load
