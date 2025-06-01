@@ -458,7 +458,14 @@ export const GetSuggestions: NavioScreen = observer(() => {
               </View>
             )}
 
-            <Button label="Confirm" onPress={fetchSuggestions} marginB-s2 disabled={loading} />
+            <Button
+              label="Find Matches"
+              onPress={fetchSuggestions}
+              marginB-s1
+              disabled={loading}
+              backgroundColor="#016A42"
+              labelStyle={{ color: "white", fontWeight: "bold" }}
+            />
 
             {loading ? (
               <Text text70M>Loading suggestions...</Text>
@@ -491,7 +498,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   </TouchableOpacity>
                 </View>
               ))
-            )}
+            }
           </ScrollView>
         </View>
       </Animated.View>
@@ -704,3 +711,11 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 });
+
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
