@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Colors } from "react-native-ui-lib";
-import { ImageBackground, Pressable, StyleSheet, TouchableOpacity } from "react-native";
-import { Row } from "./row";
-import { IconButton } from "./iconbutton";
+import {
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Pressable,
+  Modal,
+} from "react-native";
 import { timestampToDateString } from "../utils/dateutils";
-import { BG_IMAGE_2 } from '../assets';
-import { Icon } from './icon';
-import { useServices } from '../services';
-import { colors } from '../utils/designSystem';
+import { BG_IMAGE_2 } from "../assets";
+import { Icon } from "./icon";
+import { useServices } from "../services";
+import { colors } from "../utils/designSystem";
 
 type ItineraryItemProps = {
   id: string;
@@ -16,9 +20,9 @@ type ItineraryItemProps = {
   startDate: string;
   endDate: string;
   imageUrl?: string | null;
-  onDelete?: () => void; // Make optional
-  onPress?: () => void;  // <-- Add this line
-  hideDelete?: boolean;  // <-- Add this line
+  onDelete?: () => void;
+  onPress?: () => void;
+  hideDelete?: boolean;
 };
 
 export const ItineraryItem: React.FC<ItineraryItemProps> = ({
@@ -33,112 +37,160 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
   hideDelete,
 }) => {
   const { t, navio } = useServices();
+  const [showOptions, setShowOptions] = useState(false);
 
   const handlePress = onPress
     ? onPress
-    : () => navio.push('Itinerary', { itineraryId: id });
+    : () => navio.push("Itinerary", { itineraryId: id });
 
   return (
     <TouchableOpacity
       onPress={handlePress}
-      activeOpacity={0.8}
+      activeOpacity={0.9}
       style={styles.container}
     >
-      <View style={styles.titleContainer}>
-        <Text style={{ fontWeight: "bold" }}>{name}</Text>
-      </View>
-      <ImageBackground
+      <Image
         source={imageUrl ? { uri: imageUrl } : BG_IMAGE_2}
-        style={styles.imageContainer}
-        imageStyle={styles.image}
         resizeMode="cover"
-      >
-        <Row style={styles.locationContainer}>
-          <Icon name="location" color={Colors.red30} size={20} />
-          <Text>{location}</Text>
-        </Row>
-
-        <View style={styles.bottomContainer}>
-          <View style={styles.dateContainer}>
-            <Text style={styles.dateText}>
-              {timestampToDateString(startDate)} - {timestampToDateString(endDate)}
-            </Text>
-          </View>
-          {!hideDelete && (
-            <Row style={styles.row}>
-              <IconButton name="pencil" onPress={() => navio.push('ItineraryForm', { itineraryId: id })} />
-              <IconButton name="copy" />
-              <IconButton name="trash" color={Colors.red30} onPress={onDelete} />
-            </Row>
-          )}
+        style={styles.image}
+      />
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.title}>{name}</Text>
+          <TouchableOpacity onPress={() => setShowOptions(!showOptions)} onBlur={() => setShowOptions(false)}>
+            <Icon name="ellipsis-horizontal" color={colors.primary} size={20} />
+          </TouchableOpacity>
         </View>
-      </ImageBackground>
+
+        <View style={styles.row}>
+          <Icon name="location" color={Colors.red30} size={18} />
+          <Text style={styles.location}>{location}</Text>
+        </View>
+
+        <Text style={styles.date}>
+          {timestampToDateString(startDate)} - {timestampToDateString(endDate)}
+        </Text>
+
+        <Modal
+          visible={showOptions}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowOptions(false)}
+        >
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => setShowOptions(false)}
+          />
+          <View style={[styles.optionsDropdownContainer]}>
+            <View style={styles.optionsDropdown}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowOptions(false);
+                  navio.push("ItineraryForm", { itineraryId: id });
+                }}
+              >
+                <Text style={styles.option}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowOptions(false);
+                  navio.push("ItineraryForm", { duplicateId: id });
+                }}
+              >
+                <Text style={styles.option}>Duplicate</Text>
+              </TouchableOpacity>
+              {!hideDelete && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowOptions(false);
+                    onDelete?.();
+                  }}
+                >
+                  <Text style={[styles.option, { color: Colors.red30 }]}>Delete</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </Modal>
+      </View>
     </TouchableOpacity>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
     width: "85%",
     alignSelf: "center",
-
-    // iOS Shadows
+    flexDirection: "row",
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 4 },
-
-    // Android Shadow
     elevation: 5,
-
-    minHeight: 200,
-    justifyContent: "space-between",
-    borderRadius: 8,
+    height: 160,
+    borderRadius: 12,
     backgroundColor: "#fff",
     marginVertical: 8,
     overflow: "hidden",
   },
-  titleContainer: {
-    backgroundColor: colors.secondary,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-    padding: 8,
-  },
-  locationContainer: {
-    padding: 4,
-    gap: 8,
+  optionsDropdownContainer: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    zIndex: 999,
   },
   image: {
-    opacity: 0.4,
+    width: "40%",
+    height: "100%",
   },
-  imageContainer: {
+  content: {
     flex: 1,
+    padding: 12,
     justifyContent: "space-between",
   },
-  bottomContainer: {
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  dateContainer: {
-    backgroundColor: colors.secondary,
-    padding: 8,
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-    borderTopRightRadius: 8,
-  },
-  dateText: {
-    fontSize: 12,
+  title: {
     fontWeight: "bold",
+    fontSize: 16,
+    flex: 1,
+    marginRight: 8,
   },
   row: {
-    justifyContent: "space-around",
-    gap: 12,
-    paddingRight: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  location: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: Colors.grey30,
+  },
+  date: {
+    fontSize: 13,
+    color: Colors.grey40,
+    marginTop: 8,
+  },
+  optionsDropdown: {
+    position: "absolute",
+    right: 0,
+    top: 32,
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 8,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    zIndex: 999,
+  },
+  option: {
+    paddingVertical: 6,
+    fontSize: 14,
+    color: Colors.black,
   },
 });
-
