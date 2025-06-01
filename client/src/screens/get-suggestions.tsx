@@ -63,7 +63,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const [deviceLocation, setDeviceLocation] = useState<{ latitude: number; longitude: number } | null>(null); // <-- store device location
 
-  const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
+  const recreationOptions = ["Wildlife", "Parks", "Adventure", "Beaches", "Museums", "Hiking"];
   const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
 
   const animatedY = useRef(new Animated.Value(PANEL_MIN_HEIGHT)).current;
@@ -85,21 +85,36 @@ export const GetSuggestions: NavioScreen = observer(() => {
     try {
       let query = "";
       let category = getCategoryFromOption(selectedOption);
+      let latLong: string | undefined = undefined;
+
+      // Build category filters string
+      let filters: string[] = [];
+      if (selectedOption === "recreation" && selectedRecreation.length > 0) {
+        filters = filters.concat(selectedRecreation);
+      }
+      if (selectedOption === "diner" && selectedDiner.length > 0) {
+        filters = filters.concat(selectedDiner);
+      }
 
       if (location.trim()) {
-        // User typed a location, use it
-        query = location.trim();
+        // User typed in the search bar: use search bar + category + filters, DO NOT send latLong
+        query = [location.trim(), selectedOption, ...filters].filter(Boolean).join(" ");
+        latLong = undefined;
       } else if (region) {
-        // No search bar, use pin
-        // (You may want to reverse geocode here, or just use lat/lng directly)
-        query = `${region.latitude},${region.longitude}`;
+        // No search bar: use category + filters as query, and send latLong
+        query = [selectedOption, ...filters].filter(Boolean).join(" ");
+        latLong = `${region.latitude},${region.longitude}`;
       } else {
         Alert.alert("Error", "Please enter a location or select a location on the map.");
         setLoading(false);
         return;
       }
 
-      const data = await LocationSearchApi.search(query, category);
+      // Debug logging
+      console.log("Tripadvisor Query:", query);
+      console.log("Tripadvisor LatLong:", latLong);
+
+      const data = await LocationSearchApi.search(query, category, latLong);
       const results = data?.data || [];
 
       const detailedResults = await Promise.all(
