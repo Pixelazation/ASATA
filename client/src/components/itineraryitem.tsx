@@ -7,6 +7,7 @@ import { timestampToDateString } from "../utils/dateutils";
 import { BG_IMAGE_2 } from '../assets';
 import { Icon } from './icon';
 import { useServices } from '../services';
+import { colors } from '../utils/designSystem';
 
 type ItineraryItemProps = {
   id: string;
@@ -91,19 +92,17 @@ const styles = StyleSheet.create({
     // Android Shadow
     elevation: 5,
 
-    minHeight: 160,
+    minHeight: 200,
     justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "#000",
     borderRadius: 8,
     backgroundColor: "#fff",
     marginVertical: 8,
     overflow: "hidden",
   },
   titleContainer: {
-    backgroundColor: "white",
+    backgroundColor: colors.secondary,
     borderBottomWidth: 1,
-    borderBottomColor: "#000",
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
     padding: 8,
   },
   locationContainer: {
@@ -125,11 +124,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dateContainer: {
-    backgroundColor: "white",
+    backgroundColor: colors.secondary,
     padding: 8,
     borderTopWidth: 1,
     borderRightWidth: 1,
-    borderColor: "#000",
+    borderColor: 'rgba(0, 0, 0, 0.1)',
     borderTopRightRadius: 8,
   },
   dateText: {

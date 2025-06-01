@@ -10,6 +10,7 @@ import { timestampToDateTimeString } from '../utils/dateutils';
 import { ActivityModal } from './molecules/activity-modal';
 import { useServices } from '../services';
 import { getActivityIcon } from '../utils/activity-icons';
+import { colors } from '../utils/designSystem';
 
 type Props = {
   activity: ActivityType;
@@ -79,8 +80,6 @@ const styles = StyleSheet.create({
   },
   details: {
     backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: 'black',
     borderRadius: 8,
     gap: 8,
     marginBottom: 16,
@@ -126,7 +125,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderTopColor: 'black',
+    borderTopColor: 'rgba(0, 0, 0, 0.1)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     alignItems: 'center',

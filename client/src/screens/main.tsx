@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
   },
   iconButton: {
-    width: 64, 
+    width: 80, 
     aspectRatio: 1, 
     backgroundColor: colors.secondary,
     borderRadius: 8,
