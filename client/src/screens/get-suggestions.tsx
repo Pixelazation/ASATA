@@ -456,7 +456,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
             <>
               {/* Search bar, category buttons, filters, Find Matches button */}
               {/* --- Search bar now inside the panel --- */}
-              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+              <View style={styles.searchBarRow}>
                 <TextInput
                   placeholder="Enter City or Location Name"
                   value={location}
@@ -472,19 +472,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 </TouchableOpacity>
               </View>
               {showTutorial && (
-                <View style={{
-                  backgroundColor: "#fffbe6",
-                  borderRadius: 10,
-                  padding: 14,
-                  marginBottom: 12,
-                  borderWidth: 1,
-                  borderColor: "#ffe082",
-                  shadowColor: "#000",
-                  shadowOpacity: 0.08,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}>
-                  <Text style={{ fontWeight: "bold", marginBottom: 6 }}>
+                <View style={styles.tutorialContainer}>
+                  <Text style={styles.tutorialTitle}>
                     How to use Get Suggestions
                   </Text>
                   <Text>
@@ -493,9 +482,9 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   </Text>
                   <TouchableOpacity
                     onPress={() => setShowTutorial(false)}
-                    style={{ alignSelf: "flex-end", marginTop: 8 }}
+                    style={styles.tutorialGotIt}
                   >
-                    <Text style={{ color: "#016A42", fontWeight: "bold" }}>Got it</Text>
+                    <Text>Got it</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -656,27 +645,11 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   </TouchableOpacity>
                 </TouchableOpacity>
               ))
-            )}
+      )}
           </ScrollView>
           {showResults && (
             <TouchableOpacity
-              style={{
-                position: "absolute",
-                bottom: 32,
-                right: 32,
-                backgroundColor: "#007AFF",
-                borderRadius: 28,
-                width: 56,
-                height: 56,
-                justifyContent: "center",
-                alignItems: "center",
-                elevation: 6,
-                zIndex: 20,
-                shadowColor: "#000",
-                shadowOpacity: 0.18,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 2 },
-              }}
+              style={styles.fab}
               onPress={() => {
                 setShowResults(false);
                 setSuggestions([]);
@@ -763,62 +736,40 @@ export const GetSuggestions: NavioScreen = observer(() => {
           onRequestClose={() => setDetailModalVisible(false)}
         >
           <Animated.View
-            style={{
-              flex: 1,
-              backgroundColor: 'rgba(0,0,0,0.3)',
-              opacity: overlayOpacity,
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-            }}
+            style={styles.modalOverlay}
             pointerEvents={detailModalVisible ? "auto" : "none"}
           />
           <Animated.View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              transform: [{ translateY: modalTranslateY.interpolate({
-                inputRange: [0, 100],
-                outputRange: [0, 500]
-              }) }]
-            }}
+            style={styles.modalContentWrapper}
             pointerEvents="box-none"
           >
-            <View style={{
-              backgroundColor: '#fff',
-              borderRadius: 16,
-              padding: 0,
-              width: '90%',
-              maxHeight: '80%',
-              overflow: 'hidden',
-            }}>
+            <View style={styles.modalContent}>
               <ScrollView
-                contentContainerStyle={{ padding: 24 }}
+                contentContainerStyle={styles.modalScroll}
                 showsVerticalScrollIndicator={false}
               >
                 {/* Image */}
                 {modalSuggestion.photoUrl && (
-                  <Image source={{ uri: modalSuggestion.photoUrl }} style={{ width: '100%', height: 180, borderRadius: 10, marginBottom: 12 }} />
+                  <Image source={{ uri: modalSuggestion.photoUrl }} style={styles.modalImage} />
                 )}
                 {/* Title */}
-                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>{modalSuggestion.name}</Text>
+                <Text style={styles.modalTitle}>{modalSuggestion.name}</Text>
                 {/* Address */}
-                <Text style={{ color: '#555', marginBottom: 8 }}>{modalSuggestion.address_obj?.address_string || "No address available"}</Text>
+                <Text style={styles.modalAddress}>{modalSuggestion.address_obj?.address_string || "No address available"}</Text>
                 {/* Rating */}
                 {modalSuggestion.rating && (
-                  <Text style={{ color: "#FFC107", fontWeight: "bold", marginBottom: 8 }}>
+                  <Text style={styles.modalRating}>
                     {Array.from({ length: Math.round(Number(modalSuggestion.rating) || 0) }, () => "⭐").join("")}
                   </Text>
                 )}
                 {/* Description */}
                 {modalSuggestion.description && (
-                  <Text style={{ fontSize: 15, color: "#333", marginBottom: 12, textAlign: "justify" }}>
+                  <Text style={styles.modalDescription}>
                     {modalSuggestion.description}
                   </Text>
                 )}
                 {/* Buttons */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                <View style={styles.modalButtonRow}>
                   <TouchableOpacity
                     style={[styles.addToItineraryButton, { flex: 1, marginRight: 8 }]}
                     onPress={() => {
@@ -842,37 +793,39 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 </View>
 
                 {/* Reviews Section */}
-                <View style={{ marginTop: 10 }}>
-                  <Text style={{ fontSize: 17, fontWeight: "bold", marginBottom: 8 }}>Reviews</Text>
+                <View style={styles.modalReviewSection}>
+                  <Text style={styles.modalReviewTitle}>
+                    Reviews
+                  </Text>
                   {reviewsLoading ? (
                     <ActivityIndicator size="small" color="#007AFF" style={{ marginVertical: 12 }} />
                   ) : reviews.length === 0 ? (
                     <Text style={{ color: "#888", fontStyle: "italic" }}>No reviews found.</Text>
                   ) : (
                     reviews.map((review: any) => (
-                      <View key={review.id} style={{ marginBottom: 18, borderBottomWidth: 1, borderBottomColor: "#eee", paddingBottom: 12 }}>
-                        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+                      <View key={review.id} style={styles.modalReviewItem}>
+                        <View style={styles.modalReviewUserRow}>
                           <Image
                             source={{ uri: review.user?.avatar?.thumbnail }}
-                            style={{ width: 32, height: 32, borderRadius: 16, marginRight: 8, backgroundColor: "#eee" }}
+                            style={styles.modalReviewAvatar}
                           />
                           <View>
-                            <Text style={{ fontWeight: "bold" }}>{review.user?.username}</Text>
-                            <Text style={{ color: "#888", fontSize: 12 }}>
+                            <Text style={styles.modalReviewUserName}>{review.user?.username}</Text>
+                            <Text style={styles.modalReviewUserLocation}>
                               {review.user?.user_location?.name}
                             </Text>
                           </View>
                         </View>
-                        <Text style={{ fontWeight: "bold", marginBottom: 2 }}>{review.title}</Text>
-                        <Text style={{ color: "#FFC107", marginBottom: 2 }}>
+                        <Text style={styles.modalReviewTitleText}>{review.title}</Text>
+                        <Text style={styles.modalReviewStars}>
                           {Array.from({ length: Number(review.rating) || 0 }, () => "⭐").join("")}
                         </Text>
-                        <Text style={{ color: "#333", marginBottom: 4 }}>{review.text}</Text>
+                        <Text style={styles.modalReviewText}>{review.text}</Text>
                         <TouchableOpacity
                           onPress={() => Linking.openURL(review.url)}
                           style={{ alignSelf: "flex-start" }}
                         >
-                          <Text style={{ color: "#007AFF", fontSize: 13 }}>Read full review</Text>
+                          <Text style={styles.modalReviewLink}>Read full review</Text>
                         </TouchableOpacity>
                       </View>
                     ))
@@ -882,9 +835,9 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 {/* Close Button */}
                 <TouchableOpacity
                   onPress={() => setDetailModalVisible(false)}
-                  style={{ alignSelf: "center", marginTop: 18 }}
+                  style={styles.modalCloseButton}
                 >
-                  <Text style={{ color: "#007AFF", fontWeight: "bold" }}>Close</Text>
+                  <Text style={styles.modalCloseText}>Close</Text>
                 </TouchableOpacity>
               </ScrollView>
             </View>
@@ -1075,6 +1028,162 @@ activityDescription: {
 activityRating: {
   fontSize: 16,
   color: "#FFC107",
+  fontWeight: "bold",
+},
+searchBarRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 16,
+},
+tutorialContainer: {
+  backgroundColor: "#fffbe6",
+  borderRadius: 10,
+  padding: 14,
+  marginBottom: 12,
+  borderWidth: 1,
+  borderColor: "#ffe082",
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 4,
+  elevation: 2,
+},
+tutorialTitle: {
+  fontWeight: "bold",
+  marginBottom: 6,
+},
+tutorialGotIt: {
+  color: "#016A42",
+  fontWeight: "bold",
+  alignSelf: "flex-end",
+  marginTop: 8,
+},
+fab: {
+  position: "absolute",
+  bottom: 32,
+  right: 32,
+  backgroundColor: "#007AFF",
+  borderRadius: 28,
+  width: 56,
+  height: 56,
+  justifyContent: "center",
+  alignItems: "center",
+  elevation: 6,
+  zIndex: 20,
+  shadowColor: "#000",
+  shadowOpacity: 0.18,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 2 },
+},
+modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.3)',
+  position: 'absolute',
+  width: '100%',
+  height: '100%',
+},
+modalContentWrapper: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+modalContent: {
+  backgroundColor: '#fff',
+  borderRadius: 16,
+  padding: 0,
+  width: '90%',
+  maxHeight: '80%',
+  overflow: 'hidden',
+},
+modalScroll: {
+  padding: 24,
+},
+modalImage: {
+  width: '100%',
+  height: 180,
+  borderRadius: 10,
+  marginBottom: 12,
+},
+modalTitle: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  marginBottom: 8,
+},
+modalAddress: {
+  color: '#555',
+  marginBottom: 8,
+},
+modalRating: {
+  color: "#FFC107",
+  fontWeight: "bold",
+  marginBottom: 8,
+},
+modalDescription: {
+  fontSize: 15,
+  color: "#333",
+  marginBottom: 12,
+  textAlign: "justify",
+},
+modalButtonRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  marginTop: 12,
+},
+modalReviewSection: {
+  marginTop: 10,
+},
+modalReviewTitle: {
+  fontSize: 17,
+  fontWeight: "bold",
+  marginBottom: 8,
+},
+modalReviewItem: {
+  marginBottom: 18,
+  borderBottomWidth: 1,
+  borderBottomColor: "#eee",
+  paddingBottom: 12,
+},
+modalReviewUserRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 4,
+},
+modalReviewAvatar: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  marginRight: 8,
+  backgroundColor: "#eee",
+},
+modalReviewUserName: {
+  fontWeight: "bold",
+},
+modalReviewUserLocation: {
+  color: "#888",
+  fontSize: 12,
+},
+modalReviewTitleText: {
+  fontWeight: "bold",
+  marginBottom: 2,
+},
+modalReviewStars: {
+  color: "#FFC107",
+  marginBottom: 2,
+},
+modalReviewText: {
+  color: "#333",
+  marginBottom: 4,
+},
+modalReviewLink: {
+  color: "#007AFF",
+  fontSize: 13,
+  alignSelf: "flex-start",
+},
+modalCloseButton: {
+  alignSelf: "center",
+  marginTop: 18,
+},
+modalCloseText: {
+  color: "#007AFF",
   fontWeight: "bold",
 },
 });
