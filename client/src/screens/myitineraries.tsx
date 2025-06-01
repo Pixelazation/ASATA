@@ -27,11 +27,13 @@ export const MyItineraries: NavioScreen = observer(() => {
 
   const [itineraries, setItineraries] = useState<ItineraryType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fabDisabled, setFabDisabled] = useState(false); // Add this state
 
   useFocusEffect(
     useCallback(() => {
       configureUI();
       fetchItineraries();
+      setFabDisabled(false); // Re-enable FAB when returning to this screen
     }, [])
   )
 
@@ -81,6 +83,13 @@ export const MyItineraries: NavioScreen = observer(() => {
     }
   };
 
+  // Handler to prevent multiple form opens
+  const handleFabPress = () => {
+    if (fabDisabled) return;
+    setFabDisabled(true);
+    navio.push("ItineraryForm", { itineraryId: undefined });
+  };
+
   return (
     <View flex bg-bgColor style={styles.screen}>
       <Text section style={styles.header}>My Itineraries</Text>
@@ -119,7 +128,8 @@ export const MyItineraries: NavioScreen = observer(() => {
       {/* Floating Action Button */}
       <FloatingActionButton
         icon="add"
-        onPress={() => navio.push("ItineraryForm", { itineraryId: undefined })}
+        disabled={fabDisabled}
+        onPress={handleFabPress}
       />
     </View>
   );
