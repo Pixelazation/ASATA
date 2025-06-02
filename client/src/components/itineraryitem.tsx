@@ -71,47 +71,21 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
           {timestampToDateString(startDate)} - {timestampToDateString(endDate)}
         </Text>
 
-        <Modal
-          visible={showOptions}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowOptions(false)}
-        >
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            onPress={() => setShowOptions(false)}
-          />
-          <View style={[styles.optionsDropdownContainer]}>
-            <View style={styles.optionsDropdown}>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowOptions(false);
-                  navio.push("ItineraryForm", { itineraryId: id });
-                }}
-              >
-                <Text style={styles.option}>Edit</Text>
+        {showOptions && (
+          <View style={styles.optionsDropdown}>
+            <TouchableOpacity onPress={() => { setShowOptions(false); navio.push('ItineraryForm', { itineraryId: id }); }}>
+              <Text style={styles.option}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => { setShowOptions(false); navio.push('ItineraryForm', { duplicateId: id }); }}>
+              <Text style={styles.option}>Duplicate</Text>
+            </TouchableOpacity>
+            {!hideDelete && (
+              <TouchableOpacity onPress={() => { setShowOptions(false); onDelete?.(); }}>
+                <Text style={[styles.option, { color: Colors.red30 }]}>Delete</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowOptions(false);
-                  navio.push("ItineraryForm", { duplicateId: id });
-                }}
-              >
-                <Text style={styles.option}>Duplicate</Text>
-              </TouchableOpacity>
-              {!hideDelete && (
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowOptions(false);
-                    onDelete?.();
-                  }}
-                >
-                  <Text style={[styles.option, { color: Colors.red30 }]}>Delete</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+            )}
           </View>
-        </Modal>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -127,17 +101,11 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 4 },
     elevation: 5,
-    height: 160,
+    height: 200,
     borderRadius: 12,
     backgroundColor: "#fff",
     marginVertical: 8,
     overflow: "hidden",
-  },
-  optionsDropdownContainer: {
-    position: "absolute",
-    top: 60,
-    right: 20,
-    zIndex: 999,
   },
   image: {
     width: "40%",

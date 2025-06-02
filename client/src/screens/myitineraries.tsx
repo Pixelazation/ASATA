@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet } from "react-native";
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Modal, View as RNView } from "react-native";
 import { Text, View, Button, Colors } from "react-native-ui-lib";
 import { observer } from "mobx-react";
 import { NavioScreen } from "rn-navio";
@@ -29,6 +29,10 @@ export const MyItineraries: NavioScreen = observer(() => {
   const [loading, setLoading] = useState(true);
   const [fabDisabled, setFabDisabled] = useState(false); // Add this state
 
+  // Modal state for delete confirmation
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
   useFocusEffect(
     useCallback(() => {
       configureUI();
@@ -46,10 +50,10 @@ export const MyItineraries: NavioScreen = observer(() => {
     setLoading(true);
     try {
       const data = await ItineraryApi.getItineraries();
-      console.log("Fetched itineraries:", data); // Debugging log
       setItineraries(data);
     } catch (error) {
       console.error("Error fetching itineraries:", error);
+      setItineraries([]);
     } finally {
       setLoading(false);
     }
@@ -90,6 +94,25 @@ export const MyItineraries: NavioScreen = observer(() => {
     navio.push("ItineraryForm", { itineraryId: undefined });
   };
 
+  // Handler for delete with confirmation
+  const handleDeleteRequest = (id: string) => {
+    setPendingDeleteId(id);
+    setDeleteModalVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (pendingDeleteId) {
+      await deleteItinerary(pendingDeleteId);
+      setPendingDeleteId(null);
+      setDeleteModalVisible(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setPendingDeleteId(null);
+    setDeleteModalVisible(false);
+  };
+
   return (
     <View flex bg-bgColor style={styles.screen}>
       <Text section style={styles.header}>My Itineraries</Text>
@@ -109,7 +132,7 @@ export const MyItineraries: NavioScreen = observer(() => {
               startDate={itinerary.start_date}
               endDate={itinerary.end_date}
               imageUrl={itinerary.image_url}
-              onDelete={() => deleteItinerary(itinerary.id)}
+              onDelete={() => handleDeleteRequest(itinerary.id)}
             />
           ))
         ) : (
@@ -132,6 +155,52 @@ export const MyItineraries: NavioScreen = observer(() => {
         disabled={fabDisabled}
         onPress={handleFabPress}
       />
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={deleteModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCancelDelete}
+      >
+        <RNView style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.35)',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <RNView style={{
+            backgroundColor: 'white',
+            borderRadius: 16,
+            padding: 24,
+            width: '85%',
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 8, color: colors.primary }}>
+              Delete Itinerary?
+            </Text>
+            <Text style={{ color: '#444', marginBottom: 16, textAlign: 'center' }}>
+              Are you sure you want to delete this itinerary? This action cannot be undone.
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 12, width: '100%' }}>
+              <Button
+                label="Cancel"
+                backgroundColor="#eee"
+                color="#333"
+                style={{ flex: 1, marginRight: 6 }}
+                onPress={handleCancelDelete}
+              />
+              <Button
+                label="Delete"
+                backgroundColor={colors.primary}
+                color="white"
+                style={{ flex: 1, marginLeft: 6 }}
+                onPress={handleConfirmDelete}
+              />
+            </View>
+          </RNView>
+        </RNView>
+      </Modal>
     </View>
   );
 });
