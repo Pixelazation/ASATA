@@ -7,11 +7,13 @@ import {
   Pressable,
   Modal,
 } from "react-native";
+import { Alert } from "react-native";
 import { timestampToDateString } from "../utils/dateutils";
 import { BG_IMAGE_2 } from "../assets";
 import { Icon } from "./icon";
 import { useServices } from "../services";
 import { colors } from "../utils/designSystem";
+import { ItineraryApi } from "../services/api/itineraries";
 
 type ItineraryItemProps = {
   id: string;
@@ -92,9 +94,16 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({
                 <Text style={styles.option}>Edit</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => {
+                onPress={async () => {
                   setShowOptions(false);
-                  navio.push("ItineraryForm", { duplicateId: id });
+                  try {
+                    // Show some loading UI if desired
+                    const newId = await ItineraryApi.duplicateItinerary(id);
+                    navio.push("Itinerary", { itineraryId: newId });
+                  } catch (error) {
+                    // Optionally show an error message
+                    console.error("Failed to duplicate itinerary:", error);
+                  }
                 }}
               >
                 <Text style={styles.option}>Duplicate</Text>
