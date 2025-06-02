@@ -47,7 +47,7 @@ export class ItineraryApi {
   }
 
   /** ➕ Add a new itinerary for the logged-in user */
-  static async addItinerary(itinerary: AddItineraryDTO) {
+  static async addItinerary(itinerary: AddItineraryDTO): Promise<string> {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("User not authenticated");
 
@@ -65,7 +65,7 @@ export class ItineraryApi {
       .limit(1);
 
     if (fetchError) throw fetchError;
-    return latest;
+    return latest[0].id;
   }
 
   /** 📌 Track an itinerary for the logged-in user */
@@ -278,9 +278,10 @@ export class ItineraryApi {
       title: orig.title + " (Copy)",
       start_date: orig.start_date,
       end_date: orig.end_date,
+      created_at: new Date()
     };
-    const addResult = await ItineraryApi.addItinerary(newItinerary as AddItineraryDTO) as { id: string }[] | any;
-    const newId = Array.isArray(addResult) ? addResult[0]?.id : addResult?.id;
+    const newId = await ItineraryApi.addItinerary(newItinerary as AddItineraryDTO);
+    console.log(newId);
     
     if (!newId) {throw new Error("Failed to create duplicate itinerary");}
     // 3. Fetch activities for the original itinerary
@@ -289,7 +290,7 @@ export class ItineraryApi {
     console.log("Duplicating activities for new itinerary:", newId, activities);
     await supabase
       .from("Activities")
-      .insert(activities.map(({ id, itinerary_id, ...a }) => ({ ...a, itinerary_id: newId })));
+      .insert(activities.map(({ id, itinerary_id, ...a }) => ({ itinerary_id: newId, ...a })));
     return newId;
   }
   
