@@ -1,11 +1,11 @@
 import { Alert } from "react-native";
-import { supabase } from "../../lib/supabase"; // adjust path if needed
+import { supabase } from "../../lib/supabase"; // adjust the path as needed
 import { SUPABASE_URL } from '@env';
 
 const SUPABASE_EDGE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/tripadvisor-proxy";
 
-export const LocationSearchApi = {
-  search: async (query: string, category?: string, latLong?: string) => {
+export const LocationReviewApi = {
+  getReviews: async (locationId: number) => {
     try {
       const {
         data: { session },
@@ -14,11 +14,8 @@ export const LocationSearchApi = {
       const token = session?.access_token;
       if (!token) throw new Error("User is not authenticated");
 
-      const url = new URL(`${SUPABASE_EDGE_FUNCTION_URL}/location/search`);
-      url.searchParams.append("searchQuery", query);
+      const url = new URL(`${SUPABASE_EDGE_FUNCTION_URL}/location/${locationId}/reviews`);
       url.searchParams.append("language", "en");
-      if (category) url.searchParams.append("category", category);
-      if (latLong) url.searchParams.append("latLong", latLong); // <-- Add latLong if provided
 
       const response = await fetch(url.toString(), {
         method: "GET",
@@ -37,8 +34,8 @@ export const LocationSearchApi = {
       const data = await response.json();
       return data;
     } catch (error: any) {
-      console.error("Error fetching location data:", error.message ?? error);
-      Alert.alert("Error", "Failed to fetch locations. Please try again.");
+      console.error("Error fetching location reviews:", error.message ?? error);
+      Alert.alert("Error", "Failed to fetch location reviews. Please try again.");
       return null;
     }
   },

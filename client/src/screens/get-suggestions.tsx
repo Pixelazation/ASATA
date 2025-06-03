@@ -9,8 +9,11 @@ import {
   Image,
   FlatList,
   Animated,
+  Easing,
   Dimensions,
   PanResponder,
+  ActivityIndicator,
+  Pressable,
 } from "react-native";
 import { Text, View, Button } from "react-native-ui-lib";
 import { observer } from "mobx-react";
@@ -26,6 +29,13 @@ import * as Location from "expo-location"; // Import expo-location
 import { MaterialIcons } from '@expo/vector-icons'; // already imported
 import type { Region } from 'react-native-maps';
 import { ItinerarySelectorModal } from "@app/components/add-to-itinerary-modal";
+import { Modal } from "react-native";
+import { LocationReviewApi } from "@app/services/api/locationreview";
+import { Icon, IconName } from '../components/icon';
+import { RadioSelection } from '../components/molecules/radio-selection';
+import { HeaderBack } from '../components/molecules/header-back';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../utils/designSystem';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -40,9 +50,10 @@ export const GetSuggestions: NavioScreen = observer(() => {
   useAppearance();
   const { navio } = useServices();
   const params = navio.useParams<{ selectedOption?: string }>();
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const [location, setLocation] = useState("");
-  const [selectedOption, setSelectedOption] = useState<string>(params.selectedOption || "");
+  const [selectedOption, setSelectedOption] = useState<string | null>(params.selectedOption || "recreation");
   const [selectedRecreation, setSelectedRecreation] = useState<string[]>([]);
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -54,7 +65,15 @@ export const GetSuggestions: NavioScreen = observer(() => {
     longitudeDelta: 0.1421,
   });
 
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+
+  const [showResults, setShowResults] = useState(false);
+
   const selectedSuggestionRef = useRef<any>(null);
+
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [modalSuggestion, setModalSuggestion] = useState<any>(null);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
@@ -62,7 +81,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const [deviceLocation, setDeviceLocation] = useState<{ latitude: number; longitude: number } | null>(null); // <-- store device location
 
-  const recreationOptions = ["Wildlife", "Adventure", "Beaches", "Museums", "Hiking", "Parks"];
+  const recreationOptions = ["Wildlife", "Parks", "Adventure", "Beaches", "Museums", "Hiking"];
   const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
 
   const animatedY = useRef(new Animated.Value(PANEL_MIN_HEIGHT)).current;
@@ -70,6 +89,40 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const isExpandedRef = useRef(false);
   const currentY = useRef(PANEL_MIN_HEIGHT);
   const mapRef = useRef<MapView>(null);
+
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const modalTranslateY = useRef(new Animated.Value(100)).current;
+
+  useEffect(() => {
+    if (detailModalVisible) {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+          easing: Easing.linear,
+        }),
+        Animated.spring(modalTranslateY, {
+          toValue: 0,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+          easing: Easing.linear,
+        }),
+        Animated.timing(modalTranslateY, {
+          toValue: 100,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [detailModalVisible]);
 
   const toggleSelection = (item: string, type: "recreation" | "diner") => {
     if (type === "recreation") {
@@ -80,37 +133,53 @@ export const GetSuggestions: NavioScreen = observer(() => {
   };
 
   const fetchSuggestions = async () => {
-    if (!location.trim()) {
-      Alert.alert("Error", "Please enter a location or select a location on the map.");
-      return;
-    }
-
     setLoading(true);
     try {
-      let category = '';
-      if (selectedOption === "recreation") category = "attractions";
-      else if (selectedOption === "diner") category = "restaurants";
-      else if (selectedOption === "accommodation") category = "hotels";
+      let query = "";
+      let category = getCategoryFromOption(selectedOption);
+      let latLong: string | undefined = undefined;
 
-      let query = location;
-
-      if (!region && location.trim()) {
-        const selectedFilters =
-          selectedOption === "recreation" ? selectedRecreation.join(", ") :
-          selectedOption === "diner" ? selectedDiner.join(", ") : "";
-        query = `${location} ${selectedFilters}`;
-      } else if (region) {
-        const geocodeResult = await GeocodingApi.reverseGeocode(region.latitude, region.longitude);
-        if (geocodeResult) {
-          const { fullAddress } = geocodeResult;
-          const selectedFilters =
-            selectedOption === "recreation" ? selectedRecreation.join(", ") :
-            selectedOption === "diner" ? selectedDiner.join(", ") : "";
-          query = `${fullAddress} ${selectedFilters}`;
-        }
+      // Build category filters string
+      let filters: string[] = [];
+      if (selectedOption === "recreation" && selectedRecreation.length > 0) {
+        filters = filters.concat(selectedRecreation);
+      }
+      if (selectedOption === "diner" && selectedDiner.length > 0) {
+        filters = filters.concat(selectedDiner);
       }
 
-      const data = await LocationSearchApi.search(query, category);
+      // Query logic
+      if (location.trim()) {
+        // User typed in the search bar
+        if (selectedOption === "accommodation") {
+          // Hotel: use search bar + selected category only
+          query = [location.trim(), selectedOption].filter(Boolean).join(" ");
+        } else {
+          // Recreation or Diner: use search bar + filters only
+          query = [location.trim(), ...filters].filter(Boolean).join(" ");
+        }
+        latLong = undefined;
+      } else if (region) {
+        // No search bar
+        if (selectedOption === "accommodation") {
+          // Hotel: use selected category only
+          query = [selectedOption].filter(Boolean).join(" ");
+        } else {
+          // Recreation or Diner: use filters only
+          query = [...filters].filter(Boolean).join(" ");
+        }
+        latLong = `${region.latitude},${region.longitude}`;
+      } else {
+        Alert.alert("Error", "Please enter a location or select a location on the map.");
+        setLoading(false);
+        return;
+      }
+
+      // Debug logging
+      console.log("Tripadvisor Query:", query);
+      console.log("Tripadvisor LatLong:", latLong);
+
+      const data = await LocationSearchApi.search(query, category, latLong);
       const results = data?.data || [];
 
       const detailedResults = await Promise.all(
@@ -157,17 +226,22 @@ export const GetSuggestions: NavioScreen = observer(() => {
       latitudeDelta: region?.latitudeDelta || 0.1922,
       longitudeDelta: region?.longitudeDelta || 0.1421,
     });
+    
+    // Geocoding disabled due to rate limits
+    // const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
+    // if (result) {
+    //   const { fullAddress } = result;
+    //   setLocation(`${fullAddress}`);
+    // }
 
-    const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
-    if (result) {
-      const { fullAddress } = result;
-      setLocation(`${fullAddress}`);
-    }
+    setLocation(""); // Clear search bar if user moves pin
   };
 
   const handleLocationChange = (text: string) => {
     setLocation(text);
-    setRegion(undefined);
+    if (text.trim()) {
+      setRegion(undefined); // Clear pin if user types
+    }
   };
 
   // Fetch current location on screen load
@@ -185,15 +259,15 @@ export const GetSuggestions: NavioScreen = observer(() => {
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude,
         };
-        setDeviceLocation(coords); // <-- store device location
+        setDeviceLocation(coords);
         setRegion({ ...coords, latitudeDelta: 0.1922, longitudeDelta: 0.1421 });
 
-        // Optionally, reverse geocode to get the address
-        const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
-        if (geocodeResult) {
-          const { fullAddress } = geocodeResult;
-          setLocation(`${fullAddress}`);
-        }
+        // Geocoding disabled due to rate limits
+        // const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
+        // if (geocodeResult) {
+        //   const { fullAddress } = geocodeResult;
+        //   setLocation(`${fullAddress}`);
+        // }
       } catch (error) {
         console.error("Error fetching current location:", error);
         Alert.alert("Error", "Failed to fetch current location.");
@@ -278,17 +352,16 @@ export const GetSuggestions: NavioScreen = observer(() => {
   // Update region when user moves the map
   const handleRegionChangeComplete = async (newRegion: any) => {
     setRegion(newRegion);
-
-    // Reverse geocode the center of the map
-    try {
-      const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
-      if (geocodeResult) {
-        const { fullAddress } = geocodeResult;
-        setLocation(`${fullAddress}`);
-      }
-    } catch (error) {
-      console.error("Error reverse geocoding:", error);
-    }
+    // Geocoding disabled due to rate limits
+    // try {
+    //   const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
+    //   if (geocodeResult) {
+    //     const { fullAddress } = geocodeResult;
+    //     setLocation(`${fullAddress}`);
+    //   }
+    // } catch (error) {
+    //   console.error("Error reverse geocoding:", error);
+    // }
   };
 
   // Center map on current device location
@@ -319,19 +392,29 @@ export const GetSuggestions: NavioScreen = observer(() => {
       setRegion(regionCoords);
       mapRef.current?.animateToRegion(regionCoords, 1000);
 
-      // Optionally update location text
-      const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
-      if (geocodeResult) {
-        const { fullAddress } = geocodeResult;
-        setLocation(`${fullAddress}`);
-      }
+      // Geocoding disabled due to rate limits
+      // const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
+      // if (geocodeResult) {
+      //   const { fullAddress } = geocodeResult;
+      //   setLocation(`${fullAddress}`);
+      // }
     } catch (error) {
       Alert.alert("Error", "Failed to fetch current location.");
     }
   };
 
+  const categoryOptions = [
+    { name: 'diner', label: 'Diner', icon: 'restaurant' },
+    { name: 'recreation', label: 'Recreation', icon: 'sunny' },
+    { name: 'accomodation', label: 'Accomodation', icon: 'business' },
+  ] as {name: string, label: string, icon: IconName}[];
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={{ padding: 16, zIndex: 20 }}>
+        <HeaderBack />
+      </View>
+
       {/* Map and overlays (zIndex: 1) */}
       <MapView
         ref={mapRef}
@@ -350,7 +433,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
         marginTop: -110,
         zIndex: 1, // Lower than sliding panel
       }}>
-        <MaterialIcons name="place" size={48} color="#007AFF" />
+        <MaterialIcons name="place" size={48} color={colors.primary} />
       </View>
       {/* Current Location Button - zIndex: 1 */}
       <TouchableOpacity
@@ -358,18 +441,18 @@ export const GetSuggestions: NavioScreen = observer(() => {
         onPress={handleCurrentLocation}
         activeOpacity={0.7}
       >
-        <MaterialIcons name="my-location" size={32} color="#007AFF" />
+        <MaterialIcons name="my-location" size={32} color={colors.primary} />
       </TouchableOpacity>
 
       {/* Search bar and sliding panel (higher zIndex) */}
-      <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity, zIndex: 10 }]}>
+      {/* <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity, zIndex: 10 }]}>
         <TextInput
           placeholder="Search Location"
           value={location}
           onChangeText={handleLocationChange}
           style={styles.searchBar}
         />
-      </Animated.View>
+      </Animated.View> */}
 
       <Animated.View
         style={[styles.slidingPanel, { height: animatedY, zIndex: 10 }]}
@@ -385,100 +468,172 @@ export const GetSuggestions: NavioScreen = observer(() => {
           >
             <View style={styles.dragHandleBar} />
           </TouchableOpacity>
+          {!showResults && (
+            <>
+              {/* Search bar, category buttons, filters, Find Matches button */}
+              {/* --- Search bar now inside the panel --- */}
+              <View style={styles.searchBarRow}>
+                <TextInput
+                  placeholder="Enter City or Location Name"
+                  value={location}
+                  onChangeText={handleLocationChange}
+                  style={[styles.searchBar, { flex: 1 }]}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowTutorial(true)}
+                  style={{ marginLeft: 8, padding: 6 }}
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons name="lightbulb-outline" size={26} color="#FFC107" />
+                </TouchableOpacity>
+              </View>
+              {showTutorial && (
+                <View style={styles.tutorialContainer}>
+                  <Text style={styles.tutorialTitle}>
+                    How to use Get Suggestions
+                  </Text>
+                  <Text>
+                    Enter a city, hotel, restaurant, or place name in the search bar to get suggestions for that location.{"\n"}
+                    Or, move the map pin to get suggestions near a specific spot on the map.
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setShowTutorial(false)}
+                    style={styles.tutorialGotIt}
+                  >
+                    <Text>Got it</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
 
-          <View style={styles.categoryContainer}>
-            <TouchableOpacity
-              style={[styles.categoryBox, selectedOption === "accommodation" && styles.categoryBoxSelected]}
-              onPress={() => setSelectedOption("accommodation")}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.categoryIcon}>🏨</Text>
-              <Text style={styles.categoryLabel}>Accommodation</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.categoryBox, selectedOption === "recreation" && styles.categoryBoxSelected]}
-              onPress={() => setSelectedOption("recreation")}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.categoryIcon}>🏖️</Text>
-              <Text style={styles.categoryLabel}>Recreation</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.categoryBox, selectedOption === "diner" && styles.categoryBoxSelected]}
-              onPress={() => setSelectedOption("diner")}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.categoryIcon}>🍽️</Text>
-              <Text style={styles.categoryLabel}>Diner</Text>
-            </TouchableOpacity>
-          </View>
+              <View style={{ marginVertical: 8 }}>
+                <RadioSelection
+                  options={categoryOptions}
+                  pressableSize={100}
+                  selected={selectedOption}
+                  selectFunction={value => {
+                    if (value != null) setSelectedOption(value);
+                }}
+              />
+              </View>
+              
+    
+                {selectedOption === "recreation" && (
+                  <View>
+                    <Text text60 marginB-s2>Choose Recreation Types</Text>
+                    <View style={styles.optionsContainer}>
+                      {recreationOptions.map(option => (
+                        <TouchableOpacity
+                          key={option}
+                          style={[styles.optionBox, selectedRecreation.includes(option) && styles.optionBoxSelected]}
+                          onPress={() => toggleSelection(option, "recreation")}
+                        >
+                          <Text
+                            style={[styles.optionText, selectedRecreation.includes(option) && styles.optionTextSelected]}
+                          >
+                            {option}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+    
+                {selectedOption === "diner" && (
+                  <View>
+                    <Text text60 marginB-s2>Choose Diner Types</Text>
+                    <View style={styles.optionsContainer}>
+                      {dinerOptions.map(option => (
+                        <TouchableOpacity
+                          key={option}
+                          style={[styles.optionBox, selectedDiner.includes(option) && styles.optionBoxSelected]}
+                          onPress={() => toggleSelection(option, "diner")}
+                        >
+                          <Text
+                            style={[styles.optionText, selectedDiner.includes(option) && styles.optionTextSelected]}
+                          >
+                            {option}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+    
+                <Button
+                  label="Find Matches"
+                  onPress={() => {
+                    fetchSuggestions();
+                    setShowResults(true);
+                  }}
+                  marginB-s1
+                  disabled={loading}
+                  backgroundColor="#016A42"
+                  labelStyle={{ color: "white", fontWeight: "bold" }}
+                />
+            </>
+          )}
 
           <ScrollView style={styles.scrollContainer}>
-            {selectedOption === "recreation" && (
-              <View>
-                <Text text60 marginB-s2>Choose Recreation Types</Text>
-                <View style={styles.optionsContainer}>
-                  {recreationOptions.map(option => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[styles.optionBox, selectedRecreation.includes(option) && styles.optionBoxSelected]}
-                      onPress={() => toggleSelection(option, "recreation")}
-                    >
-                      <Text
-                        style={[styles.optionText, selectedRecreation.includes(option) && styles.optionTextSelected]}
-                      >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {selectedOption === "diner" && (
-              <View>
-                <Text text60 marginB-s2>Choose Diner Types</Text>
-                <View style={styles.optionsContainer}>
-                  {dinerOptions.map(option => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[styles.optionBox, selectedDiner.includes(option) && styles.optionBoxSelected]}
-                      onPress={() => toggleSelection(option, "diner")}
-                    >
-                      <Text
-                        style={[styles.optionText, selectedDiner.includes(option) && styles.optionTextSelected]}
-                      >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            <Button label="Confirm" onPress={fetchSuggestions} marginB-s2 disabled={loading} />
-
             {loading ? (
-              <Text text70M>Loading suggestions...</Text>
+              <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 40 }}>
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text style={{ marginTop: 16, color: "#555", textAlign: "center" }}>
+                  {(() => {
+                    if (selectedOption === "diner" && selectedDiner.length > 0) {
+                      return `Loading restaurant suggestions for ${selectedDiner.join(", ")}.`;
+                    }
+                    if (selectedOption === "recreation" && selectedRecreation.length > 0) {
+                      return `Loading recreation suggestions for ${selectedRecreation.join(", ")}.`;
+                    }
+                    if (selectedOption === "accommodation") {
+                      return "Loading hotel suggestions.";
+                    }
+                    // fallback
+                    return "Loading suggestions...";
+                  })()}
+                </Text>
+              </View>
             ) : (
               suggestions.map((item, index) => (
-                <View key={index} style={styles.suggestionCard}>
-                  <TouchableOpacity
-                    onPress={() => item.web_url && Linking.openURL(item.web_url)}
-                    activeOpacity={0.7}
-                    style={{ flex: 1 }}
-                  >
-                    {item.photoUrl && (
-                      <Image source={{ uri: item.photoUrl }} style={styles.suggestionImage} />
+                <TouchableOpacity
+                  key={index}
+                  style={styles.activityCard}
+                  activeOpacity={0.85}
+                  onPress={() => {
+                    setModalSuggestion(item);
+                    setDetailModalVisible(true);
+                    setReviews([]);
+                    setReviewsLoading(true);
+                    LocationReviewApi.getReviews(Number(item.location_id)).then(res => {
+                      setReviews(res?.data || []);
+                      setReviewsLoading(false);
+                    });
+                  }}
+                >
+                  {/* Image */}
+                  {item.photoUrl ? (
+                    <Image source={{ uri: item.photoUrl }} style={styles.activityImage} />
+                  ) : (
+                    <View style={[styles.activityImage, { backgroundColor: colors.placeholder }]} />
+                  )}
+                  {/* Title and Rating */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <Text style={styles.activityTitle} numberOfLines={1}>{item.name}</Text>
+                    {item.rating && (
+                      <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                        {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => <Icon name='star' color={colors.primary} size={16}/>)}
+                      </View>
                     )}
-                    <Text text60BO marginT-s2 marginB-s1>{item.name}</Text>
-                    <Text text70 marginB-s1>{item.address_obj?.address_string || "No address available"}</Text>
-                    <Text>
-                      {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("") || "No rating"}
-                    </Text>
-                  </TouchableOpacity>
+                  </View>
+                  {/* Address */}
+                  <Text style={styles.activityLocation} numberOfLines={1}>
+                    {item.address_obj?.address_string || "No address available"}
+                  </Text>
+                  {/* Description */}
+                  {item.description ? (
+                    <Text style={styles.activityDescription} numberOfLines={2}>{item.description}</Text>
+                  ) : null}
+                  {/* Add to Itinerary Button */}
                   <TouchableOpacity
                     style={styles.addToItineraryButton}
                     onPress={() => {
@@ -489,10 +644,26 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   >
                     <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
                   </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
               ))
-            )}
+      )}
           </ScrollView>
+          {showResults && (
+            <TouchableOpacity
+              style={styles.fab}
+              onPress={() => {
+                setShowResults(false);
+                setSuggestions([]);
+                setLocation("");
+                setSelectedOption("");
+                setSelectedRecreation([]);
+                setSelectedDiner([]);
+              }}
+              activeOpacity={0.85}
+            >
+              <MaterialIcons name="refresh" size={28} color={colors.primary} />
+            </TouchableOpacity>
+          )}
         </View>
       </Animated.View>
       <ItinerarySelectorModal
@@ -558,11 +729,150 @@ export const GetSuggestions: NavioScreen = observer(() => {
           });
         }}
       />
-    </View>
+      {modalSuggestion && (
+        <Modal
+          visible={detailModalVisible}
+          transparent
+          animationType="none"
+          onRequestClose={() => setDetailModalVisible(false)}
+        >
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={() => setDetailModalVisible(false)}
+          >
+            <Animated.View
+              style={styles.modalOverlay}
+              pointerEvents="auto"
+            />
+          </Pressable>
+
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: 8,
+            }}
+            pointerEvents="box-none" // this lets the pressable behind receive touches
+          >
+            <Animated.View
+              style={styles.modalContentWrapper}
+              pointerEvents="box-none"
+            >
+            <View style={styles.modalContent}>
+              <ScrollView
+                contentContainerStyle={styles.modalScroll}
+                showsVerticalScrollIndicator={false}
+              >
+                {/* Image */}
+                {modalSuggestion.photoUrl ? (
+                  <Image source={{ uri: modalSuggestion.photoUrl }} style={styles.modalImage} />
+                ) : (
+                  <View style={[styles.modalImage, {backgroundColor: colors.placeholder}]} />
+                )}
+                {/* Title */}
+                <Text style={styles.modalTitle}>{modalSuggestion.name}</Text>
+                {/* Address */}
+                <Text style={styles.modalAddress}>{modalSuggestion.address_obj?.address_string || "No address available"}</Text>
+                {/* Rating */}
+                {modalSuggestion.rating && (
+                  <Text style={styles.modalRating}>
+                    {Array.from({ length: Math.round(Number(modalSuggestion.rating) || 0) }, () => "⭐").join("")}
+                  </Text>
+                )}
+                {/* Description */}
+                {modalSuggestion.description && (
+                  <Text style={styles.modalDescription}>
+                    {modalSuggestion.description}
+                  </Text>
+                )}
+                {/* Buttons */}
+                <View style={styles.modalButtonRow}>
+                  <TouchableOpacity
+                    style={[styles.addToItineraryButton, { flex: 1, marginRight: 8 }]}
+                    onPress={() => {
+                      selectedSuggestionRef.current = modalSuggestion;
+                      setDetailModalVisible(false);
+                      setModalVisible(true);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.addToItineraryButton, { backgroundColor: "#555", flex: 1, marginLeft: 8 }]}
+                    onPress={() => {
+                      if (modalSuggestion.web_url) Linking.openURL(modalSuggestion.web_url);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.addToItineraryText}>Open in Web</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Reviews Section */}
+                <View style={styles.modalReviewSection}>
+                  <Text style={styles.modalReviewTitle}>
+                    Reviews
+                  </Text>
+                  {reviewsLoading ? (
+                    <ActivityIndicator size="large" color={colors.primary} style={{ marginVertical: 12 }} />
+                  ) : reviews.length === 0 ? (
+                    <Text style={{ color: "#888", fontStyle: "italic" }}>No reviews found.</Text>
+                  ) : (
+                    reviews.map((review: any) => (
+                      <View key={review.id} style={styles.modalReviewItem}>
+                        <View style={styles.modalReviewUserRow}>
+                          <Image
+                            source={{ uri: review.user?.avatar?.thumbnail }}
+                            style={styles.modalReviewAvatar}
+                          />
+                          <View>
+                            <Text style={styles.modalReviewUserName}>{review.user?.username}</Text>
+                            <Text style={styles.modalReviewUserLocation}>
+                              {review.user?.user_location?.name}
+                            </Text>
+                          </View>
+                        </View>
+                        <Text style={styles.modalReviewTitleText}>{review.title}</Text>
+                        <Text style={styles.modalReviewStars}>
+                          {Array.from({ length: Number(review.rating) || 0 }, () => "⭐").join("")}
+                        </Text>
+                        <Text style={styles.modalReviewText}>{review.text}</Text>
+                        <TouchableOpacity
+                          onPress={() => Linking.openURL(review.url)}
+                          style={{ alignSelf: "flex-start" }}
+                        >
+                          <Text style={styles.modalReviewLink}>Read full review</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))
+                  )}
+                </View>
+
+                {/* Close Button */}
+                <TouchableOpacity
+                  onPress={() => setDetailModalVisible(false)}
+                  style={styles.modalCloseButton}
+                >
+                  <Text style={styles.modalCloseText}>Close</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </Animated.View>
+          </View>
+        </Modal>
+      )}
+    </SafeAreaView>
   );
 });
 
 GetSuggestions.options = {
+  headerShown: false,
   title: "Get Suggestions",
 };
 
@@ -579,13 +889,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.primary,
     borderRadius: 5,
     alignSelf: "flex-start",
   },
   addToItineraryText: {
     color: "white",
     fontWeight: "600",
+    textAlign: "center",
   },
   searchBar: {
     backgroundColor: "white",
@@ -703,4 +1014,201 @@ const styles = StyleSheet.create({
     elevation: 5,
     zIndex: 10,
   },
+  activityCard: {
+  padding: 16,
+  borderWidth: 1,
+  borderColor: "#e0e0e0",
+  borderRadius: 14,
+  marginBottom: 16,
+  backgroundColor: "#fff",
+  shadowColor: "#000",
+  shadowOpacity: 0.06,
+  shadowRadius: 4,
+  elevation: 2,
+},
+activityImage: {
+  width: "100%",
+  height: 140,
+  borderRadius: 10,
+  marginBottom: 10,
+  backgroundColor: "#f0f0f0",
+},
+activityTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  flex: 1,
+  marginRight: 8,
+  color: "#222",
+},
+activityLocation: {
+  fontSize: 14,
+  color: "#555",
+  marginBottom: 4,
+},
+activityDescription: {
+  fontSize: 14,
+  color: "#333",
+  marginBottom: 8,
+},
+activityRating: {
+  fontSize: 16,
+  color: "#FFC107",
+  fontWeight: "bold",
+},
+searchBarRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 16,
+},
+tutorialContainer: {
+  backgroundColor: "#fffbe6",
+  borderRadius: 10,
+  padding: 14,
+  marginBottom: 12,
+  borderWidth: 1,
+  borderColor: "#ffe082",
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 4,
+  elevation: 2,
+},
+tutorialTitle: {
+  fontWeight: "bold",
+  marginBottom: 6,
+},
+tutorialGotIt: {
+  color: "#016A42",
+  fontWeight: "bold",
+  alignSelf: "flex-end",
+  marginTop: 8,
+},
+fab: {
+  position: "absolute",
+  bottom: 16,
+  right: 16,
+  backgroundColor: "white",
+  borderRadius: 28,
+  width: 56,
+  height: 56,
+  justifyContent: "center",
+  alignItems: "center",
+  elevation: 6,
+  zIndex: 20,
+  shadowColor: "#000",
+  shadowOpacity: 0.18,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 2 },
+},
+modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.3)',
+  position: 'absolute',
+  width: '100%',
+  height: '100%',
+},
+modalContentWrapper: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+modalContent: {
+  backgroundColor: '#fff',
+  borderRadius: 16,
+  padding: 0,
+  width: '90%',
+  maxHeight: '80%',
+  overflow: 'hidden',
+},
+modalScroll: {
+  padding: 24,
+},
+modalImage: {
+  width: '100%',
+  height: 180,
+  borderRadius: 10,
+  marginBottom: 12,
+},
+modalTitle: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  marginBottom: 8,
+},
+modalAddress: {
+  color: '#555',
+  marginBottom: 8,
+},
+modalRating: {
+  color: "#FFC107",
+  fontWeight: "bold",
+  marginBottom: 8,
+},
+modalDescription: {
+  fontSize: 15,
+  color: "#333",
+  marginBottom: 12,
+  textAlign: "justify",
+},
+modalButtonRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  marginTop: 12,
+},
+modalReviewSection: {
+  marginTop: 10,
+},
+modalReviewTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  marginBottom: 8,
+},
+modalReviewItem: {
+  marginBottom: 18,
+  borderBottomWidth: 1,
+  borderBottomColor: "#eee",
+  paddingBottom: 12,
+},
+modalReviewUserRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 4,
+},
+modalReviewAvatar: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  marginRight: 8,
+  backgroundColor: "#eee",
+},
+modalReviewUserName: {
+  fontWeight: "bold",
+},
+modalReviewUserLocation: {
+  color: "#888",
+  fontSize: 12,
+},
+modalReviewTitleText: {
+  fontWeight: "bold",
+  marginBottom: 2,
+},
+modalReviewStars: {
+  color: "#FFC107",
+  marginBottom: 2,
+},
+modalReviewText: {
+  color: "#333",
+  marginBottom: 4,
+},
+modalReviewLink: {
+  color: colors.primary,
+  fontSize: 13,
+  alignSelf: "flex-start",
+},
+modalCloseButton: {
+  alignSelf: "center",
+  marginTop: 18,
+},
+modalCloseText: {
+  color: colors.primary,
+  fontWeight: "bold",
+},
 });

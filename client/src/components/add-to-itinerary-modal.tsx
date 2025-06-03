@@ -4,6 +4,7 @@ import { ItineraryApi } from "@app/services/api/itineraries";
 import { ItineraryItem } from "./itineraryitem"; // Adjust path if needed
 import { MaterialIcons } from '@expo/vector-icons'; // or your icon lib
 import { Alert } from "react-native";
+import { colors } from '../utils/designSystem';
 
 interface Props {
   visible: boolean;
@@ -54,8 +55,8 @@ export const ItinerarySelectorModal: React.FC<Props> = ({ visible, onClose, onSe
             }}
             activeOpacity={0.8}
           >
-            <MaterialIcons name="add" size={32} color="#007AFF" style={{ marginRight: 12 }} />
-            <Text style={styles.createNewText}>Create New Itinerary from Activity</Text>
+            <MaterialIcons name="add" size={32} color="white" style={{ marginRight: 12 }} />
+            <Text style={styles.createNewText}>Add to New Itinerary</Text>
           </TouchableOpacity>
           {/* --- Existing Itineraries --- */}
           {loading ? (
@@ -82,7 +83,7 @@ export const ItinerarySelectorModal: React.FC<Props> = ({ visible, onClose, onSe
           )}
         </ScrollView>
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Text style={styles.closeText}>Close</Text>
+          <Text style={styles.closeText}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </Modal>
@@ -98,18 +99,20 @@ const styles = StyleSheet.create({
   createNewItinerary: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: "#f0f0f0",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    width: "85%",
+    alignSelf: "center",
     borderWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: "#016A42",
     justifyContent: 'center',
   },
   createNewText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#007AFF",
+    color: "white",
   },
   header: {
     fontSize: 22,
@@ -149,7 +152,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   closeText: {
-    color: "blue",
+    color: "#016A42",
     fontSize: 16,
   },
 });

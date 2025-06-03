@@ -13,19 +13,22 @@ type OptionType = {
 
 type Props = {
   label?: string;
+  pressableSize?: number;
   selected: string | null;
   selectFunction: React.Dispatch<React.SetStateAction<string | null>>;
   options: OptionType[];
 };
 
 export const RadioSelection: React.FC<Props> = (props) => {
-  const {label, selected, selectFunction, options} = props;
+  const {label, selected, selectFunction, options, pressableSize} = props;
 
   return (
     <View style={{ gap: 8}}>
-      <Text style={{fontWeight: 'bold', color: colors.primary}}>
-        {label}
-      </Text>
+      {label && (
+        <Text style={{fontWeight: 'bold', color: colors.primary}}>
+          {label}
+        </Text>
+      )}
       <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignContent: 'center' }}>
         {options.map(({name, label, icon}, index) => {
           return (
@@ -34,6 +37,7 @@ export const RadioSelection: React.FC<Props> = (props) => {
               label={label}
               icon={icon}
               selected={selected === name}
+              size={pressableSize}
               onPress={() => selectFunction(selected == name ? null : name)}
             />
           )
@@ -42,15 +46,3 @@ export const RadioSelection: React.FC<Props> = (props) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  pressable: {
-    width: 60, 
-    aspectRatio: 1, 
-    backgroundColor: colors.secondary,
-    borderRadius: 8,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
-})

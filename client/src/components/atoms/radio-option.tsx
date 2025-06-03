@@ -6,17 +6,18 @@ import { colors } from '../../utils/designSystem';
 
 type Props = {
   label?: string;
+  size?: number;
   icon: IconName;
   selected: boolean;
   onPress?: () => void;
 };
 
 export const RadioOption: React.FC<Props> = (props) => {
-  const {label, icon, selected, onPress} = props;
+  const {label, icon, selected, size, onPress} = props;
 
   return (
     <View style={{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-      <Pressable style={[styles.pressable, selected && styles.selected]} onPress={onPress}>
+      <Pressable style={[styles.pressable, selected && styles.selected, { width: size || 60 }]} onPress={onPress}>
         <Icon name={icon} size={32} color={selected ? 'white' : colors.primary} />
       </Pressable>
       <Text style={[styles.label, selected && styles.selectedText]}>
