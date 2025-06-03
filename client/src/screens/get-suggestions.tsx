@@ -34,6 +34,7 @@ import { Icon, IconName } from '../components/icon';
 import { RadioSelection } from '../components/molecules/radio-selection';
 import { HeaderBack } from '../components/molecules/header-back';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../utils/designSystem';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -431,7 +432,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
         marginTop: -110,
         zIndex: 1, // Lower than sliding panel
       }}>
-        <MaterialIcons name="place" size={48} color="#007AFF" />
+        <MaterialIcons name="place" size={48} color={colors.primary} />
       </View>
       {/* Current Location Button - zIndex: 1 */}
       <TouchableOpacity
@@ -439,7 +440,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
         onPress={handleCurrentLocation}
         activeOpacity={0.7}
       >
-        <MaterialIcons name="my-location" size={32} color="#007AFF" />
+        <MaterialIcons name="my-location" size={32} color={colors.primary} />
       </TouchableOpacity>
 
       {/* Search bar and sliding panel (higher zIndex) */}
@@ -502,35 +503,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   </TouchableOpacity>
                 </View>
               )}
-    
-              {/* <View style={styles.categoryContainer}>
-                <TouchableOpacity
-                  style={[styles.categoryBox, selectedOption === "accommodation" && styles.categoryBoxSelected]}
-                  onPress={() => setSelectedOption("accommodation")}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.categoryIcon}>🏨</Text>
-                  <Text style={styles.categoryLabel}>Accommodation</Text>
-                </TouchableOpacity>
-    
-                <TouchableOpacity
-                  style={[styles.categoryBox, selectedOption === "recreation" && styles.categoryBoxSelected]}
-                  onPress={() => setSelectedOption("recreation")}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.categoryIcon}>🏖️</Text>
-                  <Text style={styles.categoryLabel}>Recreation</Text>
-                </TouchableOpacity>
-    
-                <TouchableOpacity
-                  style={[styles.categoryBox, selectedOption === "diner" && styles.categoryBoxSelected]}
-                  onPress={() => setSelectedOption("diner")}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.categoryIcon}>🍽️</Text>
-                  <Text style={styles.categoryLabel}>Diner</Text>
-                </TouchableOpacity>
-              </View> */}
 
               <View style={{ marginVertical: 8 }}>
                 <RadioSelection
@@ -603,7 +575,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
           <ScrollView style={styles.scrollContainer}>
             {loading ? (
               <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 40 }}>
-                <ActivityIndicator size="large" color="#007AFF" />
+                <ActivityIndicator size="large" color={colors.primary} />
                 <Text style={{ marginTop: 16, color: "#555", textAlign: "center" }}>
                   {(() => {
                     if (selectedOption === "diner" && selectedDiner.length > 0) {
@@ -686,7 +658,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
               }}
               activeOpacity={0.85}
             >
-              <MaterialIcons name="refresh" size={28} color="#fff" />
+              <MaterialIcons name="refresh" size={28} color={colors.primary} />
             </TouchableOpacity>
           )}
         </View>
@@ -824,7 +796,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                     Reviews
                   </Text>
                   {reviewsLoading ? (
-                    <ActivityIndicator size="small" color="#007AFF" style={{ marginVertical: 12 }} />
+                    <ActivityIndicator size="large" color={colors.primary} style={{ marginVertical: 12 }} />
                   ) : reviews.length === 0 ? (
                     <Text style={{ color: "#888", fontStyle: "italic" }}>No reviews found.</Text>
                   ) : (
@@ -892,13 +864,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.primary,
     borderRadius: 5,
     alignSelf: "flex-start",
   },
   addToItineraryText: {
     color: "white",
     fontWeight: "600",
+    textAlign: "center",
   },
   searchBar: {
     backgroundColor: "white",
@@ -1086,9 +1059,9 @@ tutorialGotIt: {
 },
 fab: {
   position: "absolute",
-  bottom: 32,
-  right: 32,
-  backgroundColor: "#007AFF",
+  bottom: 16,
+  right: 16,
+  backgroundColor: "white",
   borderRadius: 28,
   width: 56,
   height: 56,
@@ -1159,7 +1132,7 @@ modalReviewSection: {
   marginTop: 10,
 },
 modalReviewTitle: {
-  fontSize: 17,
+  fontSize: 18,
   fontWeight: "bold",
   marginBottom: 8,
 },
@@ -1201,7 +1174,7 @@ modalReviewText: {
   marginBottom: 4,
 },
 modalReviewLink: {
-  color: "#007AFF",
+  color: colors.primary,
   fontSize: 13,
   alignSelf: "flex-start",
 },
@@ -1210,7 +1183,7 @@ modalCloseButton: {
   marginTop: 18,
 },
 modalCloseText: {
-  color: "#007AFF",
+  color: colors.primary,
   fontWeight: "bold",
 },
 });
