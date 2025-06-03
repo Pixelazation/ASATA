@@ -32,6 +32,8 @@ import { Modal } from "react-native";
 import { LocationReviewApi } from "@app/services/api/locationreview";
 import { Icon, IconName } from '../components/icon';
 import { RadioSelection } from '../components/molecules/radio-selection';
+import { HeaderBack } from '../components/molecules/header-back';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -406,7 +408,11 @@ export const GetSuggestions: NavioScreen = observer(() => {
   ] as {name: string, label: string, icon: IconName}[];
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={{ padding: 16, zIndex: 20 }}>
+        <HeaderBack />
+      </View>
+
       {/* Map and overlays (zIndex: 1) */}
       <MapView
         ref={mapRef}
@@ -864,11 +870,12 @@ export const GetSuggestions: NavioScreen = observer(() => {
           </Animated.View>
         </Modal>
       )}
-    </View>
+    </SafeAreaView>
   );
 });
 
 GetSuggestions.options = {
+  headerShown: false,
   title: "Get Suggestions",
 };
 
