@@ -13,6 +13,7 @@ import {
   Dimensions,
   PanResponder,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
 import { Text, View, Button } from "react-native-ui-lib";
 import { observer } from "mobx-react";
@@ -610,8 +611,10 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   }}
                 >
                   {/* Image */}
-                  {item.photoUrl && (
+                  {item.photoUrl ? (
                     <Image source={{ uri: item.photoUrl }} style={styles.activityImage} />
+                  ) : (
+                    <View style={[styles.activityImage, { backgroundColor: colors.placeholder }]} />
                   )}
                   {/* Title and Rating */}
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
@@ -733,22 +736,43 @@ export const GetSuggestions: NavioScreen = observer(() => {
           animationType="none"
           onRequestClose={() => setDetailModalVisible(false)}
         >
-          <Animated.View
-            style={styles.modalOverlay}
-            pointerEvents={detailModalVisible ? "auto" : "none"}
-          />
-          <Animated.View
-            style={styles.modalContentWrapper}
-            pointerEvents="box-none"
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={() => setDetailModalVisible(false)}
           >
+            <Animated.View
+              style={styles.modalOverlay}
+              pointerEvents="auto"
+            />
+          </Pressable>
+
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: 8,
+            }}
+            pointerEvents="box-none" // this lets the pressable behind receive touches
+          >
+            <Animated.View
+              style={styles.modalContentWrapper}
+              pointerEvents="box-none"
+            >
             <View style={styles.modalContent}>
               <ScrollView
                 contentContainerStyle={styles.modalScroll}
                 showsVerticalScrollIndicator={false}
               >
                 {/* Image */}
-                {modalSuggestion.photoUrl && (
+                {modalSuggestion.photoUrl ? (
                   <Image source={{ uri: modalSuggestion.photoUrl }} style={styles.modalImage} />
+                ) : (
+                  <View style={[styles.modalImage, {backgroundColor: colors.placeholder}]} />
                 )}
                 {/* Title */}
                 <Text style={styles.modalTitle}>{modalSuggestion.name}</Text>
@@ -840,6 +864,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
               </ScrollView>
             </View>
           </Animated.View>
+          </View>
         </Modal>
       )}
     </SafeAreaView>
