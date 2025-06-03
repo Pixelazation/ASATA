@@ -620,9 +620,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                     <Text style={styles.activityTitle} numberOfLines={1}>{item.name}</Text>
                     {item.rating && (
-                      // <Text style={styles.activityRating}>
-                      //   {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => "⭐").join("")}
-                      // </Text>
                       <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                         {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => <Icon name='star' color={colors.primary} size={16}/>)}
                       </View>
