@@ -30,6 +30,8 @@ import type { Region } from 'react-native-maps';
 import { ItinerarySelectorModal } from "@app/components/add-to-itinerary-modal";
 import { Modal } from "react-native";
 import { LocationReviewApi } from "@app/services/api/locationreview";
+import { Icon, IconName } from '../components/icon';
+import { RadioSelection } from '../components/molecules/radio-selection';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -47,7 +49,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const [showTutorial, setShowTutorial] = useState(false);
 
   const [location, setLocation] = useState("");
-  const [selectedOption, setSelectedOption] = useState<string>(params.selectedOption || "");
+  const [selectedOption, setSelectedOption] = useState<string | null>(params.selectedOption || "recreation");
   const [selectedRecreation, setSelectedRecreation] = useState<string[]>([]);
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -397,6 +399,12 @@ export const GetSuggestions: NavioScreen = observer(() => {
     }
   };
 
+  const categoryOptions = [
+    { name: 'diner', label: 'Diner', icon: 'restaurant' },
+    { name: 'recreation', label: 'Recreation', icon: 'sunny' },
+    { name: 'accomodation', label: 'Accomodation', icon: 'business' },
+  ] as {name: string, label: string, icon: IconName}[];
+
   return (
     <View style={styles.container}>
       {/* Map and overlays (zIndex: 1) */}
@@ -489,7 +497,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 </View>
               )}
     
-              <View style={styles.categoryContainer}>
+              {/* <View style={styles.categoryContainer}>
                 <TouchableOpacity
                   style={[styles.categoryBox, selectedOption === "accommodation" && styles.categoryBoxSelected]}
                   onPress={() => setSelectedOption("accommodation")}
@@ -516,7 +524,19 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   <Text style={styles.categoryIcon}>🍽️</Text>
                   <Text style={styles.categoryLabel}>Diner</Text>
                 </TouchableOpacity>
+              </View> */}
+
+              <View style={{ marginVertical: 8 }}>
+                <RadioSelection
+                  options={categoryOptions}
+                  pressableSize={100}
+                  selected={selectedOption}
+                  selectFunction={value => {
+                    if (value != null) setSelectedOption(value);
+                }}
+              />
               </View>
+              
     
                 {selectedOption === "recreation" && (
                   <View>
