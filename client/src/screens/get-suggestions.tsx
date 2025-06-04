@@ -439,7 +439,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const categoryOptions = [
     { name: 'diner', label: 'Diner', icon: 'restaurant' },
     { name: 'recreation', label: 'Recreation', icon: 'sunny' },
-    { name: 'accomodation', label: 'Accomodation', icon: 'business' },
+    { name: 'accommodation', label: 'Accomodation', icon: 'business' },
   ] as {name: string, label: string, icon: IconName}[];
 
   return (
