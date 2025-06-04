@@ -234,7 +234,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
     //   setLocation(`${fullAddress}`);
     // }
 
-    setLocation(""); // Clear search bar if user moves pin
+    // setLocation(""); // Clear search bar if user moves pin
   };
 
   const handleLocationChange = (text: string) => {
@@ -263,11 +263,11 @@ export const GetSuggestions: NavioScreen = observer(() => {
         setRegion({ ...coords, latitudeDelta: 0.1922, longitudeDelta: 0.1421 });
 
         // Geocoding disabled due to rate limits
-        // const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
-        // if (geocodeResult) {
-        //   const { fullAddress } = geocodeResult;
-        //   setLocation(`${fullAddress}`);
-        // }
+        const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
+        if (geocodeResult) {
+          const { fullAddress } = geocodeResult;
+          setLocation(`${fullAddress}`);
+        }
       } catch (error) {
         console.error("Error fetching current location:", error);
         Alert.alert("Error", "Failed to fetch current location.");
@@ -352,16 +352,17 @@ export const GetSuggestions: NavioScreen = observer(() => {
   // Update region when user moves the map
   const handleRegionChangeComplete = async (newRegion: any) => {
     setRegion(newRegion);
+    console.log(newRegion);
     // Geocoding disabled due to rate limits
-    // try {
-    //   const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
-    //   if (geocodeResult) {
-    //     const { fullAddress } = geocodeResult;
-    //     setLocation(`${fullAddress}`);
-    //   }
-    // } catch (error) {
-    //   console.error("Error reverse geocoding:", error);
-    // }
+    try {
+      const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
+      if (geocodeResult) {
+        const { fullAddress } = geocodeResult;
+        setLocation(`${fullAddress}`);
+      }
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+    }
   };
 
   // Center map on current device location
@@ -420,9 +421,15 @@ export const GetSuggestions: NavioScreen = observer(() => {
         ref={mapRef}
         provider={PROVIDER_DEFAULT}
         style={StyleSheet.absoluteFillObject}
-        region={region}
+        initialRegion={{
+          latitude: 10.321684,
+          longitude: 123.898671,
+          latitudeDelta: 0.1922,
+          longitudeDelta: 0.1421,
+        }}
+
         onRegionChangeComplete={handleRegionChangeComplete}
-        onPress={handleMapPress}
+        // onPress={handleMapPress}
       />
       {/* Center Pin Overlay - zIndex: 1 */}
       <View pointerEvents="none" style={{
