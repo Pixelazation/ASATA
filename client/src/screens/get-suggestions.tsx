@@ -156,7 +156,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
           query = [location.trim(), selectedOption].filter(Boolean).join(" ");
         } else {
           // Recreation or Diner: use search bar + filters only
-          query = [location.trim(), ...filters].filter(Boolean).join(" ");
+          query = [location.trim(), selectedOption, ...filters].filter(Boolean).join(" ");
         }
         latLong = undefined;
       } else if (region) {
@@ -166,7 +166,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
           query = [selectedOption].filter(Boolean).join(" ");
         } else {
           // Recreation or Diner: use filters only
-          query = [...filters].filter(Boolean).join(" ");
+          query = [selectedOption, ...filters].filter(Boolean).join(" ");
         }
         latLong = `${region.latitude},${region.longitude}`;
       } else {
@@ -692,7 +692,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 longitude: selected.longitude,
                 latitude: selected.latitude,
               },
-              category: getCategoryFromOption(selectedOption)
+              category: getCategoryFromOption(selectedOption || '')
             });
           }
           setModalVisible(false);
