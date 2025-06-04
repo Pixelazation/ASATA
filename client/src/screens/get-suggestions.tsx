@@ -54,6 +54,9 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const [showTutorial, setShowTutorial] = useState(false);
 
   const [location, setLocation] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+
   const [selectedOption, setSelectedOption] = useState<string | null>(params.selectedOption || "recreation");
   const recreationOptions = ["Wildlife", "Parks", "Adventure", "Beaches", "Museums", "Hiking"];
   const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
@@ -200,7 +203,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
           query = [location.trim(), selectedOption].filter(Boolean).join(" ");
         } else {
           // Recreation or Diner: use search bar + filters only
-          query = [location.trim(), ...filters].filter(Boolean).join(" ");
+          query = [location.trim(), selectedOption, ...filters].filter(Boolean).join(" ");
         }
         latLong = undefined;
       } else if (region) {
@@ -210,7 +213,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
           query = [selectedOption].filter(Boolean).join(" ");
         } else {
           // Recreation or Diner: use filters only
-          query = [...filters].filter(Boolean).join(" ");
+          query = [selectedOption, ...filters].filter(Boolean).join(" ");
         }
         latLong = `${region.latitude},${region.longitude}`;
       } else {
@@ -262,30 +265,18 @@ export const GetSuggestions: NavioScreen = observer(() => {
     }
   };
 
-  const handleMapPress = async (event: any) => {
-    const { coordinate } = event.nativeEvent;
-    setRegion({
-      latitude: coordinate.latitude,
-      longitude: coordinate.longitude,
-      latitudeDelta: region?.latitudeDelta || 0.1922,
-      longitudeDelta: region?.longitudeDelta || 0.1421,
-    });
-    
-    // Geocoding disabled due to rate limits
-    // const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
-    // if (result) {
-    //   const { fullAddress } = result;
-    //   setLocation(`${fullAddress}`);
-    // }
-
-    setLocation(""); // Clear search bar if user moves pin
-  };
-
-  const handleLocationChange = (text: string) => {
-    setLocation(text);
-    if (text.trim()) {
-      setRegion(undefined); // Clear pin if user types
+  const updateLocationFromPin = async (latitude: number, longitude: number) => {
+    const geocodeResult = await GeocodingApi.reverseGeocode(latitude, longitude);
+    if (geocodeResult) {
+      const { fullAddress, city, country } = geocodeResult;
+      setLocation(`${fullAddress}`);
+      setCity(`${city || ''}`);
+      setCountry(`${country || ''}`);
     }
+  }
+
+  const handleLocationChange = async (text: string) => {
+    // const location = await GeocodingApi.forwardGeocode(text);
   };
 
   // Fetch current location on screen load
@@ -307,11 +298,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
         setRegion({ ...coords, latitudeDelta: 0.1922, longitudeDelta: 0.1421 });
 
         // Geocoding disabled due to rate limits
-        // const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
-        // if (geocodeResult) {
-        //   const { fullAddress } = geocodeResult;
-        //   setLocation(`${fullAddress}`);
-        // }
+        updateLocationFromPin(coords.latitude, coords.longitude);
+
       } catch (error) {
         console.error("Error fetching current location:", error);
         Alert.alert("Error", "Failed to fetch current location.");
@@ -325,6 +313,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
     const opacity = 1 - (panelHeight - PANEL_MIN_HEIGHT) / (PANEL_MAX_HEIGHT - PANEL_MIN_HEIGHT);
     searchBarOpacity.setValue(opacity);
   };
+
+  const adjustPanelOnSearch = () => {
+    if (isExpandedRef.current) {
+      // If panel is expanded, collapse it
+      togglePanel();
+    } 
+  }
 
   const togglePanel = () => {
     const targetHeight = isExpandedRef.current ? PANEL_MIN_HEIGHT : PANEL_MAX_HEIGHT;
@@ -396,16 +391,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
   // Update region when user moves the map
   const handleRegionChangeComplete = async (newRegion: any) => {
     setRegion(newRegion);
+    console.log(newRegion);
     // Geocoding disabled due to rate limits
-    // try {
-    //   const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
-    //   if (geocodeResult) {
-    //     const { fullAddress } = geocodeResult;
-    //     setLocation(`${fullAddress}`);
-    //   }
-    // } catch (error) {
-    //   console.error("Error reverse geocoding:", error);
-    // }
+    try {
+      updateLocationFromPin(newRegion.latitude, newRegion.longitude);
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+    }
   };
 
   // Center map on current device location
@@ -436,12 +428,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
       setRegion(regionCoords);
       mapRef.current?.animateToRegion(regionCoords, 1000);
 
-      // Geocoding disabled due to rate limits
-      // const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
-      // if (geocodeResult) {
-      //   const { fullAddress } = geocodeResult;
-      //   setLocation(`${fullAddress}`);
-      // }
+      updateLocationFromPin(coords.latitude, coords.longitude);
     } catch (error) {
       Alert.alert("Error", "Failed to fetch current location.");
     }
@@ -464,9 +451,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
         ref={mapRef}
         provider={PROVIDER_DEFAULT}
         style={StyleSheet.absoluteFillObject}
-        region={region}
+        initialRegion={{
+          latitude: deviceLocation?.latitude || 10.321684,
+          longitude: deviceLocation?.longitude || 123.898671,
+          latitudeDelta: 0.1922,
+          longitudeDelta: 0.1421,
+        }}
         onRegionChangeComplete={handleRegionChangeComplete}
-        onPress={handleMapPress}
       />
       {/* Center Pin Overlay - zIndex: 1 */}
       <View pointerEvents="none" style={{
@@ -521,6 +512,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   placeholder="Enter City or Location Name"
                   value={location}
                   onChangeText={handleLocationChange}
+                  onPressIn={adjustPanelOnSearch}
                   style={[styles.searchBar, { flex: 1 }]}
                 />
                 <TouchableOpacity
