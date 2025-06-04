@@ -14,6 +14,9 @@ import {
   PanResponder,
   ActivityIndicator,
   Pressable,
+  Platform,
+  KeyboardAvoidingView,
+  Keyboard
 } from "react-native";
 import { Text, View, Button } from "react-native-ui-lib";
 import { observer } from "mobx-react";
@@ -122,6 +125,18 @@ export const GetSuggestions: NavioScreen = observer(() => {
         }),
       ]).start();
     }
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
+      // Prevent the panel from moving
+      animatedY.setValue(PANEL_MIN_HEIGHT);
+    });
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      // Restore panel to its original state
+      animatedY.setValue(currentY.current);
+    });
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
   }, [detailModalVisible]);
 
   const toggleSelection = (item: string, type: "recreation" | "diner") => {
@@ -458,213 +473,218 @@ export const GetSuggestions: NavioScreen = observer(() => {
         style={[styles.slidingPanel, { height: animatedY, zIndex: 10 }]}
         {...panResponder.panHandlers}
       >
-        <View style={styles.panelContent}>
-          {/* <Text text50 marginB-s2>Get Suggestions</Text> */}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={"height"}
+        > 
+          <View style={styles.panelContent}>
+            {/* <Text text50 marginB-s2>Get Suggestions</Text> */}
 
-          <TouchableOpacity 
-            style={styles.dragHandle} 
-            onPress={togglePanel}
-            activeOpacity={0.8}
-          >
-            <View style={styles.dragHandleBar} />
-          </TouchableOpacity>
-          {!showResults && (
-            <>
-              {/* Search bar, category buttons, filters, Find Matches button */}
-              {/* --- Search bar now inside the panel --- */}
-              <View style={styles.searchBarRow}>
-                <TextInput
-                  placeholder="Enter City or Location Name"
-                  value={location}
-                  onChangeText={handleLocationChange}
-                  style={[styles.searchBar, { flex: 1 }]}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowTutorial(true)}
-                  style={{ marginLeft: 8, padding: 6 }}
-                  activeOpacity={0.7}
-                >
-                  <MaterialIcons name="lightbulb-outline" size={26} color="#FFC107" />
-                </TouchableOpacity>
-              </View>
-              {showTutorial && (
-                <View style={styles.tutorialContainer}>
-                  <Text style={styles.tutorialTitle}>
-                    How to use Get Suggestions
-                  </Text>
-                  <Text>
-                    Enter a city, hotel, restaurant, or place name in the search bar to get suggestions for that location.{"\n"}
-                    Or, move the map pin to get suggestions near a specific spot on the map.
-                  </Text>
+            <TouchableOpacity 
+              style={styles.dragHandle} 
+              onPress={togglePanel}
+              activeOpacity={0.8}
+            >
+              <View style={styles.dragHandleBar} />
+            </TouchableOpacity>
+            {!showResults && (
+              <>
+                {/* Search bar, category buttons, filters, Find Matches button */}
+                {/* --- Search bar now inside the panel --- */}
+                <View style={styles.searchBarRow}>
+                  <TextInput
+                    placeholder="Enter City or Location Name"
+                    value={location}
+                    onChangeText={handleLocationChange}
+                    style={[styles.searchBar, { flex: 1 }]}
+                  />
                   <TouchableOpacity
-                    onPress={() => setShowTutorial(false)}
-                    style={styles.tutorialGotIt}
+                    onPress={() => setShowTutorial(true)}
+                    style={{ marginLeft: 8, padding: 6 }}
+                    activeOpacity={0.7}
                   >
-                    <Text>Got it</Text>
+                    <MaterialIcons name="lightbulb-outline" size={26} color="#FFC107" />
                   </TouchableOpacity>
                 </View>
-              )}
+                {showTutorial && (
+                  <View style={styles.tutorialContainer}>
+                    <Text style={styles.tutorialTitle}>
+                      How to use Get Suggestions
+                    </Text>
+                    <Text>
+                      Enter a city, hotel, restaurant, or place name in the search bar to get suggestions for that location.{"\n"}
+                      Or, move the map pin to get suggestions near a specific spot on the map.
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => setShowTutorial(false)}
+                      style={styles.tutorialGotIt}
+                    >
+                      <Text>Got it</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
 
-              <View style={{ marginVertical: 8 }}>
-                <RadioSelection
-                  options={categoryOptions}
-                  pressableSize={100}
-                  selected={selectedOption}
-                  selectFunction={value => {
-                    if (value != null) setSelectedOption(value);
-                }}
-              />
-              </View>
-              
-    
-                {selectedOption === "recreation" && (
-                  <View>
-                    <Text text60 marginB-s2>Choose Recreation Types</Text>
-                    <View style={styles.optionsContainer}>
-                      {recreationOptions.map(option => (
-                        <TouchableOpacity
-                          key={option}
-                          style={[styles.optionBox, selectedRecreation.includes(option) && styles.optionBoxSelected]}
-                          onPress={() => toggleSelection(option, "recreation")}
-                        >
-                          <Text
-                            style={[styles.optionText, selectedRecreation.includes(option) && styles.optionTextSelected]}
-                          >
-                            {option}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-                )}
-    
-                {selectedOption === "diner" && (
-                  <View>
-                    <Text text60 marginB-s2>Choose Diner Types</Text>
-                    <View style={styles.optionsContainer}>
-                      {dinerOptions.map(option => (
-                        <TouchableOpacity
-                          key={option}
-                          style={[styles.optionBox, selectedDiner.includes(option) && styles.optionBoxSelected]}
-                          onPress={() => toggleSelection(option, "diner")}
-                        >
-                          <Text
-                            style={[styles.optionText, selectedDiner.includes(option) && styles.optionTextSelected]}
-                          >
-                            {option}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-                )}
-    
-                <Button
-                  label="Find Matches"
-                  onPress={() => {
-                    fetchSuggestions();
-                    setShowResults(true);
+                <View style={{ marginVertical: 8 }}>
+                  <RadioSelection
+                    options={categoryOptions}
+                    pressableSize={100}
+                    selected={selectedOption}
+                    selectFunction={value => {
+                      if (value != null) setSelectedOption(value);
                   }}
-                  marginB-s1
-                  disabled={loading}
-                  backgroundColor="#016A42"
-                  labelStyle={{ color: "white", fontWeight: "bold" }}
                 />
-            </>
-          )}
-
-          <ScrollView style={styles.scrollContainer}>
-            {loading ? (
-              <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 40 }}>
-                <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={{ marginTop: 16, color: "#555", textAlign: "center" }}>
-                  {(() => {
-                    if (selectedOption === "diner" && selectedDiner.length > 0) {
-                      return `Loading restaurant suggestions for ${selectedDiner.join(", ")}.`;
-                    }
-                    if (selectedOption === "recreation" && selectedRecreation.length > 0) {
-                      return `Loading recreation suggestions for ${selectedRecreation.join(", ")}.`;
-                    }
-                    if (selectedOption === "accommodation") {
-                      return "Loading hotel suggestions.";
-                    }
-                    // fallback
-                    return "Loading suggestions...";
-                  })()}
-                </Text>
-              </View>
-            ) : (
-              suggestions.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.activityCard}
-                  activeOpacity={0.85}
-                  onPress={() => {
-                    setModalSuggestion(item);
-                    setDetailModalVisible(true);
-                    setReviews([]);
-                    setReviewsLoading(true);
-                    LocationReviewApi.getReviews(Number(item.location_id)).then(res => {
-                      setReviews(res?.data || []);
-                      setReviewsLoading(false);
-                    });
-                  }}
-                >
-                  {/* Image */}
-                  {item.photoUrl ? (
-                    <Image source={{ uri: item.photoUrl }} style={styles.activityImage} />
-                  ) : (
-                    <View style={[styles.activityImage, { backgroundColor: colors.placeholder }]} />
-                  )}
-                  {/* Title and Rating */}
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <Text style={styles.activityTitle} numberOfLines={1}>{item.name}</Text>
-                    {item.rating && (
-                      <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => <Icon name='star' color={colors.primary} size={16}/>)}
+                </View>
+                
+      
+                  {selectedOption === "recreation" && (
+                    <View>
+                      <Text text60 marginB-s2>Choose Recreation Types</Text>
+                      <View style={styles.optionsContainer}>
+                        {recreationOptions.map(option => (
+                          <TouchableOpacity
+                            key={option}
+                            style={[styles.optionBox, selectedRecreation.includes(option) && styles.optionBoxSelected]}
+                            onPress={() => toggleSelection(option, "recreation")}
+                          >
+                            <Text
+                              style={[styles.optionText, selectedRecreation.includes(option) && styles.optionTextSelected]}
+                            >
+                              {option}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
                       </View>
-                    )}
-                  </View>
-                  {/* Address */}
-                  <Text style={styles.activityLocation} numberOfLines={1}>
-                    {item.address_obj?.address_string || "No address available"}
-                  </Text>
-                  {/* Description */}
-                  {item.description ? (
-                    <Text style={styles.activityDescription} numberOfLines={2}>{item.description}</Text>
-                  ) : null}
-                  {/* Add to Itinerary Button */}
-                  <TouchableOpacity
-                    style={styles.addToItineraryButton}
+                    </View>
+                  )}
+      
+                  {selectedOption === "diner" && (
+                    <View>
+                      <Text text60 marginB-s2>Choose Diner Types</Text>
+                      <View style={styles.optionsContainer}>
+                        {dinerOptions.map(option => (
+                          <TouchableOpacity
+                            key={option}
+                            style={[styles.optionBox, selectedDiner.includes(option) && styles.optionBoxSelected]}
+                            onPress={() => toggleSelection(option, "diner")}
+                          >
+                            <Text
+                              style={[styles.optionText, selectedDiner.includes(option) && styles.optionTextSelected]}
+                            >
+                              {option}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+      
+                  <Button
+                    label="Find Matches"
                     onPress={() => {
-                      selectedSuggestionRef.current = item;
-                      setModalVisible(true);
+                      fetchSuggestions();
+                      setShowResults(true);
                     }}
-                    activeOpacity={0.8}
+                    marginB-s1
+                    disabled={loading}
+                    backgroundColor="#016A42"
+                    labelStyle={{ color: "white", fontWeight: "bold" }}
+                  />
+              </>
+            )}
+
+            <ScrollView style={styles.scrollContainer}>
+              {loading ? (
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 40 }}>
+                  <ActivityIndicator size="large" color={colors.primary} />
+                  <Text style={{ marginTop: 16, color: "#555", textAlign: "center" }}>
+                    {(() => {
+                      if (selectedOption === "diner" && selectedDiner.length > 0) {
+                        return `Loading restaurant suggestions for ${selectedDiner.join(", ")}.`;
+                      }
+                      if (selectedOption === "recreation" && selectedRecreation.length > 0) {
+                        return `Loading recreation suggestions for ${selectedRecreation.join(", ")}.`;
+                      }
+                      if (selectedOption === "accommodation") {
+                        return "Loading hotel suggestions.";
+                      }
+                      // fallback
+                      return "Loading suggestions...";
+                    })()}
+                  </Text>
+                </View>
+              ) : (
+                suggestions.map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.activityCard}
+                    activeOpacity={0.85}
+                    onPress={() => {
+                      setModalSuggestion(item);
+                      setDetailModalVisible(true);
+                      setReviews([]);
+                      setReviewsLoading(true);
+                      LocationReviewApi.getReviews(Number(item.location_id)).then(res => {
+                        setReviews(res?.data || []);
+                        setReviewsLoading(false);
+                      });
+                    }}
                   >
-                    <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
+                    {/* Image */}
+                    {item.photoUrl ? (
+                      <Image source={{ uri: item.photoUrl }} style={styles.activityImage} />
+                    ) : (
+                      <View style={[styles.activityImage, { backgroundColor: colors.placeholder }]} />
+                    )}
+                    {/* Title and Rating */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <Text style={styles.activityTitle} numberOfLines={1}>{item.name}</Text>
+                      {item.rating && (
+                        <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                          {Array.from({ length: Math.round(Number(item.rating) || 0) }, () => <Icon name='star' color={colors.primary} size={16}/>)}
+                        </View>
+                      )}
+                    </View>
+                    {/* Address */}
+                    <Text style={styles.activityLocation} numberOfLines={1}>
+                      {item.address_obj?.address_string || "No address available"}
+                    </Text>
+                    {/* Description */}
+                    {item.description ? (
+                      <Text style={styles.activityDescription} numberOfLines={2}>{item.description}</Text>
+                    ) : null}
+                    {/* Add to Itinerary Button */}
+                    <TouchableOpacity
+                      style={styles.addToItineraryButton}
+                      onPress={() => {
+                        selectedSuggestionRef.current = item;
+                        setModalVisible(true);
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.addToItineraryText}>Add to Itinerary</Text>
+                    </TouchableOpacity>
                   </TouchableOpacity>
-                </TouchableOpacity>
-              ))
-      )}
-          </ScrollView>
-          {showResults && (
-            <TouchableOpacity
-              style={styles.fab}
-              onPress={() => {
-                setShowResults(false);
-                setSuggestions([]);
-                setLocation("");
-                setSelectedOption("");
-                setSelectedRecreation([]);
-                setSelectedDiner([]);
-              }}
-              activeOpacity={0.85}
-            >
-              <MaterialIcons name="refresh" size={28} color={colors.primary} />
-            </TouchableOpacity>
-          )}
-        </View>
+                ))
+        )}
+            </ScrollView>
+            {showResults && (
+              <TouchableOpacity
+                style={styles.fab}
+                onPress={() => {
+                  setShowResults(false);
+                  setSuggestions([]);
+                  setLocation("");
+                  setSelectedOption("");
+                  setSelectedRecreation([]);
+                  setSelectedDiner([]);
+                }}
+                activeOpacity={0.85}
+              >
+                <MaterialIcons name="refresh" size={28} color={colors.primary} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </KeyboardAvoidingView>
       </Animated.View>
       <ItinerarySelectorModal
         visible={modalVisible}
