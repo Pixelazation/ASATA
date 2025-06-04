@@ -248,16 +248,25 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const updateLocationFromPin = async (latitude: number, longitude: number) => {
     const geocodeResult = await GeocodingApi.reverseGeocode(latitude, longitude);
+
+    console.log("Reverse Geocode Result:", geocodeResult);
+
     if (geocodeResult) {
       const { fullAddress, city, country } = geocodeResult;
       setLocation(`${fullAddress}`);
+      setSearchInput(`${fullAddress}`);
       setCity(`${city || ''}`);
       setCountry(`${country || ''}`);
+
+      console.log("Updated Location:", fullAddress, city, country);
+
     }
   }
 
   const handleLocationChange = async (text: string) => {
     setLocation(text);
+    setSearchInput(text);
+
     if (text.trim().length === 0) return;
 
     try {
@@ -480,16 +489,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
       >
         <MaterialIcons name="my-location" size={32} color={colors.primary} />
       </TouchableOpacity>
-
-      {/* Search bar and sliding panel (higher zIndex) */}
-      {/* <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity, zIndex: 10 }]}>
-        <TextInput
-          placeholder="Search Location"
-          value={location}
-          onChangeText={handleLocationChange}
-          style={styles.searchBar}
-        />
-      </Animated.View> */}
 
       <Animated.View
         style={[styles.slidingPanel, { height: animatedY, zIndex: 10 }]}
