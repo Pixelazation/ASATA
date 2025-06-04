@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native-ui-lib";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AddFilterModal } from "./add-filter-modal";
 import { colors } from "../utils/designSystem";
@@ -33,12 +34,12 @@ export const FilterChipAddBar: React.FC<Props> = ({
         >
           {selected.includes(label) && (
             <MaterialIcons
-                name="check"
-                size={16}
-                color="#fff"
-                style={{ marginRight: 4 }}
+              name="check"
+              size={16}
+              color="#fff"
+              style={{ marginRight: 4 }}
             />
-         )}
+          )}
           <Text
             style={[
               styles.chipText,
@@ -65,7 +66,6 @@ export const FilterChipAddBar: React.FC<Props> = ({
   );
 };
 
-import { Text } from "react-native-ui-lib";
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",

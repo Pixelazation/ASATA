@@ -36,6 +36,7 @@ import { RadioSelection } from '../components/molecules/radio-selection';
 import { HeaderBack } from '../components/molecules/header-back';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../utils/designSystem';
+import { FilterChipAddBar } from "../components/filter-chip-add-bar";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PANEL_MIN_HEIGHT = 200;
@@ -54,8 +55,53 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const [location, setLocation] = useState("");
   const [selectedOption, setSelectedOption] = useState<string | null>(params.selectedOption || "recreation");
+  const recreationOptions = ["Wildlife", "Parks", "Adventure", "Beaches", "Museums", "Hiking"];
+  const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
+  const [recreationFilters, setRecreationFilters] = useState([...recreationOptions]);
   const [selectedRecreation, setSelectedRecreation] = useState<string[]>([]);
+  const [dinerFilters, setDinerFilters] = useState([...dinerOptions]);
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
+
+  const handleToggleDiner = (label: string) => {
+    setSelectedDiner(prev => {
+      if (prev.includes(label)) {
+        // If it's a custom filter (not in the original options), remove from filters too
+        if (!dinerOptions.includes(label)) {
+          setDinerFilters(filters => filters.filter(f => f !== label));
+        }
+        return prev.filter(item => item !== label);
+      } else {
+        return [...prev, label];
+      }
+    });
+  };
+  const handleAddDiner = (label: string) => {
+    if (!dinerFilters.includes(label)) {
+      setDinerFilters((prev) => [...prev, label]);
+      setSelectedDiner((prev) => [...prev, label]);
+    }
+  };
+
+  const handleToggleRecreation = (label: string) => {
+    setSelectedRecreation(prev => {
+      if (prev.includes(label)) {
+        // If it's a custom filter (not in the original options), remove from filters too
+        if (!recreationOptions.includes(label)) {
+          setRecreationFilters(filters => filters.filter(f => f !== label));
+        }
+        return prev.filter(item => item !== label);
+      } else {
+        return [...prev, label];
+      }
+    });
+  };
+  const handleAddRecreation = (label: string) => {
+    if (!dinerFilters.includes(label)) {
+      setRecreationFilters((prev) => [...prev, label]);
+      setSelectedRecreation((prev) => [...prev, label]);
+    }
+  };
+
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [region, setRegion] = useState<Region | undefined>({
@@ -81,8 +127,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const [deviceLocation, setDeviceLocation] = useState<{ latitude: number; longitude: number } | null>(null); // <-- store device location
 
-  const recreationOptions = ["Wildlife", "Parks", "Adventure", "Beaches", "Museums", "Hiking"];
-  const dinerOptions = ["Fast Food", "Fine Dining", "Cafés", "Buffets", "Local Cuisine"];
 
   const animatedY = useRef(new Animated.Value(PANEL_MIN_HEIGHT)).current;
   const searchBarOpacity = useRef(new Animated.Value(1)).current;
@@ -519,43 +563,25 @@ export const GetSuggestions: NavioScreen = observer(() => {
     
                 {selectedOption === "recreation" && (
                   <View>
-                    <Text text60 marginB-s2>Choose Recreation Types</Text>
-                    <View style={styles.optionsContainer}>
-                      {recreationOptions.map(option => (
-                        <TouchableOpacity
-                          key={option}
-                          style={[styles.optionBox, selectedRecreation.includes(option) && styles.optionBoxSelected]}
-                          onPress={() => toggleSelection(option, "recreation")}
-                        >
-                          <Text
-                            style={[styles.optionText, selectedRecreation.includes(option) && styles.optionTextSelected]}
-                          >
-                            {option}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
+                    <Text text60 marginB-s2>Choose Diner Types</Text>
+                    <FilterChipAddBar
+                      filters={recreationFilters}
+                      selected={selectedRecreation}
+                      onToggle={handleToggleRecreation}
+                      onAdd={handleAddRecreation}
+                    />
                   </View>
                 )}
     
                 {selectedOption === "diner" && (
                   <View>
                     <Text text60 marginB-s2>Choose Diner Types</Text>
-                    <View style={styles.optionsContainer}>
-                      {dinerOptions.map(option => (
-                        <TouchableOpacity
-                          key={option}
-                          style={[styles.optionBox, selectedDiner.includes(option) && styles.optionBoxSelected]}
-                          onPress={() => toggleSelection(option, "diner")}
-                        >
-                          <Text
-                            style={[styles.optionText, selectedDiner.includes(option) && styles.optionTextSelected]}
-                          >
-                            {option}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
+                    <FilterChipAddBar
+                      filters={dinerFilters}
+                      selected={selectedDiner}
+                      onToggle={handleToggleDiner}
+                      onAdd={handleAddDiner}
+                    />
                   </View>
                 )}
     
