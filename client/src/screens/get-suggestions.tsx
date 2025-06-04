@@ -136,7 +136,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
     setLoading(true);
     try {
       let query = "";
-      let category = getCategoryFromOption(selectedOption);
+      let category = getCategoryFromOption(selectedOption || "");
       let latLong: string | undefined = undefined;
 
       // Build category filters string
@@ -692,7 +692,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                 longitude: selected.longitude,
                 latitude: selected.latitude,
               },
-              category: getCategoryFromOption(selectedOption)
+              category: getCategoryFromOption(selectedOption || "")
             });
           }
           setModalVisible(false);
@@ -722,7 +722,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                     longitude: selected.longitude,
                     latitude: selected.latitude,
                   },
-                  category: getCategoryFromOption(selectedOption)
+                  category: getCategoryFromOption(selectedOption || "")
                 });
               }
             }
