@@ -270,6 +270,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
     searchBarOpacity.setValue(opacity);
   };
 
+  const adjustPanelOnSearch = () => {
+    if (isExpandedRef.current) {
+      // If panel is expanded, collapse it
+      togglePanel();
+    } 
+  }
+
   const togglePanel = () => {
     const targetHeight = isExpandedRef.current ? PANEL_MIN_HEIGHT : PANEL_MAX_HEIGHT;
     isExpandedRef.current = !isExpandedRef.current;
@@ -461,6 +468,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
                   placeholder="Enter City or Location Name"
                   value={location}
                   onChangeText={handleLocationChange}
+                  onPressIn={adjustPanelOnSearch}
                   style={[styles.searchBar, { flex: 1 }]}
                 />
                 <TouchableOpacity
