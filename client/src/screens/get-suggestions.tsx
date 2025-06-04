@@ -116,6 +116,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
 
   const [showResults, setShowResults] = useState(false);
 
@@ -247,16 +248,46 @@ export const GetSuggestions: NavioScreen = observer(() => {
 
   const updateLocationFromPin = async (latitude: number, longitude: number) => {
     const geocodeResult = await GeocodingApi.reverseGeocode(latitude, longitude);
+
+    console.log("Reverse Geocode Result:", geocodeResult);
+
     if (geocodeResult) {
       const { fullAddress, city, country } = geocodeResult;
       setLocation(`${fullAddress}`);
+      setSearchInput(`${fullAddress}`);
       setCity(`${city || ''}`);
       setCountry(`${country || ''}`);
+
+      console.log("Updated Location:", fullAddress, city, country);
+
     }
   }
 
   const handleLocationChange = async (text: string) => {
-    // const location = await GeocodingApi.forwardGeocode(text);
+    setLocation(text);
+    setSearchInput(text);
+
+    if (text.trim().length === 0) return;
+
+    try {
+      const coords = await GeocodingApi.forwardGeocode(text);
+      if (coords && coords.lat && coords.lng) {
+        const newRegion = {
+          latitude: coords.lat,
+          longitude: coords.lng,
+          latitudeDelta: 0.1922,
+          longitudeDelta: 0.1421,
+        };
+        setRegion(newRegion);
+        setDeviceLocation({ latitude: coords.lat, longitude: coords.lng });
+        mapRef.current?.animateToRegion(newRegion, 1000);
+
+        // Optionally update city/country using reverse geocode
+        updateLocationFromPin(coords.lat, coords.lng);
+      }
+    } catch (error) {
+      Alert.alert("Location not found", "Could not find the specified location.");
+    }
   };
 
   // Fetch current location on screen load
@@ -417,7 +448,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const categoryOptions = [
     { name: 'diner', label: 'Diner', icon: 'restaurant' },
     { name: 'recreation', label: 'Recreation', icon: 'sunny' },
-    { name: 'accomodation', label: 'Accomodation', icon: 'business' },
+    { name: 'accommodation', label: 'Accomodation', icon: 'business' },
   ] as {name: string, label: string, icon: IconName}[];
 
   return (
@@ -459,16 +490,6 @@ export const GetSuggestions: NavioScreen = observer(() => {
         <MaterialIcons name="my-location" size={32} color={colors.primary} />
       </TouchableOpacity>
 
-      {/* Search bar and sliding panel (higher zIndex) */}
-      {/* <Animated.View style={[styles.searchBarContainer, { opacity: searchBarOpacity, zIndex: 10 }]}>
-        <TextInput
-          placeholder="Search Location"
-          value={location}
-          onChangeText={handleLocationChange}
-          style={styles.searchBar}
-        />
-      </Animated.View> */}
-
       <Animated.View
         style={[styles.slidingPanel, { height: animatedY, zIndex: 10 }]}
         {...panResponder.panHandlers}
@@ -490,10 +511,12 @@ export const GetSuggestions: NavioScreen = observer(() => {
               <View style={styles.searchBarRow}>
                 <TextInput
                   placeholder="Enter City or Location Name"
-                  value={location}
-                  onChangeText={handleLocationChange}
+                  value={searchInput}
+                  onChangeText={setSearchInput}
+                  onSubmitEditing={() => handleLocationChange(searchInput)}
                   onPressIn={adjustPanelOnSearch}
                   style={[styles.searchBar, { flex: 1 }]}
+                  returnKeyType="search"
                 />
                 <TouchableOpacity
                   onPress={() => setShowTutorial(true)}

@@ -56,7 +56,7 @@ export const navio = Navio.build({
   },
   stacks: {
     MainStack: ['Main', 'Example', 'GetSuggestions' , 'MyItineraries', 'Itinerary', 'ItineraryForm', 'ActivityForm'],
-    MyItinerariesStack:['MyItineraries', 'Itinerary', 'ItineraryForm', 'ActivityForm'],
+    MyItinerariesStack:['MyItineraries', 'Itinerary', 'ItineraryForm', 'ActivityForm', 'GetSuggestions'],
     SettingsStack:['Settings', 'EditAccount'],
     ExampleStack: {
       screens: ['Example'],
