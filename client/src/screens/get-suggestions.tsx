@@ -182,11 +182,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const fetchSuggestions = async () => {
     setLoading(true);
     try {
-      let query = "";
       let category = getCategoryFromOption(selectedOption || "");
-      let latLong: string | undefined = undefined;
+      let latLong: string | undefined = region ? `${region.latitude},${region.longitude}` : undefined;
+      // let address = [city, country].filter(Boolean).join(", ");
+      let address = country;
+      // let address = "";
 
-      // Build category filters string
+      // Gather all selected filters (including custom)
       let filters: string[] = [];
       if (selectedOption === "recreation" && selectedRecreation.length > 0) {
         filters = filters.concat(selectedRecreation);
@@ -195,38 +197,16 @@ export const GetSuggestions: NavioScreen = observer(() => {
         filters = filters.concat(selectedDiner);
       }
 
-      // Query logic
-      if (location.trim()) {
-        // User typed in the search bar
-        if (selectedOption === "accommodation") {
-          // Hotel: use search bar + selected category only
-          query = [location.trim(), selectedOption].filter(Boolean).join(" ");
-        } else {
-          // Recreation or Diner: use search bar + filters only
-          query = [location.trim(), selectedOption, ...filters].filter(Boolean).join(" ");
-        }
-        latLong = undefined;
-      } else if (region) {
-        // No search bar
-        if (selectedOption === "accommodation") {
-          // Hotel: use selected category only
-          query = [selectedOption].filter(Boolean).join(" ");
-        } else {
-          // Recreation or Diner: use filters only
-          query = [selectedOption, ...filters].filter(Boolean).join(" ");
-        }
-        latLong = `${region.latitude},${region.longitude}`;
-      } else {
-        Alert.alert("Error", "Please enter a location or select a location on the map.");
-        setLoading(false);
-        return;
-      }
+      // Query logic: use filters if any, otherwise use category
+      let query = filters.length > 0 ? filters.join(",") : category;
 
       // Debug logging
       console.log("Tripadvisor Query:", query);
       console.log("Tripadvisor LatLong:", latLong);
+      console.log("Tripadvisor Category:", category);
+      console.log("Tripadvisor Address:", address);
 
-      const data = await LocationSearchApi.search(query, category, latLong);
+      const data = await LocationSearchApi.search(query, category, latLong, address);
       const results = data?.data || [];
 
       const detailedResults = await Promise.all(
