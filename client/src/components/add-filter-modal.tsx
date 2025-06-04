@@ -28,7 +28,7 @@ export const AddFilterModal: React.FC<Props> = ({ visible, onClose, onAdd }) => 
         <View style={styles.modal}>
           <View style={styles.topBar}>
             <TouchableOpacity onPress={onClose} style={styles.backButton}>
-              <MaterialIcons name="arrow-back" size={24} color="#222" />
+              <MaterialIcons name="close" size={24} color="#222" />
             </TouchableOpacity>
             <Text style={styles.title}>Add Custom Filter</Text>
             <View style={{ width: 32 }} />
