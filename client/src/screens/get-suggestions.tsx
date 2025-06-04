@@ -56,6 +56,9 @@ export const GetSuggestions: NavioScreen = observer(() => {
   const [showTutorial, setShowTutorial] = useState(false);
 
   const [location, setLocation] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+
   const [selectedOption, setSelectedOption] = useState<string | null>(params.selectedOption || "recreation");
   const [selectedRecreation, setSelectedRecreation] = useState<string[]>([]);
   const [selectedDiner, setSelectedDiner] = useState<string[]>([]);
@@ -233,30 +236,18 @@ export const GetSuggestions: NavioScreen = observer(() => {
     }
   };
 
-  const handleMapPress = async (event: any) => {
-    const { coordinate } = event.nativeEvent;
-    setRegion({
-      latitude: coordinate.latitude,
-      longitude: coordinate.longitude,
-      latitudeDelta: region?.latitudeDelta || 0.1922,
-      longitudeDelta: region?.longitudeDelta || 0.1421,
-    });
-    
-    // Geocoding disabled due to rate limits
-    // const result = await GeocodingApi.reverseGeocode(coordinate.latitude, coordinate.longitude);
-    // if (result) {
-    //   const { fullAddress } = result;
-    //   setLocation(`${fullAddress}`);
-    // }
-
-    setLocation(""); // Clear search bar if user moves pin
-  };
-
-  const handleLocationChange = (text: string) => {
-    setLocation(text);
-    if (text.trim()) {
-      setRegion(undefined); // Clear pin if user types
+  const updateLocationFromPin = async (latitude: number, longitude: number) => {
+    const geocodeResult = await GeocodingApi.reverseGeocode(latitude, longitude);
+    if (geocodeResult) {
+      const { fullAddress, city, country } = geocodeResult;
+      setLocation(`${fullAddress}`);
+      setCity(`${city || ''}`);
+      setCountry(`${country || ''}`);
     }
+  }
+
+  const handleLocationChange = async (text: string) => {
+    // const location = await GeocodingApi.forwardGeocode(text);
   };
 
   // Fetch current location on screen load
@@ -278,11 +269,8 @@ export const GetSuggestions: NavioScreen = observer(() => {
         setRegion({ ...coords, latitudeDelta: 0.1922, longitudeDelta: 0.1421 });
 
         // Geocoding disabled due to rate limits
-        // const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
-        // if (geocodeResult) {
-        //   const { fullAddress } = geocodeResult;
-        //   setLocation(`${fullAddress}`);
-        // }
+        updateLocationFromPin(coords.latitude, coords.longitude);
+
       } catch (error) {
         console.error("Error fetching current location:", error);
         Alert.alert("Error", "Failed to fetch current location.");
@@ -367,16 +355,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
   // Update region when user moves the map
   const handleRegionChangeComplete = async (newRegion: any) => {
     setRegion(newRegion);
+    console.log(newRegion);
     // Geocoding disabled due to rate limits
-    // try {
-    //   const geocodeResult = await GeocodingApi.reverseGeocode(newRegion.latitude, newRegion.longitude);
-    //   if (geocodeResult) {
-    //     const { fullAddress } = geocodeResult;
-    //     setLocation(`${fullAddress}`);
-    //   }
-    // } catch (error) {
-    //   console.error("Error reverse geocoding:", error);
-    // }
+    try {
+      updateLocationFromPin(newRegion.latitude, newRegion.longitude);
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+    }
   };
 
   // Center map on current device location
@@ -407,12 +392,7 @@ export const GetSuggestions: NavioScreen = observer(() => {
       setRegion(regionCoords);
       mapRef.current?.animateToRegion(regionCoords, 1000);
 
-      // Geocoding disabled due to rate limits
-      // const geocodeResult = await GeocodingApi.reverseGeocode(coords.latitude, coords.longitude);
-      // if (geocodeResult) {
-      //   const { fullAddress } = geocodeResult;
-      //   setLocation(`${fullAddress}`);
-      // }
+      updateLocationFromPin(coords.latitude, coords.longitude);
     } catch (error) {
       Alert.alert("Error", "Failed to fetch current location.");
     }
@@ -435,9 +415,13 @@ export const GetSuggestions: NavioScreen = observer(() => {
         ref={mapRef}
         provider={PROVIDER_DEFAULT}
         style={StyleSheet.absoluteFillObject}
-        region={region}
+        initialRegion={{
+          latitude: deviceLocation?.latitude || 10.321684,
+          longitude: deviceLocation?.longitude || 123.898671,
+          latitudeDelta: 0.1922,
+          longitudeDelta: 0.1421,
+        }}
         onRegionChangeComplete={handleRegionChangeComplete}
-        onPress={handleMapPress}
       />
       {/* Center Pin Overlay - zIndex: 1 */}
       <View pointerEvents="none" style={{
