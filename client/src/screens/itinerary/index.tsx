@@ -244,7 +244,7 @@ export const Itinerary: NavioScreen = observer(() => {
           {editMode ? (
             <FloatingActionMenu 
               icon='add'
-              onPress1={addDummyActivity}
+              onPress1={() => navio.push('GetSuggestions', { selectedOption: 'diner' })}
               onPress2={() => navio.push('ActivityForm', {itineraryId: itineraryId})}
             />
           ) : (
